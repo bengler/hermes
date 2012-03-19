@@ -1,0 +1,32 @@
+---
+development:
+  database: hermes_development
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  username: hermes
+  password: lysning
+
+test:
+  database: hermes_test
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  username: hermes
+  password: lysning
+
+staging:
+  database: hermes_staging
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  username: hermes
+  password: lysning
+
+production:
+  database: hermes_production
+  adapter: postgresql
+  encoding: unicode
+  host: localhost
+  username: hermes
+  password: lysning
