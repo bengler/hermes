@@ -6,3 +6,4 @@ coverage/
 .rvmrc
 .idea
 config/realms/*
+/_trash
