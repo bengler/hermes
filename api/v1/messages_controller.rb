@@ -34,6 +34,10 @@ module Hermes
         end
       end
 
+      get '/:realm/stats' do |realm|
+        pg :statistics, :locals => {:statistics => Message.statistics}
+      end
+
       get '/:realm/messages/:id' do |realm, id|
         message = Message.where(:realm => realm).where(:id => id).first
         if message

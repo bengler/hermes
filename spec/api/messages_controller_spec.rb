@@ -19,6 +19,19 @@ describe Hermes::V1::MessagesController do
     Hermes::V1::MessagesController
   end
 
+  describe "GET /:realm/stats" do
+    it 'returns statistics' do
+      get "/test/stats"
+      last_response.status.should == 200
+      statistics = JSON.parse(last_response.body)
+      statistics.should include('statistics')
+      statistics['statistics'].should include('failed_count')
+      statistics['statistics'].should include('delivered_count')
+      statistics['statistics'].should include('in_progress_count')
+      statistics['statistics'].should include('unknown_count')
+    end
+  end
+
   describe "POST /:realm/messages" do
     it 'rejects unknown realm' do
       post_body "/doobie/messages", {}, JSON.dump(
