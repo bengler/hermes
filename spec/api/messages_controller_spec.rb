@@ -20,15 +20,27 @@ describe Hermes::V1::MessagesController do
   end
 
   describe "GET /:realm/stats" do
-    it 'returns statistics' do
-      get "/test/stats"
-      last_response.status.should == 200
-      statistics = JSON.parse(last_response.body)
-      statistics.should include('statistics')
-      statistics['statistics'].should include('failed_count')
-      statistics['statistics'].should include('delivered_count')
-      statistics['statistics'].should include('in_progress_count')
-      statistics['statistics'].should include('unknown_count')
+    Message::VALID_STATUSES.each do |status|
+      it "returns statistics for '#{status}'" do
+        Message.destroy_all
+        Message.create!(
+          :vendor_id => 'test',
+          :realm => 'test',
+          :status => status,
+          :recipient_number => '12345678')
+        get "/test/stats"
+        last_response.status.should == 200
+        statistics = JSON.parse(last_response.body)
+        statistics.should include('statistics')
+        statistics['statistics'].should include('failed_count')
+        statistics['statistics'].should include('delivered_count')
+        statistics['statistics'].should include('in_progress_count')
+        statistics['statistics'].should include('unknown_count')
+        statistics['statistics']["#{status}_count"].should == 1
+        (Message::VALID_STATUSES - [status]).each do |other_status|
+          statistics['statistics']["#{other_status}_count"].should == 0
+        end
+      end
     end
   end
 
