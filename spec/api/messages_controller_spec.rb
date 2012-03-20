@@ -128,6 +128,10 @@ describe Hermes::V1::MessagesController do
         :status => 'in_progress')
       get "/test/messages/#{message.id}"
       last_response.status.should == 200
+      result = JSON.parse(last_response.body)
+      result.should include('message')
+      result['message']['realm'].should == 'test'
+      result['message']['status'].should == 'in_progress'
     end
 
     it 'returns 404 for non-existent message' do
