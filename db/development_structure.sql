@@ -25,7 +25,9 @@ CREATE TABLE messages (
     updated_at timestamp without time zone,
     vendor_id text NOT NULL,
     realm text NOT NULL,
-    status text NOT NULL
+    status text NOT NULL,
+    callback_url text,
+    recipient_number text
 );
 
 

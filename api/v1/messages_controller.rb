@@ -52,7 +52,9 @@ module Hermes
         message = Message.create!(
           :vendor_id => id,
           :realm => realm,
-          :status => 'in_progress')
+          :status => 'in_progress',
+          :recipient_number => attrs['recipient_number'],
+          :callback_url => attrs['callback_url'])
 
         response.status = 202
         response.headers['Location'] = url("#{realm}/#{message.id}")
