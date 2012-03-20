@@ -19,9 +19,9 @@ describe Hermes::V1::MessagesController do
     Hermes::V1::MessagesController
   end
 
-  describe "POST /:realm" do
+  describe "POST /:realm/messages" do
     it 'rejects unknown realm' do
-      post_body "/doobie", {}, JSON.dump(
+      post_body "/doobie/messages", {}, JSON.dump(
         :recipient_number => '12345678',
         :body => 'Yip')
       last_response.status.should == 404
@@ -30,7 +30,7 @@ describe Hermes::V1::MessagesController do
     it 'accepts message' do
       mobiletech_stub = stub_mobiletech_success!
 
-      post_body "/test", {}, JSON.dump(
+      post_body "/test/messages", {}, JSON.dump(
         :recipient_number => '12345678',
         :body => 'Yip')
 
@@ -51,7 +51,7 @@ describe Hermes::V1::MessagesController do
       callback_stub = stub_request(:post, 'http://example.com/').with(
         :query => {:status => 'failed'})
 
-      post_body "/test", {}, JSON.dump(
+      post_body "/test/messages", {}, JSON.dump(
         :recipient_number => '12345678',
         :body => 'Yip',
         :callback_url => 'http://example.com/')
@@ -78,7 +78,7 @@ describe Hermes::V1::MessagesController do
           raise "Yip yip"
         })
 
-      post_body "/test", {}, JSON.dump(
+      post_body "/test/messages", {}, JSON.dump(
         :recipient_number => '12345678',
         :body => 'Yip',
         :callback_url => 'http://example.com/')
@@ -95,18 +95,18 @@ describe Hermes::V1::MessagesController do
     end
   end
 
-  describe "GET /:realm/:id" do
+  describe "GET /:realm/messages/:id" do
     it 'shows status for message' do
       message = Hermes::Message.create!(
         :vendor_id => 'vroom',
         :realm => 'test',
         :status => 'in_progress')
-      get "/test/#{message.id}"
+      get "/test/messages/#{message.id}"
       last_response.status.should == 200
     end
 
     it 'returns 404 for non-existent message' do
-      get "/test/23890428309494"
+      get "/test/messages/23890428309494"
       last_response.status.should == 404
     end
 
@@ -115,7 +115,7 @@ describe Hermes::V1::MessagesController do
         :vendor_id => 'vroom',
         :realm => 'test',
         :status => 'in_progress')
-      get "/yipyip/#{message.id}"
+      get "/yipyip/messages/#{message.id}"
       last_response.status.should == 404
     end
   end
@@ -155,20 +155,6 @@ describe Hermes::V1::MessagesController do
         </BatchReport>
       }
       last_response.status.should == 200
-    end
-
-    it 'returns 404 for non-existent message' do
-      get "/test/23890428309494"
-      last_response.status.should == 404
-    end
-
-    it 'returns 404 for non-existent realm' do
-      message = Hermes::Message.create!(
-        :vendor_id => 'vroom',
-        :realm => 'test',
-        :status => 'in_progress')
-      get "/yipyip/#{message.id}"
-      last_response.status.should == 404
     end
   end
 

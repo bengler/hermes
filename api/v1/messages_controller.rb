@@ -34,7 +34,7 @@ module Hermes
         end
       end
 
-      get '/:realm/:id' do |realm, id|
+      get '/:realm/messages/:id' do |realm, id|
         message = Message.where(:realm => realm).where(:id => id).first
         if message
           pg :message, :locals => {:message => message}
@@ -43,7 +43,7 @@ module Hermes
         end
       end
 
-      post '/:realm' do |realm|
+      post '/:realm/messages' do |realm|
         provider = @configuration.provider_for_realm(realm)
 
         attrs = JSON.parse(request.env['rack.input'].read)
