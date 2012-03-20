@@ -5,7 +5,16 @@ module Hermes
 
     class MessagesController < Sinatra::Base
 
-      set :root, File.expand_path('..', __FILE__)
+      configure do |config|
+        config.set :root, File.expand_path('..', __FILE__)
+        config.set :logging, true
+        config.set :logger, ActiveRecord::Base.logger
+        config.set :show_exceptions, false
+      end
+
+      configure :development do |config|
+        config.set :show_exceptions, true
+      end
 
       register Sinatra::Pebblebed
 
