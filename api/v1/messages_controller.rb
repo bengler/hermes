@@ -64,16 +64,21 @@ module Hermes
 
       post '/:realm/receipt' do |realm|
         provider = @configuration.provider_for_realm(realm)
-        raw = request.env['rack.input'].read
-        puts raw
-        result = provider.parse_receipt(request.path_info, raw)
-        if result[:id] and result[:status]
-          message = Message.
-            where(:realm => realm).
-            where(:vendor_id => result[:id]).first
-          if message
-            message.status = result[:status]
-            message.save!
+        raw = request.env['rack.input'].read if request.env['rack.input']
+        raw ||= ''
+        begin
+          result = provider.parse_receipt(request.path_info, raw)
+        rescue Exception => e
+          logger.error("Ignoring exception during receipt parsing: #{e}")
+        else
+          if result[:id] and result[:status]
+            message = Message.
+              where(:realm => realm).
+              where(:vendor_id => result[:id]).first
+            if message
+              message.status = result[:status]
+              message.save!
+            end
           end
         end
         ''

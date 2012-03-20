@@ -26,7 +26,7 @@ describe MobiletechProvider do
 
     it "treats gateway non-SOAP response as invalid responses" do
       stub_request(:post, 'http://msggw.dextella.net/BatchService').to_return(
-        :body => 'YIP YIP YIP', :status => 200)
+        :body => 'YIP YIP YIP')
       lambda {
         provider.send_short_message!(:recipient_number => '12345678', :body => 'test')
       }.should raise_error(MobiletechProvider::InvalidResponseError)
@@ -124,7 +124,7 @@ describe MobiletechProvider do
       stub.should have_requested(:post, 'http://msggw.dextella.net/BatchService')
     end
 
-    it 'sends batch SMS and returns ID from response' do
+    it 'sends batch SMS and returns ID' do
       stub = stub_request(:post, 'http://msggw.dextella.net/BatchService').to_return(
         :body => %{
           <?xml version="1.0"?>

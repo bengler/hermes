@@ -1,5 +1,6 @@
 source :rubygems
 
+gem 'rake'
 gem 'sinatra', '~> 1.3.2'
 gem 'sinatra-activerecord', '~> 0.1.3'
 gem 'rack', '~> 1.4'
@@ -18,7 +19,7 @@ gem 'bunny', '~> 0.7.9'
 
 group :test do
   gem 'bengler_test_helper',  :git => "git@github.com:origo/bengler_test_helper.git"
-  gem 'rspec', '~> 2.7.0.rc1'
+  gem 'rspec', '~> 2.8'
   gem 'rack-test'
   gem 'simplecov', :require => false
   gem 'webmock'
@@ -29,6 +30,9 @@ group :development do
   gem 'capistrano', '=2.8.0'
   gem 'capistrano-ext', '=1.2.1'
   gem 'thin'
+  gem 'redcarpet'
+  gem 'yard', '~> 0.7.5'
+  gem 'yard-sinatra'
 end
 
 group :production do

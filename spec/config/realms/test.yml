@@ -1,3 +1,4 @@
 provider: mobiletech
 cpid: 1234
 secret: yippie-ki-yay
+default_prefix: 47
