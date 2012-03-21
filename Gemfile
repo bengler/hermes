@@ -30,9 +30,6 @@ group :development do
   gem 'capistrano', '=2.8.0'
   gem 'capistrano-ext', '=1.2.1'
   gem 'thin'
-  gem 'redcarpet'
-  gem 'yard', '~> 0.7.5'
-  gem 'yard-sinatra'
 end
 
 group :production do
