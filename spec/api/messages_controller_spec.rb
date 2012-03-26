@@ -7,10 +7,6 @@ describe Hermes::V1::MessagesController do
 
   include Rack::Test::Methods
 
-  around :each do |block|
-    ActiveRecord::Base.transaction(&block)
-  end
-
   before :each do
     Hermes::Configuration.instance.load!(File.expand_path('../..', __FILE__))
   end
@@ -87,7 +83,7 @@ describe Hermes::V1::MessagesController do
       last_response.status.should == 202
       last_response.body.should =~ /\d+/
       
-      mobiletech_stub.should have_requested(:post, 'http://msggw.dextella.net/BatchService')
+      mobiletech_stub.should have_been_requested
 
       message = Message.where(:id => last_response.body).first
       message.should_not == nil
@@ -115,8 +111,7 @@ describe Hermes::V1::MessagesController do
       message.status = 'failed'
       message.save!
 
-      callback_stub.should have_requested(:post, 'http://example.com/').with(
-        :query => {:status => 'failed'})
+      callback_stub.should have_been_requested
     end
 
     it 'accepts message with failing callback' do
@@ -140,8 +135,7 @@ describe Hermes::V1::MessagesController do
       message.status = 'failed'
       message.save!
 
-      callback_stub.should have_requested(:post, 'http://example.com/').with(
-        :query => {:status => 'failed'})
+      callback_stub.should have_been_requested
     end
   end
 

@@ -20,7 +20,17 @@ require 'pp'
 set :environment, :test
 
 RSpec.configure do |config|
-  config.before(:each) do
+  config.before :each do
     WebMock.reset!
+  end
+  config.around :each do |block|
+    abort_class = Class.new(Exception) {}
+    begin
+      ActiveRecord::Base.transaction do
+        block.call
+        raise abort_class
+      end
+    rescue abort_class
+    end
   end
 end
