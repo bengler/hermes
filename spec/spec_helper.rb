@@ -14,7 +14,6 @@ require 'rspec/autorun'
 require 'rack/test'
 require 'excon'
 require 'webmock/rspec'
-require 'webmock/http_lib_adapters/excon_adapter'
 require 'stringio'
 require 'pp'
 
