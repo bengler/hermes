@@ -30,13 +30,16 @@ module Hermes
     end
 
     class << self
-      def statistics
+      def statistics(options = {})
         result = Statistics.new
-        connection.select_all(%{
-          select status, count(*) as count from messages
-          where status is not null
-          group by status
-        }).each do |row|
+        where = arel_table['status'].not_eq(nil)
+        if (realm = options[:realm])
+          where = where.and(arel_table['realm'].eq(realm.to_s))
+        end
+        connection.select_all(
+          arel_table.project("status, count(*)").where(where).
+            group(arel_table['status']).to_sql
+        ).each do |row|
           status, count = row['status'], row['count'].to_i
           result.send("#{status}_count=", count)
         end

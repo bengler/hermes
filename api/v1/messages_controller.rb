@@ -34,8 +34,12 @@ module Hermes
         end
       end
 
-      get '/:realm/stats' do |realm|
+      get '/stats' do
         pg :statistics, :locals => {:statistics => Message.statistics}
+      end
+
+      get '/:realm/stats' do |realm|
+        pg :statistics, :locals => {:statistics => Message.statistics(:realm => realm)}
       end
 
       get '/:realm/messages/:id' do |realm, id|
