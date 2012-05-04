@@ -17,6 +17,14 @@ GIT
   specs:
     bengler_test_helper (0.0.2)
 
+GIT
+  remote: git@github.com:origo/capistrano-bengler.git
+  revision: 8e3bb27d90e779b75af1dca83d71b8ad33a69c3e
+  specs:
+    capistrano-bengler (0.0.11)
+      capistrano (>= 2.9)
+      capistrano-ext (>= 1.2.1)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -35,7 +43,7 @@ GEM
     arel (3.0.2)
     builder (3.0.0)
     bunny (0.7.9)
-    capistrano (2.8.0)
+    capistrano (2.9.0)
       highline
       net-scp (>= 1.0.0)
       net-sftp (>= 2.0.0)
@@ -128,8 +136,8 @@ DEPENDENCIES
   activerecord (~> 3.2.2)
   bengler_test_helper!
   bunny (~> 0.7.9)
-  capistrano (= 2.8.0)
-  capistrano-ext (= 1.2.1)
+  capistrano (~> 2.9.0)
+  capistrano-bengler!
   excon (~> 0.12.0)
   hupper (~> 0.0.1)
   nokogiri (~> 1.5.2)

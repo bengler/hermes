@@ -16,9 +16,9 @@ gem 'o5-logging', :git => "git://github.com/benglerpebbles/o5-logging.git"
 gem 'nokogiri', '~> 1.5.2'
 gem 'excon', '~> 0.12.0'
 gem 'bunny', '~> 0.7.9'
+gem 'bengler_test_helper', :git => "git@github.com:origo/bengler_test_helper.git"
 
 group :test do
-  gem 'bengler_test_helper',  :git => "git@github.com:origo/bengler_test_helper.git"
   gem 'rspec', '~> 2.8'
   gem 'rack-test'
   gem 'simplecov', :require => false
@@ -27,8 +27,8 @@ group :test do
 end
 
 group :development do
-  gem 'capistrano', '=2.8.0'
-  gem 'capistrano-ext', '=1.2.1'
+  gem 'capistrano', '~> 2.9.0'
+	gem 'capistrano-bengler', :git => 'git@github.com:origo/capistrano-bengler.git'
   gem 'thin'
 end
 
