@@ -26,16 +26,6 @@ end
 ENV['RACK_ENV'] ||= "development"
 environment = ENV['RACK_ENV']
 
-ActiveRecord::Base.logger = O5::LOG if defined?(O5::LOG)
 ActiveRecord::Base.logger ||= Logger.new($stdout) if environment != 'test'
 ActiveRecord::Base.logger ||= Logger.new('/dev/null')
-
-Hupper.on_initialize do
-  Hermes::Configuration.instance.load!
-  ActiveRecord::Base.establish_connection(
-    YAML::load(File.open("config/database.yml"))[environment])
-end
-
-Hupper.on_release do
-  ActiveRecord::Base.connection.disconnect!
-end
+Hermes::Configuration.instance.load!

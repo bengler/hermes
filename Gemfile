@@ -10,9 +10,6 @@ gem 'pg', '~> 0.13.2'
 gem 'yajl-ruby', '~> 1.1.0', :require => "yajl"
 gem 'pebblebed', '~> 0.0.9'
 gem 'petroglyph', :git => 'git@github.com:benglerpebbles/petroglyph.git'
-gem 'pingable', '~> 0.0.9'
-gem 'hupper', '~> 0.0.1'
-gem 'o5-logging', :git => "git://github.com/benglerpebbles/o5-logging.git"
 gem 'nokogiri', '~> 1.5.2'
 gem 'excon', '~> 0.12.0'
 gem 'bunny', '~> 0.7.9'

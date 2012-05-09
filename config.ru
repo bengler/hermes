@@ -5,10 +5,12 @@ set :environment, ENV['RACK_ENV'].to_sym
 
 use Rack::CommonLogger
 
-Pingable.active_record_checks!
+map '/ping' do
+  'hermes'
+end
 
-map '/api/hermes/v1/ping' do
-  run Pingable::Handler.new('hermes')
+map '/api/hermes/ping' do
+	'hermes'
 end
 
 map '/api/hermes/v1' do
