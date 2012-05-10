@@ -22,11 +22,3 @@ staging:
   host: localhost
   username: hermes
   password: lysning
-
-production:
-  database: hermes_production
-  adapter: postgresql
-  encoding: unicode
-  host: localhost
-  username: hermes
-  password: lysning
