@@ -12,6 +12,11 @@ require 'excon'
 require 'securerandom'
 require 'singleton'
 
+unless defined?(LOGGER)
+  LOGGER = Logger.new($stderr)
+  LOGGER.level = Logger::INFO
+end
+
 %w(
   lib/hermes
   api/v1
@@ -28,8 +33,7 @@ end
 ENV['RACK_ENV'] ||= "development"
 environment = ENV['RACK_ENV']
 
-ActiveRecord::Base.logger ||= Logger.new($stdout) if environment != 'test'
-ActiveRecord::Base.logger ||= Logger.new('/dev/null')
+ActiveRecord::Base.logger ||= LOGGER
 ActiveRecord::Base.establish_connection(
   YAML::load(File.open("config/database.yml"))[environment])
 Hermes::Configuration.instance.load!

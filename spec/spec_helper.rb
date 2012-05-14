@@ -19,6 +19,8 @@ require 'pp'
 
 set :environment, :test
 
+LOGGER.level = Logger::FATAL
+
 RSpec.configure do |config|
   config.before :each do
     WebMock.reset!
