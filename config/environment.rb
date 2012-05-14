@@ -12,6 +12,9 @@ require 'excon'
 require 'securerandom'
 require 'singleton'
 
+ENV['RACK_ENV'] ||= "development"
+environment = ENV['RACK_ENV']
+
 unless defined?(LOGGER)
   LOGGER = Logger.new($stderr)
   LOGGER.level = Logger::INFO
@@ -25,13 +28,6 @@ end
     require f
   end
 end
-
-Pebblebed.config do
-  service :hermes
-end
-
-ENV['RACK_ENV'] ||= "development"
-environment = ENV['RACK_ENV']
 
 ActiveRecord::Base.logger ||= LOGGER
 ActiveRecord::Base.establish_connection(

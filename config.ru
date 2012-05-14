@@ -1,6 +1,5 @@
 require File.expand_path('../config/environment', __FILE__)
 
-ENV['RACK_ENV'] ||= 'development'
 set :environment, ENV['RACK_ENV'].to_sym
 
 use Rack::CommonLogger
