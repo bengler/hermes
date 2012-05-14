@@ -7,3 +7,4 @@ coverage/
 .idea
 config/realms/*
 /_trash
+/.brow
