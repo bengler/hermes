@@ -2,7 +2,7 @@ source :rubygems
 
 gem 'rake'
 gem 'sinatra', '~> 1.3.2'
-gem 'sinatra-activerecord', '~> 0.1.3'
+gem 'sinatra-activerecord', '~> 0.1.3', :require => false
 gem 'rack', '~> 1.4'
 gem 'rack-contrib', '~> 1.1.0'
 gem 'activerecord', '~> 3.2.2', :require => 'active_record'
