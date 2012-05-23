@@ -5,7 +5,7 @@ class CreateMessages < ActiveRecord::Migration
       t.timestamp :created_at
       t.timestamp :updated_at
       t.text :vendor_id, :null => false
-      t.text :realm, :null => false
+      t.text :profile, :null => false
       t.text :status, :null => false
     end
   end

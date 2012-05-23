@@ -21,7 +21,7 @@ describe Hermes::V1::MessagesController do
         Message.destroy_all
         Message.create!(
           :vendor_id => 'test',
-          :realm => 'test',
+          :profile => 'test',
           :status => status,
           :recipient_number => '12345678')
         get "/test/stats"
@@ -40,13 +40,13 @@ describe Hermes::V1::MessagesController do
     end
   end
 
-  describe "GET /:realm/stats" do
+  describe "GET /:profile/stats" do
     Message::VALID_STATUSES.each do |status|
       it "returns statistics for '#{status}'" do
         Message.destroy_all
         Message.create!(
           :vendor_id => 'test',
-          :realm => 'test',
+          :profile => 'test',
           :status => status,
           :recipient_number => '12345678')
         get "/test/stats"
@@ -65,8 +65,8 @@ describe Hermes::V1::MessagesController do
     end
   end
 
-  describe "POST /:realm/messages" do
-    it 'rejects unknown realm' do
+  describe "POST /:profile/messages" do
+    it 'rejects unknown profile' do
       post_body "/doobie/messages", {}, JSON.dump(
         :recipient_number => '12345678',
         :body => 'Yip')
@@ -139,17 +139,17 @@ describe Hermes::V1::MessagesController do
     end
   end
 
-  describe "GET /:realm/messages/:id" do
+  describe "GET /:profile/messages/:id" do
     it 'shows status for message' do
       message = Hermes::Message.create!(
         :vendor_id => 'vroom',
-        :realm => 'test',
+        :profile => 'test',
         :status => 'in_progress')
       get "/test/messages/#{message.id}"
       last_response.status.should == 200
       result = JSON.parse(last_response.body)
       result.should include('message')
-      result['message']['realm'].should == 'test'
+      result['message']['profile'].should == 'test'
       result['message']['status'].should == 'in_progress'
     end
 
@@ -158,17 +158,17 @@ describe Hermes::V1::MessagesController do
       last_response.status.should == 404
     end
 
-    it 'returns 404 for non-existent realm' do
+    it 'returns 404 for non-existent profile' do
       message = Hermes::Message.create!(
         :vendor_id => 'vroom',
-        :realm => 'test',
+        :profile => 'test',
         :status => 'in_progress')
       get "/yipyip/messages/#{message.id}"
       last_response.status.should == 404
     end
   end
 
-  describe "POST /:realm/receipt" do
+  describe "POST /:profile/receipt" do
     it 'returns 200 even on bad data' do
       post_body "/test/receipt", {}, %{I am a banana}
       last_response.status.should == 200
@@ -177,7 +177,7 @@ describe Hermes::V1::MessagesController do
     it 'accepts Mobiletech receipt' do
       message = Hermes::Message.create!(
         :vendor_id => 'vroom',
-        :realm => 'test',
+        :profile => 'test',
         :status => 'in_progress')
       post_body "/test/receipt", {}, %{
         <BatchReport>

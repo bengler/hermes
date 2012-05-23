@@ -23,13 +23,13 @@ module Hermes
       end
 
       helpers do
-        def receipt_url(realm)
+        def receipt_url(profile)
           # FIXME: Use the right stuff
           if ENV['RACK_ENV'] == 'development'
             # Set up a tunnel on samla.park.origo.no port 10900 to receive receipts
-            "http://origo.tunnel.o5.no/api/hermes/v1/#{realm}/receipt"
+            "http://origo.tunnel.o5.no/api/hermes/v1/#{profile}/receipt"
           else
-            url("#{realm}/receipt")
+            url("#{profile}/receipt")
           end
         end
       end
@@ -38,12 +38,12 @@ module Hermes
         pg :statistics, :locals => {:statistics => Message.statistics}
       end
 
-      get '/:realm/stats' do |realm|
-        pg :statistics, :locals => {:statistics => Message.statistics(:realm => realm)}
+      get '/:profile/stats' do |profile|
+        pg :statistics, :locals => {:statistics => Message.statistics(:profile => profile)}
       end
 
-      get '/:realm/messages/:id' do |realm, id|
-        message = Message.where(:realm => realm).where(:id => id).first
+      get '/:profile/messages/:id' do |profile, id|
+        message = Message.where(:profile => profile).where(:id => id).first
         if message
           pg :message, :locals => {:message => message}
         else
@@ -51,8 +51,8 @@ module Hermes
         end
       end
 
-      post '/:realm/messages' do |realm|
-        provider = @configuration.provider_for_realm(realm)
+      post '/:profile/messages' do |profile|
+        provider = @configuration.provider_for_profile(profile)
 
         attrs = JSON.parse(request.env['rack.input'].read)
 
@@ -64,23 +64,23 @@ module Hermes
             :amount => (attrs['rate'] || {})['amount']
           },
           :body => attrs['body'],
-          :receipt_url => receipt_url(realm))
+          :receipt_url => receipt_url(profile))
 
         message = Message.create!(
           :vendor_id => id,
-          :realm => realm,
+          :profile => profile,
           :status => 'in_progress',
           :recipient_number => attrs['recipient_number'],
           :callback_url => attrs['callback_url'])
 
         response.status = 202
-        response.headers['Location'] = url("#{realm}/#{message.id}")
+        response.headers['Location'] = url("#{profile}/#{message.id}")
         response.headers['Content-Type'] = 'text/plain'
         message.id.to_s
       end
 
-      post '/:realm/receipt' do |realm|
-        provider = @configuration.provider_for_realm(realm)
+      post '/:profile/receipt' do |profile|
+        provider = @configuration.provider_for_profile(profile)
         raw = request.env['rack.input'].read if request.env['rack.input']
         raw ||= ''
         begin
@@ -90,7 +90,7 @@ module Hermes
         else
           if result[:id] and result[:status]
             message = Message.
-              where(:realm => realm).
+              where(:profile => profile).
               where(:vendor_id => result[:id]).first
             if message
               message.status = result[:status]
