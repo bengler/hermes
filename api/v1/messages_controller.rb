@@ -12,11 +12,11 @@ module Hermes
         config.set :show_exceptions, false
       end
 
-      configure :development do |config|
-        config.set :show_exceptions, true
-      end
-
       register Sinatra::Pebblebed
+
+      error ::Hermes::Configuration::ProviderNotFound do
+        404
+      end
 
       before do
         @configuration = Configuration.instance
@@ -99,10 +99,6 @@ module Hermes
           end
         end
         ''
-      end
-
-      error Configuration::ProviderNotFound do
-        404
       end
 
     end

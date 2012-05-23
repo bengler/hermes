@@ -2,7 +2,7 @@ module Hermes
 
   class Configuration
 
-    class ProviderNotFound < Exception; end
+    class ProviderNotFound < StandardError; end
 
     include Singleton
 
