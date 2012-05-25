@@ -9,7 +9,7 @@ gem 'activerecord', '~> 3.2.2', :require => 'active_record'
 gem 'pg', '~> 0.13.2'
 gem 'yajl-ruby', '~> 1.1.0', :require => "yajl"
 gem 'pebblebed', '~> 0.0.9'
-gem 'petroglyph', :git => 'git@github.com:benglerpebbles/petroglyph.git'
+gem 'petroglyph', '~> 0.0.2'
 gem 'nokogiri', '~> 1.5.2'
 gem 'excon', '~> 0.12.0'
 gem 'bunny', '~> 0.7.9'

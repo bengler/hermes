@@ -1,11 +1,4 @@
 GIT
-  remote: git@github.com:benglerpebbles/petroglyph.git
-  revision: 448a0bf82b3a8af5b16f6eaf7cfb54254115efd1
-  specs:
-    petroglyph (0.0.1)
-      tilt
-
-GIT
   remote: git@github.com:origo/bengler_test_helper.git
   revision: 25c9cdd45795c530ad8e82d325e7c6d28b5cb37c
   specs:
@@ -76,6 +69,8 @@ GEM
       pathbuilder
       queryparams
       yajl-ruby
+    petroglyph (0.0.2)
+      tilt
     pg (0.13.2)
     queryparams (0.0.3)
     rack (1.4.1)
@@ -132,7 +127,7 @@ DEPENDENCIES
   excon (~> 0.12.0)
   nokogiri (~> 1.5.2)
   pebblebed (~> 0.0.9)
-  petroglyph!
+  petroglyph (~> 0.0.2)
   pg (~> 0.13.2)
   rack (~> 1.4)
   rack-contrib (~> 1.1.0)
