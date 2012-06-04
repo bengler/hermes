@@ -28,7 +28,7 @@ end
 
 group :development do
   gem 'capistrano', '~> 2.9.0'
-	gem 'capistrano-bengler', :git => 'git@github.com:origo/capistrano-bengler.git'
+	gem 'capistrano-bengler', :git => 'git@github.com:bengler/capistrano-bengler.git'
   gem 'thin'
 end
 
