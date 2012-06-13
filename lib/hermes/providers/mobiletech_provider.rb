@@ -61,11 +61,7 @@ module Hermes
       # Test whether provider is functional. Returns true or false.
       def test!
         begin
-          send_short_message(
-            :recipient_number => '_',
-            :rate => -1,
-            :body => '',
-            :id => Time.now.strftime('%Y%m%d%H%M%S'))
+          send_short_message!(:recipient_number => '_', :body => '')
         rescue Excon::Errors::Error
           false
         rescue MessageRejectedError
