@@ -42,6 +42,15 @@ module Hermes
         pg :statistics, :locals => {:statistics => Message.statistics(:profile => profile)}
       end
 
+      post '/:profile/test' do |profile|
+        provider = @configuration.provider_for_profile(profile)
+        if provider.test!
+          halt 200, "Provider is fine"
+        else
+          halt 500, "Provider unavailable"
+        end
+      end
+
       get '/:profile/messages/:id' do |profile, id|
         message = Message.where(:profile => profile).where(:id => id).first
         if message

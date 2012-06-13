@@ -206,6 +206,11 @@ describe Hermes::V1::MessagesController do
     end
   end
 
+  describe 'POST /:profile/test' do
+    post '/test/test'
+    last_response.should be_success
+  end
+
   def post_body(path, params, body, env = {})
     post(path, params, env.merge('rack.input' => StringIO.new(body)))
   end

@@ -58,6 +58,23 @@ module Hermes
         tid
       end
 
+      # Test whether provider is functional. Returns true or false.
+      def test!
+        begin
+          send_short_message(
+            :recipient_number => '_',
+            :rate => -1,
+            :body => '',
+            :id => Time.now.strftime('%Y%m%d%H%M%S'))
+        rescue Excon::Errors::Error
+          false
+        rescue MessageRejectedError
+          true
+        else
+          false  # Gateway is being weird, should never accept that message
+        end
+      end
+
       def parse_receipt(url, raw_data)
         document = Nokogiri::XML(raw_data, nil, nil, NOKOGIRI_PARSE_OPTIONS)
         cpid = document.xpath("/BatchReport/CpId").text

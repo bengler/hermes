@@ -24,6 +24,12 @@ Options must be a hash of the following:
 The provider must return a vendor-specific string key that can be used to query the status of a message delivery.
 
 ```ruby
+test!
+```
+
+Test whether the provider's connection is functional. Returns true or false.
+
+```ruby
 parse_receipt(url, raw_body)
 ```
 
