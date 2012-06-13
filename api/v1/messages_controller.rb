@@ -8,7 +8,6 @@ module Hermes
       configure do |config|
         config.set :root, File.expand_path('..', __FILE__)
         config.set :logging, true
-        config.set :logger, LOGGER
         config.set :show_exceptions, false
       end
 
@@ -23,6 +22,10 @@ module Hermes
       end
 
       helpers do
+        def logger
+          LOGGER
+        end
+
         def receipt_url(profile)
           # FIXME: Use the right stuff
           if ENV['RACK_ENV'] == 'development'
