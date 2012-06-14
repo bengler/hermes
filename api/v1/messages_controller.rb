@@ -17,6 +17,18 @@ module Hermes
         404
       end
 
+      error StandardError, Exception do |e|
+        LOGGER.error e.message
+        e.backtrace.each do |line|
+          LOGGER.error line
+        end
+        if ENV['RACK_ENV'] == 'production'
+          halt 500, "Internal error"
+        else
+          halt 500, e.message
+        end
+      end
+
       before do
         @configuration = Configuration.instance
       end
