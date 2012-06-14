@@ -39,12 +39,15 @@ module Hermes
         end
 
         def receipt_url(profile)
-          # FIXME: Use the right stuff
-          if ENV['RACK_ENV'] == 'development'
-            # Set up a tunnel on samla.park.origo.no port 10900 to receive receipts
-            "http://origo.tunnel.o5.no/api/hermes/v1/#{profile}/receipt"
-          else
-            "http://#{request.host}:#{request.port}/api/hermes/v1/#{profile}/receipt"
+          # FIXME: Make configurable
+          case ENV['RACK_ENV']
+            when 'development'
+              # Set up a tunnel on samla.park.origo.no port 10900 to receive receipts
+              "http://origo.tunnel.o5.no/api/hermes/v1/#{profile}/receipt"
+            when 'staging'
+              "http://hermes.o5.no/api/hermes/v1/#{profile}/receipt"
+            else
+              "http://hermes.staging.o5.no/hermes/v1/#{profile}/receipt"
           end
         end
       end
