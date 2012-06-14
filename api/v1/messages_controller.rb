@@ -44,7 +44,7 @@ module Hermes
             # Set up a tunnel on samla.park.origo.no port 10900 to receive receipts
             "http://origo.tunnel.o5.no/api/hermes/v1/#{profile}/receipt"
           else
-            url("#{profile}/receipt")
+            "http://#{request.host}:#{request.port}/api/hermes/v1/#{profile}/receipt"
           end
         end
       end
