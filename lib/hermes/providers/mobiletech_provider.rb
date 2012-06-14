@@ -38,9 +38,11 @@ module Hermes
           :receipt_url, :rate, :recipient_number, :sender_number, :body, :timeout)
         tid = generate_tid
         Timeout.timeout(options[:timeout] || 30) do
+          body = build_request(tid, options)
+          LOGGER.info "Posting batch to Mobiletech: #{body}"
           response = @connection.post(
             :path => BATCH_SERVICE_PATH,
-            :body => build_request(tid, options),
+            :body => body,
             :headers => {'Content-Type' => 'application/xml'})
           case response.status
             when 200, 201
