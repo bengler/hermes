@@ -1,16 +1,16 @@
 GIT
+  remote: git@github.com:bengler/bengler_test_helper.git
+  revision: 599b0c5cec320a9d7b1f1bca378c9e33bd25f27d
+  specs:
+    bengler_test_helper (0.0.2)
+
+GIT
   remote: git@github.com:bengler/capistrano-bengler.git
   revision: a6ff1c753efbe10d80199596711e418644390f1d
   specs:
     capistrano-bengler (0.0.17)
       capistrano (>= 2.9)
       capistrano-ext (>= 1.2.1)
-
-GIT
-  remote: git@github.com:origo/bengler_test_helper.git
-  revision: 25c9cdd45795c530ad8e82d325e7c6d28b5cb37c
-  specs:
-    bengler_test_helper (0.0.2)
 
 GEM
   remote: http://rubygems.org/

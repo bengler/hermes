@@ -15,7 +15,7 @@ gem 'excon', '~> 0.12.0'
 gem 'bunny', '~> 0.7.9'
 
 group :test, :development do
-  gem 'bengler_test_helper', :git => "git@github.com:origo/bengler_test_helper.git"
+  gem 'bengler_test_helper', :git => "git@github.com:bengler/bengler_test_helper.git"
 end
 
 group :test do
@@ -28,7 +28,7 @@ end
 
 group :development do
   gem 'capistrano', '~> 2.9.0'
-	gem 'capistrano-bengler', :git => 'git@github.com:bengler/capistrano-bengler.git'
+  gem 'capistrano-bengler', :git => 'git@github.com:bengler/capistrano-bengler.git'
   gem 'thin'
 end
 
