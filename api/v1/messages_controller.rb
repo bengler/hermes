@@ -91,14 +91,16 @@ module Hermes
             :amount => (attrs['rate'] || {})['amount']
           },
           :body => attrs['body'],
-          :receipt_url => receipt_url(profile))
+          :receipt_url => receipt_url(profile),
+          :bill => attrs['bill'])
 
         message = Message.create!(
           :vendor_id => id,
           :profile => profile,
           :status => 'in_progress',
           :recipient_number => attrs['recipient_number'],
-          :callback_url => attrs['callback_url'])
+          :callback_url => attrs['callback_url'],
+          :bill => attrs['bill'])
 
         response.status = 202
         response.headers['Location'] = url("#{profile}/#{message.id}")

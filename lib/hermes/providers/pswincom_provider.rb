@@ -31,7 +31,7 @@ module Hermes
       end
 
       def send_short_message!(options)
-        options.assert_valid_keys(:receipt_url, :rate, :sender_number, :recipient_number, :body, :timeout)
+        options.assert_valid_keys(:receipt_url, :rate, :sender_number, :recipient_number, :body, :timeout, :bill)
         Timeout.timeout(options[:timeout] || 30) do
           response = HTTPClient.new.post(
             URL,

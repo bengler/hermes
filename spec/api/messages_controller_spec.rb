@@ -91,6 +91,26 @@ describe Hermes::V1::MessagesController do
       message.recipient_number.should == '12345678'
     end
 
+    it 'accepts message with bill entity' do
+      mobiletech_stub = stub_mobiletech_success!
+
+      post_body "/test/messages", {}, JSON.dump(
+        :recipient_number => '12345678',
+        :body => 'Yip',
+        :bill => 'Skrue McDuck')
+
+      last_response.status.should == 202
+      last_response.body.should =~ /\d+/
+
+      mobiletech_stub.should have_been_requested
+
+      message = Message.where(:id => last_response.body).first
+      message.should_not == nil
+      message.status.should == 'in_progress'
+      message.recipient_number.should == '12345678'
+      message.bill.should == 'Skrue McDuck'
+    end
+
     it 'accepts message with callback' do
       stub_mobiletech_success!
 

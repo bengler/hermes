@@ -20,6 +20,7 @@ Options must be a hash of the following:
   * `:amount` (required): amount in that currency * 100. Eg., to specify 1 USD, specify `100`.
 * `:sender`: the sender number or text. May not be supported by all providers.
 * `:timeout`: timeout, in seconds, for the sending to complete.
+* `:bill`: a string representing an entity that should be billed for sending the message.
 
 The provider must return a vendor-specific string key that can be used to query the status of a message delivery.
 

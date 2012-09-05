@@ -35,7 +35,7 @@ module Hermes
 
       def send_short_message!(options)
         options.assert_valid_keys(
-          :receipt_url, :rate, :recipient_number, :sender_number, :body, :timeout)
+          :receipt_url, :rate, :recipient_number, :sender_number, :body, :timeout, :bill)
         tid = generate_tid
         Timeout.timeout(options[:timeout] || 30) do
           body = build_request(tid, options)
