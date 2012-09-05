@@ -30,7 +30,7 @@ module Hermes
         @default_sender_country = options[:default_sender_country] || DEFAULT_SENDER_COUNTRY
         @default_sender_number = options[:default_sender_number]
 
-        @connection = Excon.new(URL)
+        @connection = Excon.new(SERVICE)
       end
 
       def send_short_message!(options)

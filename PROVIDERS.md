@@ -50,3 +50,14 @@ This provider supports the following configuration variables:
 * `:sender_country`: Country code of sender. Defaults to `NO`.
 * `:default_sender`: Sender number to use by default. Defaults to the nothing (ie., the gateway default).
 * `:default_prefix`: Prefix to use for numbers when no country prefix has been specified. Defaults to `47`.
+
+PSWinCom
+----------
+
+This provider supports the following configuration variables:
+
+* `:user` (required): The API user.
+* `:password` (required): The API password.
+* `:default_sender_country`: Country code of sender. Defaults to `NO`.
+* `:default_sender_number`: Sender number to use by default. Defaults to the nothing (ie., the gateway default).
+* `:default_prefix`: Prefix to use for numbers when no country prefix has been specified. Defaults to `47`.
