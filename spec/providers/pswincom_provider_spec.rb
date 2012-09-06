@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'spec_helper'
 
 include Hermes::Providers
@@ -26,16 +27,34 @@ describe PSWinComProvider do
 
     it "treats gateway response other than 0 as rejected by the server" do
       stub_request(:post, 'https://sms.pswin.com/http4sms/sendRef.asp').to_return(
-        :body => '1\n')
+        :body => "1\nFoo\nBar")
       lambda {
         provider.send_short_message!(:recipient_number => '12345678', :body => 'test')
       }.should raise_error(PSWinComProvider::MessageRejectedError)
     end
 
-    it "Returns a reference value if the message was sent" do
+    it "returns a reference value if the message was sent" do
       stub_request(:post, 'https://sms.pswin.com/http4sms/sendRef.asp').to_return(
         :body => "0\nOK\n4A4B0034DB")
       provider.send_short_message!(:recipient_number => '12345678', :body => 'test').should == "4A4B0034DB"
+    end
+
+    it "returns a error if no reference was returned" do
+      stub_request(:post, 'https://sms.pswin.com/http4sms/sendRef.asp').to_return(
+        :body => "0\nOK")
+      lambda {
+        provider.send_short_message!(:recipient_number => '12345678', :body => 'test')
+      }.should raise_error(PSWinComProvider::InvalidResponseError)
+    end
+
+    it "sends message bodies as ISO-8859 Latin 1" do
+      stub_request(:post, "https://sms.pswin.com/http4sms/sendRef.asp").
+               with(:body => {"PW"=>"bar", "RCPREQ"=>"Y", "RCV"=>"4712345678", "SND"=>"", "TXT"=>"V\xE6rste bl\xE5 d\xF8den", "USER"=>"foo"},
+                    :headers => {'Content-Type'=>'application/x-www-form-urlencoded'}).
+               to_return(:status => 200, :body => "0\nOK\n123123", :headers => {})
+      provider.send_short_message!(:recipient_number => '12345678', :body => 'Værste blå døden')
+      a_request(:post, "https://sms.pswin.com/http4sms/sendRef.asp").
+        with(:body => "USER=foo&PW=bar&RCV=4712345678&SND=&TXT=V%E6rste+bl%E5+d%F8den&RCPREQ=Y").should have_been_made
     end
 
     [310, 312, 500].each do |status|

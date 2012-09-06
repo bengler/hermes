@@ -44,6 +44,7 @@ module Hermes
           raise APIFailureError.new(response.body) if [310, 312, 500].include?(response.status)
           raise InvalidResponseError.new(response.body) if [302, 202, 404].include?(response.status)
           data = response.body.split("\n")
+          raise InvalidResponseError.new(response.body) if data[2].blank?
           return data[2].strip if data[0].strip == "0" # Return reference ID if status is 0 (valid)
           raise MessageRejectedError.new(response.body)
         end
@@ -107,7 +108,7 @@ module Hermes
             "PW" => @password,
             "RCV" => number_to_msisdn(recipient_number),
             "SND" => sender_number || @default_sender_number,
-            "TXT" => message,
+            "TXT" => message.encode("iso-8859-1"),
             "RCPREQ" => "Y" # get a unique reference value back
           }
         end
