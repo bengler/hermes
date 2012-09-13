@@ -19,9 +19,13 @@ GEM
       i18n (~> 0.6)
       multi_json (~> 1.0)
     addressable (2.2.7)
+    airbrake (3.1.4)
+      builder
+      girl_friday
     arel (3.0.2)
     builder (3.0.0)
     bunny (0.7.9)
+    connection_pool (0.9.2)
     crack (0.3.1)
     curb (0.8.0)
     daemons (1.1.8)
@@ -30,6 +34,8 @@ GEM
     eventmachine (0.12.10)
     excon (0.12.0)
     futurevalue (0.0.2)
+    girl_friday (0.10.0)
+      connection_pool (~> 0.9.0)
     httpclient (2.2.5)
     i18n (0.6.0)
     kgio (2.7.3)
@@ -97,6 +103,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 3.2.2)
+  airbrake (~> 3.1.4)
   bengler_test_helper!
   bunny (~> 0.7.9)
   excon (~> 0.12.0)

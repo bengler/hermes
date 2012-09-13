@@ -14,6 +14,7 @@ gem 'nokogiri', '~> 1.5.2'
 gem 'excon', '~> 0.12.0'
 gem 'bunny', '~> 0.7.9'
 gem 'httpclient'
+gem 'airbrake', '~> 3.1.4', :require => false
 
 group :test, :development do
   gem 'bengler_test_helper', :git => "git@github.com:bengler/bengler_test_helper.git"
