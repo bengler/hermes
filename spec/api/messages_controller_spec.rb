@@ -15,16 +15,17 @@ describe Hermes::V1::MessagesController do
     Hermes::V1::MessagesController
   end
 
-  describe "GET /stats" do
+  describe "GET /:realm/stats/sms" do
     Message::VALID_STATUSES.each do |status|
       it "returns statistics for '#{status}'" do
         Message.destroy_all
         Message.create!(
-          :vendor_id => 'test',
-          :profile => 'test',
+          :vendor_id => '123123',
+          :kind => 'sms',
+          :realm => 'test',
           :status => status,
-          :recipient_number => '12345678')
-        get "/test/stats"
+          :recipient => '12345678')
+        get "/test/stats/sms"
         last_response.status.should == 200
         statistics = JSON.parse(last_response.body)
         statistics.should include('statistics')
@@ -40,34 +41,9 @@ describe Hermes::V1::MessagesController do
     end
   end
 
-  describe "GET /:profile/stats" do
-    Message::VALID_STATUSES.each do |status|
-      it "returns statistics for '#{status}'" do
-        Message.destroy_all
-        Message.create!(
-          :vendor_id => 'test',
-          :profile => 'test',
-          :status => status,
-          :recipient_number => '12345678')
-        get "/test/stats"
-        last_response.status.should == 200
-        statistics = JSON.parse(last_response.body)
-        statistics.should include('statistics')
-        statistics['statistics'].should include('failed_count')
-        statistics['statistics'].should include('delivered_count')
-        statistics['statistics'].should include('in_progress_count')
-        statistics['statistics'].should include('unknown_count')
-        statistics['statistics']["#{status}_count"].should == 1
-        (Message::VALID_STATUSES - [status]).each do |other_status|
-          statistics['statistics']["#{other_status}_count"].should == 0
-        end
-      end
-    end
-  end
-
-  describe "POST /:profile/messages" do
-    it 'rejects unknown profile' do
-      post_body "/doobie/messages", {}, JSON.dump(
+  describe "POST /:realm/messages/sms" do
+    it 'rejects unknown realm' do
+      post_body "/doobie/messages/sms", {}, JSON.dump(
         :recipient_number => '12345678',
         :body => 'Yip')
       last_response.status.should == 404
@@ -76,25 +52,25 @@ describe Hermes::V1::MessagesController do
     it 'accepts message' do
       mobiletech_stub = stub_mobiletech_success!
 
-      post_body "/test/messages", {}, JSON.dump(
+      post_body "/test/messages/sms", {}, JSON.dump(
         :recipient_number => '12345678',
         :body => 'Yip')
 
       last_response.status.should == 202
       last_response.body.should =~ /\d+/
-      
+
       mobiletech_stub.should have_been_requested
 
       message = Message.where(:id => last_response.body).first
       message.should_not == nil
       message.status.should == 'in_progress'
-      message.recipient_number.should == '12345678'
+      message.recipient.should == '12345678'
     end
 
     it 'accepts message with bill entity' do
       mobiletech_stub = stub_mobiletech_success!
 
-      post_body "/test/messages", {}, JSON.dump(
+      post_body "/test/messages/sms", {}, JSON.dump(
         :recipient_number => '12345678',
         :body => 'Yip',
         :bill => 'Skrue McDuck')
@@ -107,7 +83,7 @@ describe Hermes::V1::MessagesController do
       message = Message.where(:id => last_response.body).first
       message.should_not == nil
       message.status.should == 'in_progress'
-      message.recipient_number.should == '12345678'
+      message.recipient.should == '12345678'
       message.bill.should == 'Skrue McDuck'
     end
 
@@ -117,7 +93,7 @@ describe Hermes::V1::MessagesController do
       callback_stub = stub_request(:post, 'http://example.com/').with(
         :query => {:status => 'failed'})
 
-      post_body "/test/messages", {}, JSON.dump(
+      post_body "/test/messages/sms", {}, JSON.dump(
         :recipient_number => '12345678',
         :body => 'Yip',
         :callback_url => 'http://example.com/')
@@ -125,7 +101,7 @@ describe Hermes::V1::MessagesController do
       last_response.status.should == 202
       last_response.body.should =~ /\d+/
       last_response.headers['Content-Type'].should =~ /text\/plain/
-      last_response.headers['Location'].should =~ /\/test\/#{Regexp.escape last_response.body}/
+      last_response.headers['Location'].should =~ /\/test\/messages\/sms\/#{Regexp.escape last_response.body}/
 
       message = Message.where(:id => last_response.body).first
       message.status = 'failed'
@@ -143,8 +119,8 @@ describe Hermes::V1::MessagesController do
           raise "Yip yip"
         })
 
-      post_body "/test/messages", {}, JSON.dump(
-        :recipient_number => '12345678',
+      post_body "/test/messages/sms", {}, JSON.dump(
+        :recipient => '12345678',
         :body => 'Yip',
         :callback_url => 'http://example.com/')
 
@@ -159,17 +135,18 @@ describe Hermes::V1::MessagesController do
     end
   end
 
-  describe "GET /:profile/messages/:id" do
+  describe "GET /:realm/messages/:id" do
     it 'shows status for message' do
       message = Hermes::Message.create!(
         :vendor_id => 'vroom',
-        :profile => 'test',
+        :realm => 'test',
+        :kind => 'sms',
         :status => 'in_progress')
       get "/test/messages/#{message.id}"
       last_response.status.should == 200
       result = JSON.parse(last_response.body)
       result.should include('message')
-      result['message']['profile'].should == 'test'
+      result['message']['realm'].should == 'test'
       result['message']['status'].should == 'in_progress'
     end
 
@@ -178,17 +155,18 @@ describe Hermes::V1::MessagesController do
       last_response.status.should == 404
     end
 
-    it 'returns 404 for non-existent profile' do
+    it 'returns 404 if the realm is not the same as the message realm' do
       message = Hermes::Message.create!(
         :vendor_id => 'vroom',
-        :profile => 'test',
+        :realm => 'test',
+        :kind => 'sms',
         :status => 'in_progress')
       get "/yipyip/messages/#{message.id}"
       last_response.status.should == 404
     end
   end
 
-  describe "POST /:profile/receipt" do
+  describe "POST /:realm/receipt" do
     it 'returns 200 even on bad data' do
       post_body "/test/receipt", {}, %{I am a banana}
       last_response.status.should == 200
@@ -197,7 +175,8 @@ describe Hermes::V1::MessagesController do
     it 'accepts Mobiletech receipt' do
       message = Hermes::Message.create!(
         :vendor_id => 'vroom',
-        :profile => 'test',
+        :realm => 'test',
+        :kind => 'sms',
         :status => 'in_progress')
       post_body "/test/receipt", {}, %{
         <BatchReport>
@@ -226,7 +205,7 @@ describe Hermes::V1::MessagesController do
     end
   end
 
-  describe 'POST /:profile/test' do
+  describe 'POST /:realm/test/sms' do
     it 'returns 200 when provider is OK' do
       stub_request(:post, 'http://msggw.dextella.net/BatchService').to_return(
         :status => 200,
@@ -247,7 +226,7 @@ describe Hermes::V1::MessagesController do
             </soap:Body>
           </soap:Envelope>
         })
-      post '/test/test'
+      post '/test/test/sms'
       last_response.status.should == 200
     end
   end
