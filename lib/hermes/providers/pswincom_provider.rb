@@ -13,7 +13,7 @@ module Hermes
       DEFAULT_PREFIX = '47'.freeze
 
       class PSWinComError < Exception; end
-      class ConfigurationError < Exception; end
+      class ConfigurationError < PSWinComError; end
       class APIFailureError < PSWinComError; end
       class InvalidResponseError < PSWinComError; end
       class MessageRejectedError < PSWinComError; end
@@ -30,8 +30,10 @@ module Hermes
         @default_sender_number = options[:default_sender_number]
       end
 
-      def send_short_message!(options)
+      def send_message!(options)
         options.assert_valid_keys(:receipt_url, :rate, :sender_number, :recipient_number, :body, :timeout, :bill)
+        raise Hermes::OptionMissingError.new("recipient_number is missing") unless options[:recipient_number]
+        raise Hermes::OptionMissingError.new("body is missing") unless options[:body]
         Timeout.timeout(options[:timeout] || 30) do
           response = HTTPClient.new.post(
             URL,
@@ -53,7 +55,7 @@ module Hermes
       # Test whether provider is functional. Returns true or false.
       def test!
         begin
-          send_short_message!(:recipient_number => '_', :body => '')
+          send_message!(:recipient_number => '_', :body => '')
         rescue Excon::Errors::Error
           false
         rescue MessageRejectedError

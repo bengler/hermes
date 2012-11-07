@@ -19,13 +19,13 @@ module Hermes
       def initialize(options = {})
         options.assert_valid_keys(:cpid, :default_prefix, :default_sender_country, :secret,
           :default_sender_number)
-        
+
         @cpid = options[:cpid].to_s if options[:cpid]
         raise ConfigurationError, "CPID must be specified" unless @cpid
 
         @secret = options[:secret]
         raise ConfigurationError, "Secret must be specified" unless @secret
-        
+
         @default_prefix = options[:default_prefix] || DEFAULT_PREFIX
         @default_sender_country = options[:default_sender_country] || DEFAULT_SENDER_COUNTRY
         @default_sender_number = options[:default_sender_number]
@@ -33,7 +33,7 @@ module Hermes
         @connection = Excon.new(URL)
       end
 
-      def send_short_message!(options)
+      def send_message!(options)
         options.assert_valid_keys(
           :receipt_url, :rate, :recipient_number, :sender_number, :body, :timeout, :bill)
         tid = generate_tid
@@ -63,7 +63,7 @@ module Hermes
       # Test whether provider is functional. Returns true or false.
       def test!
         begin
-          send_short_message!(:recipient_number => '_', :body => '')
+          send_message!(:recipient_number => '_', :body => '')
         rescue Excon::Errors::Error
           false
         rescue MessageRejectedError
@@ -102,7 +102,7 @@ module Hermes
       rescue Nokogiri::XML::SyntaxError => e
         raise InvalidReceiptError, "Invalid receipt from Mobiletech: #{raw_data}"
       end
-        
+
       private
 
         URL = 'http://msggw.dextella.net'.freeze
@@ -112,7 +112,7 @@ module Hermes
         FALSE_RESPONSE = 'false'.freeze
 
         DEFAULT_SENDER_COUNTRY = 'NO'.freeze
-      
+
         DEFAULT_PREFIX = '47'
 
         NOKOGIRI_PARSE_OPTIONS =
@@ -207,7 +207,7 @@ module Hermes
                   end
                   xml['bat'].transId do
                     xml.text tid
-                  end      
+                  end
                 end
               end
             end
@@ -239,7 +239,7 @@ module Hermes
             body = message_from_soap_envelope(body)
           rescue InvalidResponseError
             message = ''
-          else            
+          else
             document = Nokogiri::XML(body, nil, nil, NOKOGIRI_PARSE_OPTIONS)
             message = document.xpath('//faultstring').text
           end
