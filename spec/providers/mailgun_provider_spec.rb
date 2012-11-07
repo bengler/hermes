@@ -24,9 +24,9 @@ describe MailGunProvider do
 
     it "returns a reference value if the message was sent" do
       stub_request(:post, "https://api:foo@api.mailgun.net/v2/test.com/messages").
-         with(:body => {"from"=>"", "html"=>"", "subject"=>"", "text"=>"test", "to"=>"foo@bar.com"},
-              :headers => {'Authorization'=>'Basic YXBpOmZvbw==', 'Content-Type'=>'application/x-www-form-urlencoded'}).
-         to_return(:status => 200, :body => {:message => "Queued. Thank you.", :id => "<20111114174239.25659.5817@test.com>"}.to_json, :headers => {})
+        with(:body => {"from"=>"No-reply <no-reply@test.com>", "html"=>"", "subject"=>"", "text"=>"test", "to"=>"foo@bar.com"},
+             :headers => {'Authorization'=>'Basic YXBpOmZvbw==', 'Content-Type'=>'application/x-www-form-urlencoded'}).
+          to_return(:status => 200, :body => {:message => "Queued. Thank you.", :id => "<20111114174239.25659.5817@test.com>"}.to_json, :headers => {})
       provider.send_message!(:recipient_email => 'foo@bar.com', :text => 'test').should == "<20111114174239.25659.5817@test.com>"
     end
 
