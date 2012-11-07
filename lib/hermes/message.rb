@@ -8,7 +8,7 @@ module Hermes
       :unknown
     ].freeze
 
-    validates :profile, :presence => {}
+    validates :realm, :presence => {}
     validates :vendor_id, :presence => {}
     validates :status, :inclusion => {:in => VALID_STATUSES}
 
@@ -33,8 +33,11 @@ module Hermes
       def statistics(options = {})
         result = Statistics.new
         where = arel_table['status'].not_eq(nil)
-        if (profile = options[:profile])
-          where = where.and(arel_table['profile'].eq(profile.to_s))
+        if (realm = options[:realm])
+          where = where.and(arel_table['realm'].eq(realm.to_s))
+        end
+        if (kind = options[:kind])
+          where = where.and(arel_table['kind'].eq(kind.to_s))
         end
         connection.select_all(
           arel_table.project("status, count(*)").where(where).
