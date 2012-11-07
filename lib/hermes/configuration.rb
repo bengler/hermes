@@ -1,5 +1,7 @@
 module Hermes
 
+  class OptionMissingError < Exception; end
+
   class Configuration
 
     class ProviderNotFound < StandardError; end
@@ -11,23 +13,28 @@ module Hermes
     end
 
     def load!(root_path = nil)
+
       @providers.clear
       root_path ||= File.expand_path('../../..', __FILE__)
 
-      # Check realms/ for backwards compatibility.
-      Dir.glob(File.join(root_path, 'config/{profiles,realms}/*.yml')).each do |file_name|
-        profile = File.basename(file_name.gsub(/\.yml$/, ''))
+      Dir.glob(File.join(root_path, 'config/realms/*.yml')).each do |file_name|
+        realm = File.basename(file_name.gsub(/\.yml$/, ''))
         File.open(file_name) do |file|
-          config = YAML.load(file).symbolize_keys
-          provider_class = find_provider_class(config.delete(:provider))
-          provider = provider_class.new(config)
-          @providers[profile] = provider
+          config = YAML.load(file)
+          sms_provider_class = find_provider_class(config['sms'].delete('provider'))
+          sms_provider = sms_provider_class.new(config['sms'].symbolize_keys)
+          email_provider_class = find_provider_class(config['email'].delete('provider'))
+          email_provider = email_provider_class.new(config['email'].symbolize_keys)
+          @providers[realm.to_sym] = {:sms => sms_provider, :email => email_provider}
         end
       end
     end
 
-    def provider_for_profile(profile)
-      @providers[profile] or raise ProviderNotFound.new(profile)
+    def provider_for_realm_and_kind(realm, kind)
+      if @providers[realm.to_sym] and @providers[realm.to_sym][kind.to_sym]
+        return @providers[realm.to_sym][kind.to_sym]
+      end
+      raise ProviderNotFound.new("A provider for '#{kind}' on realm '#{realm}' was not found.")
     end
 
     def find_provider_class(name)
