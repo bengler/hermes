@@ -32,4 +32,4 @@ end
 ActiveRecord::Base.logger ||= LOGGER
 ActiveRecord::Base.establish_connection(
   YAML::load(File.open("config/database.yml"))[environment])
-Hermes::Configuration.instance.load!
+
