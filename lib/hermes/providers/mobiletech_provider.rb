@@ -1,3 +1,5 @@
+require 'active_support/core_ext/hash/keys'
+
 module Hermes
   module Providers
 
@@ -17,8 +19,8 @@ module Hermes
       attr_reader :default_sender_number
 
       def initialize(options = {})
-        options.assert_valid_keys(:cpid, :default_prefix, :default_sender_country, :secret,
-          :default_sender_number)
+        options.assert_valid_keys(:cpid, :default_prefix,
+          :default_sender_country, :secret, :default_sender_number)
 
         @cpid = options[:cpid].to_s if options[:cpid]
         raise ConfigurationError, "CPID must be specified" unless @cpid
