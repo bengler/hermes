@@ -1,3 +1,0 @@
-node :message => message do
-  attributes :id, :realm, :status, :recipient, :kind, :callback_url, :bill
-end

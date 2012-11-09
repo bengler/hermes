@@ -1,3 +1,0 @@
-node :statistics => statistics do
-  attributes :failed_count, :delivered_count, :in_progress_count, :unknown_count
-end
