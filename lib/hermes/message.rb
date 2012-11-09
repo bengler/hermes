@@ -8,7 +8,7 @@ module Hermes
 
     VALID_STATUSES = [
       :failed,
-      :in_progress,
+      :inprogress,
       :delivered,
       :unknown
     ].freeze

@@ -15,7 +15,8 @@ module Hermes
           {
             :post => {
               :document => message,
-              :tags => ["in_progress"],
+              :restricted => true,
+              :tags => ["inprogress"],
               :external_id => Message.external_id_prefix(provider) <<
                 provider.send_message!(
                   message.tap{|hs| hs.delete(:callback_url)}.
