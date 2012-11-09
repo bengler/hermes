@@ -6,9 +6,12 @@ module Hermes
         require_god
         provider = @configuration.provider_for_realm_and_kind(realm, :sms)
         connector = pebblebed_connector(realm, current_identity)
-        message = sms_message_from_attrs(JSON.parse(request.env['rack.input'].read))
+        attrs = JSON.parse(request.env['rack.input'].read)
+        path = "#{realm}"
+        path << ".#{attrs['path']}" if attrs['path']
+        message = sms_message_from_attrs(attrs.tap{|hs| hs.delete(:path)})
         post = connector.grove.post(
-          "/posts/post.sms:#{realm}",
+          "/posts/post.sms:#{path}",
           {
             :post => {
               :document => message,

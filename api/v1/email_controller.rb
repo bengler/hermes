@@ -7,12 +7,16 @@ module Hermes
         require_god
         provider = @configuration.provider_for_realm_and_kind(realm, :email)
         connector = pebblebed_connector(realm, current_identity)
-        message = email_message_from_attrs(JSON.parse(request.env['rack.input'].read))
+        attrs = JSON.parse(request.env['rack.input'].read)
+        path = "#{realm}"
+        path << ".#{attrs['path']}" if attrs['path']
+        message = email_message_from_attrs(attrs.tap{|hs| hs.delete(:path)})
         post = connector.grove.post(
-          "/posts/post.email:#{realm}",
+          "/posts/post.email:#{path}",
           {
             :post => {
               :document => message,
+              :restricted => true,
               :tags => ["in_progress"],
               :external_id => Message.external_id_prefix(provider) <<
                 provider.send_message!(
