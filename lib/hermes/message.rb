@@ -1,5 +1,10 @@
+require 'delegate'
+require 'deepstruct'
+
+require 'pebbles-uid'
+
 module Hermes
-  class Message < ActiveRecord::Base
+  class Message < SimpleDelegator
 
     VALID_STATUSES = [
       :failed,
@@ -8,71 +13,71 @@ module Hermes
       :unknown
     ].freeze
 
-    validates :realm, :presence => {}
-    validates :vendor_id, :presence => {}
-    validates :status, :inclusion => {:in => VALID_STATUSES}
+    def update!(attributes)
+      old_tags = self.tags
+      new_tags = Hermes::Message.grove(Pebbles::Uid.new(self['uid']).realm).
+        put("/posts/#{self['uid']}", attributes)['post']['tags']
+      the_tags = new_tags.to_a-old_tags.to_a
+      notify_callback_url(the_tags.first) if the_tags.any?
+    end
 
-    after_update :notify_callback_url
+    def failed?
+      tags.include?('failed') and !tags.include?('delivered')
+    end
 
-    class Statistics
-      def initialize
-        @failed_count, @in_progress_count, @delivered_count, @unknown_count = 0, 0, 0, 0
-      end
+    def delivered?
+      tags.include?('delivered')
+    end
 
-      attr_writer :failed_count
-      attr_writer :in_progress_count
-      attr_writer :delivered_count
-      attr_writer :unknown_count
+    def tags
+      self['tags'] || []
+    end
 
-      def [](key)
-        instance_variable_get("@#{key}")
+    def self.find(uid, realm)
+      begin
+        new(grove(realm).get(uid)['post'])
+      rescue Pebblebed::HttpNotFoundError
+        return nil
       end
     end
 
-    class << self
-      def statistics(options = {})
-        result = Statistics.new
-        where = arel_table['status'].not_eq(nil)
-        if (realm = options[:realm])
-          where = where.and(arel_table['realm'].eq(realm.to_s))
-        end
-        if (kind = options[:kind])
-          where = where.and(arel_table['kind'].eq(kind.to_s))
-        end
-        connection.select_all(
-          arel_table.project("status, count(*)").where(where).
-            group(arel_table['status']).to_sql
-        ).each do |row|
-          status, count = row['status'], row['count'].to_i
-          result.send("#{status}_count=", count)
-        end
-        result
+    def self.find_by_external_id(id, realm)
+      begin
+        message = new(grove(realm).get("/posts", :external_id => id)['post'])
+      rescue Pebblebed::HttpNotFoundError
+        return nil
       end
     end
 
-    def status=(value)
-      if value
-        value = value.to_sym if value.respond_to?(:to_sym)
-        super(value)
-      end
+    def self.external_id_prefix(provider)
+      "#{provider.class.name.underscore.split('/').last}_id:"
+    end
+
+    def self.grove(realm)
+      session = Hermes::Configuration.instance.session_for_realm(realm)
+      grove = Pebblebed::Connector.new(session).grove
     end
 
     private
 
+      def callback_url
+        self['document']['callback_url']
+      end
+
       # TODO: Schedule asynchronously using AMQP
-      def notify_callback_url
-        if self.callback_url and status_changed?
-          uri = URI.parse(self.callback_url)
+      def notify_callback_url(status)
+        if callback_url
+          uri = URI.parse(callback_url)
           uri.query << '&' if uri.query
           uri.query ||= ''
-          uri.query << "status=#{self.status}"
-          logger.info("Notifying callback #{uri}")
+          uri.query << "status=#{status}"
+          LOGGER.info("Notifying callback #{uri}")
           begin
             Timeout.timeout(10) do
               Excon.post(uri.to_s)
             end
           rescue Exception => e
-            logger.error("Callback failed: #{uri}: #{e.class}: #{e.message}")
+            LOGGER.error("Callback failed: #{uri}: #{e.class}: #{e.message}")
           end
         end
         true
