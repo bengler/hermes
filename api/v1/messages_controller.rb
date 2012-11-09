@@ -35,6 +35,8 @@ module Hermes
 
       before do
         @configuration = Configuration.instance
+        cache_control :private, :no_cache, :no_store, :must_revalidate
+        headers "Content-Type" => "application/json; charset=utf8"
       end
 
       post '/:realm/test/:kind' do |realm, kind|
@@ -86,16 +88,16 @@ module Hermes
           LOGGER
         end
 
-        def receipt_url(realm)
+        def receipt_url(realm, kind)
           # FIXME: Make configurable
           case ENV['RACK_ENV']
             when 'development'
               # Set up a tunnel on samla.park.origo.no port 10900 to receive receipts
-              "http://origo.tunnel.o5.no/api/hermes/v1/#{realm}/receipt"
+              "http://origo.tunnel.o5.no/api/hermes/v1/#{realm}/receipt/#{kind}"
             when 'staging'
-              "http://hermes.o5.no/api/hermes/v1/#{realm}/receipt"
+              "http://hermes.o5.no/api/hermes/v1/#{realm}/receipt/#{kind}"
             else
-              "http://hermes.staging.o5.no/hermes/v1/#{realm}/receipt"
+              "http://hermes.staging.o5.no/hermes/v1/#{realm}/receipt/#{kind}"
           end
         end
       end

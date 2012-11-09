@@ -16,10 +16,11 @@ module Hermes
               :external_id => Message.external_id_prefix(provider) <<
                 provider.send_message!(
                   message.tap{|hs| hs.delete(:callback_url)}.
-                    merge(:receipt_url => receipt_url(realm)))
+                    merge(:receipt_url => receipt_url(realm, :sms)))
             }
           }
         )
+        halt 200, post.to_json
       end
       helpers do
         def sms_message_from_attrs(attrs)
