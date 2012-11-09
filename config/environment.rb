@@ -6,7 +6,6 @@ Bundler.require
 require 'rack/contrib'
 require 'yajl/json_gem'
 require 'pebblebed/sinatra'
-require 'sinatra/petroglyph'
 require 'timeout'
 require 'excon'
 require 'securerandom'
