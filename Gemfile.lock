@@ -45,8 +45,6 @@ GEM
       queryparams
       yajl-ruby
     pebbles-uid (0.0.9)
-    petroglyph (0.0.5)
-      tilt
     pg (0.13.2)
     queryparams (0.0.3)
     rack (1.4.1)
@@ -66,7 +64,6 @@ GEM
     rspec-expectations (2.11.3)
       diff-lcs (~> 1.1.3)
     rspec-mocks (2.11.3)
-    servolux (0.10.0)
     simplecov (0.7.1)
       multi_json (~> 1.0)
       simplecov-html (~> 0.7.1)
@@ -101,14 +98,12 @@ DEPENDENCIES
   nokogiri (~> 1.5.2)
   pebblebed (~> 0.0.9)
   pebbles-uid
-  petroglyph (~> 0.0.2)
   pg (~> 0.13.2)
   rack (~> 1.4)
   rack-contrib (~> 1.1.0)
   rack-test
   rake
   rspec (~> 2.8)
-  servolux
   simplecov
   sinatra (~> 1.3.2)
   thin
