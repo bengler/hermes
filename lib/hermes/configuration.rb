@@ -21,13 +21,21 @@ module Hermes
         realm = File.basename(file_name.gsub(/\.yml$/, ''))
         File.open(file_name) do |file|
           config = YAML.load(file)
-          sms_provider_class = find_provider_class(config['sms'].delete('provider'))
-          sms_provider = sms_provider_class.new(config['sms'].symbolize_keys)
-          email_provider_class = find_provider_class(config['email'].delete('provider'))
-          email_provider = email_provider_class.new(config['email'].symbolize_keys)
-          @providers[realm.to_sym] = {:sms => sms_provider, :email => email_provider}
+          if config['sms']
+            sms_provider_class = find_provider_class(config['sms'].delete('provider'))
+            sms_provider = sms_provider_class.new(config['sms'].symbolize_keys)
+          end
+          if config['email']
+            email_provider_class = find_provider_class(config['email'].delete('provider'))
+            email_provider = email_provider_class.new(config['email'].symbolize_keys)
+          end
+          @providers[realm.to_sym] = {:session => config['session'], :sms => sms_provider, :email => email_provider}
         end
       end
+    end
+
+    def session_for_realm(realm)
+      @providers[realm.to_sym][:session]
     end
 
     def provider_for_realm_and_kind(realm, kind)
