@@ -3,8 +3,9 @@ module Hermes
     class MessagesController < Sinatra::Base
 
       # @apidoc
-      # Send an SMS
+      # Send a SMS.
       #
+      # @note Requires a god session.
       # @category Hermes/SMS
       # @path /api/hermes/v1/:realm/sms
       # @http POST

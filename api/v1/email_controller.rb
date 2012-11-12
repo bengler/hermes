@@ -3,8 +3,9 @@ module Hermes
     class MessagesController < Sinatra::Base
 
       # @apidoc
-      # Send an email
+      # Send an email. Requires a god session.
       #
+      # @note Requires a god session.
       # @category Hermes/Email
       # @path /api/hermes/v1/:realm/email
       # @http POST
