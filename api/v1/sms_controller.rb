@@ -2,6 +2,20 @@ module Hermes
   module V1
     class MessagesController < Sinatra::Base
 
+      # @apidoc
+      # Send an SMS
+      #
+      # @category Hermes/SMS
+      # @path /api/hermes/v1/:realm/sms
+      # @http POST
+      # @example /api/hermes/v1/dna/sms
+      # @required [String] realm the configured realm to send with
+      # @required [String] recipient_number the mobile number to send to
+      # @required [String] body the message text
+      # @optional [String] sender_number the mobile number or sender label (string) that the message is sent form
+      # @optional [String] callback_url the url that should be called when a new status for the message is set
+      # @optional [Hash] rate a hash with {"currency": "NOK", "amount": "1"}
+      # @returns [JSON]
       post '/:realm/messages/sms' do |realm|
         require_god
         provider = @configuration.provider_for_realm_and_kind(realm, :sms)
