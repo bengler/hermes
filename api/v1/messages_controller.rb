@@ -60,18 +60,19 @@ module Hermes
       end
 
       post '/:realm/receipt/:kind' do |realm, kind|
+        logger.error(request)
         provider = @configuration.provider_for_realm_and_kind(realm, kind)
         raw = request.env['rack.input'].read if request.env['rack.input']
         raw ||= ''
         begin
-          result = provider.parse_receipt(request.path_info, raw)
+          result = provider.parse_receipt(request.path_info, raw, params)
         rescue Exception => e
           logger.error("Ignoring exception during receipt parsing: #{e}")
         else
           if result[:id] and result[:status]
             message = Message.find_by_external_id(Message.external_id_prefix(provider) << result[:id], realm)
             if message
-              message.update!({:document => {:tags => [result[:status]]}})
+              message.add_tag!(result[:status])
             end
           end
         end
