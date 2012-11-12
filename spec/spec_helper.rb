@@ -84,10 +84,10 @@ def stub_checkpoint_success!
 end
 
 def stub_grove_update_success!
-  stub_request(:get, "http://hermes.dev/api/grove/v1/posts?external_id=mobiletech_provider_id:vroom&session=some_checkpoint_god_session_for_test_realm").
+  stub_request(:get, "http://hermes.dev/api/grove/v1/posts/*?external_id=mobiletech_provider_id:vroom&session=some_checkpoint_god_session_for_test_realm").
     to_return(:status => 200, :body => '{"post": {"uid": "post.sms:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}, "tags": ["in_progress"]}}')
-  stub_request(:put, "http://hermes.dev/api/grove/v1/posts/post.sms:test$1234").
-    with(:body => "{\"document\":{\"tags\":[\"delivered\"]},\"session\":\"some_checkpoint_god_session_for_test_realm\"}").
+  stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.sms:test$1234/tags/delivered").
+  with(:body => "{\"session\":\"some_checkpoint_god_session_for_test_realm\"}", :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
       to_return(:status => 200, :body => '{"post": {"uid": "post.sms:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}, "tags": ["in_progress", "delivered"]}}')
 end
 
