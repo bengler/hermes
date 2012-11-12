@@ -65,7 +65,7 @@ module Hermes
         end
       end
 
-      def parse_receipt(url, raw_data)
+      def parse_receipt(url, raw_data, params=nil)
         parsed_data = CGI::parse(raw_data)
         tid = parsed_data["REF"].first
         result = {:id => tid}

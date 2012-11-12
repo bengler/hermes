@@ -75,7 +75,7 @@ module Hermes
         end
       end
 
-      def parse_receipt(url, raw_data)
+      def parse_receipt(url, raw_data, params=nil)
         document = Nokogiri::XML(raw_data, nil, nil, NOKOGIRI_PARSE_OPTIONS)
         cpid = document.xpath("/BatchReport/CpId").text
         if cpid != @cpid

@@ -1,4 +1,5 @@
-require "httpclient"
+require 'httpclient'
+require 'rack/utils'
 
 module Hermes
   module Providers
@@ -64,13 +65,19 @@ module Hermes
         end
       end
 
-      def parse_receipt(url, raw_data)
-        parsed_data = JSON.parse(raw_data)
-        id = parsed_data["id"]
-        message = parsed_data["message"]
+      def parse_receipt(url, raw_data, params=nil)
+        id = params["Message-Id"]
+        status = case params["event"]
+          when "bounced"
+            :failed
+          when "delivered"
+            :delivered
+          when "dropped"
+            :failed
+        end
         result = {:id => id}
-        result[:status] = :in_progress
-        result[:vendor_message] = message
+        result[:status] = status
+        result[:vendor_message] = params["error"]
         result
       end
 
