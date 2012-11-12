@@ -14,7 +14,7 @@ module Hermes
       # @optional [String] subject the message subject
       # @optional [String] text the message plain text
       # @optional [String] html the message HTML
-      # @optional [String] sender_emaio the email address the email is sent from
+      # @optional [String] sender_email the email address the email is sent from
       # @optional [String] callback_url the url that should be called when a new status for the message is set
       # @returns [JSON]
       post '/:realm/messages/email' do |realm|
