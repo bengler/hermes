@@ -74,6 +74,8 @@ module Hermes
             :delivered
           when "dropped"
             :failed
+          else
+            :unknown
         end
         result = {:id => id}
         result[:status] = status
