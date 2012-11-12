@@ -13,10 +13,10 @@ module Hermes
       :unknown
     ].freeze
 
-    def update!(attributes)
+    def add_tag!(tag)
       old_tags = self.tags
       new_tags = Hermes::Message.grove(Pebbles::Uid.new(self['uid']).realm).
-        put("/posts/#{self['uid']}", attributes)['post']['tags']
+        post("/posts/#{self['uid']}/tags/#{tag}")['post']['tags']
       the_tags = new_tags.to_a-old_tags.to_a
       notify_callback_url(the_tags.first) if the_tags.any?
     end
@@ -43,7 +43,7 @@ module Hermes
 
     def self.find_by_external_id(id, realm)
       begin
-        message = new(grove(realm).get("/posts", :external_id => id)['post'])
+        message = new(grove(realm).get("/posts/*", :external_id => id)['post'])
       rescue Pebblebed::HttpNotFoundError
         return nil
       end
