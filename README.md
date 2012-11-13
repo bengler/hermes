@@ -38,11 +38,11 @@ Create the file ./config/realms/test.yml with the content:
 
 The file name is the realm name (with .yml).
 
-The ``session` key is a god session for this realm in Checkpoint.
+The ``session`` key is a god session for this realm in Checkpoint.
 
-Under ``implementations`` we put the configuration for various provider implmentations (see [providers.md](providers.md) for details).
+Under ``implementations`` we put the configuration for various provider implmentations (see [./providers.md](providers.md) for details).
 
-### Sending sms and email
+### Sending messages
 
 With the example above we have set up the possibility to send sms and email for the 'test' realm.
 
