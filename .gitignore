@@ -6,5 +6,6 @@ coverage/
 .rvmrc
 .idea
 config/realms/*
+config/site.rb
 /_trash
 /.brow

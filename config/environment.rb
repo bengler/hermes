@@ -6,11 +6,11 @@ Bundler.require
 require 'rack/contrib'
 require 'yajl/json_gem'
 require 'pebblebed/sinatra'
-require 'sinatra/petroglyph'
 require 'timeout'
 require 'excon'
 require 'securerandom'
 require 'singleton'
+require 'active_support/all'
 
 ENV['RACK_ENV'] ||= "development"
 environment = ENV['RACK_ENV']
@@ -19,6 +19,8 @@ unless defined?(LOGGER)
   LOGGER = Logger.new($stderr)
   LOGGER.level = Logger::INFO
 end
+
+require File.expand_path('config/pebblebed.rb')
 
 %w(
   lib/hermes
@@ -29,7 +31,3 @@ end
   end
 end
 
-ActiveRecord::Base.logger ||= LOGGER
-ActiveRecord::Base.establish_connection(
-  YAML::load(File.open("config/database.yml"))[environment])
-Hermes::Configuration.instance.load!
