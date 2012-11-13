@@ -37,7 +37,7 @@ module Hermes
 
       def send_message!(options)
         options.assert_valid_keys(
-          :receipt_url, :rate, :recipient_number, :sender_number, :body, :timeout, :bill)
+          :receipt_url, :rate, :recipient_number, :sender_number, :text, :timeout, :bill)
         tid = generate_tid
         Timeout.timeout(options[:timeout] || 30) do
           body = build_request(tid, options)
@@ -65,7 +65,7 @@ module Hermes
       # Test whether provider is functional. Returns true or false.
       def test!
         begin
-          send_message!(:recipient_number => '_', :body => '')
+          send_message!(:recipient_number => '_', :text => '')
         rescue Excon::Errors::Error
           false
         rescue MessageRejectedError
@@ -165,7 +165,7 @@ module Hermes
                     xml.text @cpid
                   end
                   xml['bat'].defaultText do
-                    xml.text options[:body]
+                    xml.text options[:text]
                   end
                   xml['bat'].messages do
                     xml['mes'].SmsMessage do

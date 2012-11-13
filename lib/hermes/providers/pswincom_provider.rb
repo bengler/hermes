@@ -31,14 +31,14 @@ module Hermes
       end
 
       def send_message!(options)
-        options.assert_valid_keys(:receipt_url, :rate, :sender_number, :recipient_number, :body, :timeout, :bill)
+        options.assert_valid_keys(:receipt_url, :rate, :sender_number, :recipient_number, :text, :timeout, :bill)
         raise Hermes::OptionMissingError.new("recipient_number is missing") unless options[:recipient_number]
-        raise Hermes::OptionMissingError.new("body is missing") unless options[:body]
+        raise Hermes::OptionMissingError.new("text is missing") unless options[:text]
         Timeout.timeout(options[:timeout] || 30) do
           response = HTTPClient.new.post(
             URL,
             post_data(
-              options[:body],
+              options[:text],
               options[:recipient_number],
               options[:sender_number]
             )
