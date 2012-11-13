@@ -17,6 +17,10 @@ module Hermes
         return halt 404, e.message
       end
 
+      error ::Hermes::Configuration::SessionNotFound do |e|
+        return halt 404, e.message
+      end
+
       error ::Hermes::OptionMissingError do |e|
         return halt 400, e.message
       end
@@ -48,15 +52,10 @@ module Hermes
         end
       end
 
-      get '/:realm/messages/:id' do |realm, id|
-        require_god
-        message = Message.where(:id => id)
-        if message.any?
-          if message.first.realm == realm
-            return pg :message, :locals => {:message => message.first}
-          end
-        end
-        halt 404, "No such message"
+      get '/:realm/messages/:uid' do |realm, uid|
+        message = Message.find(realm, uid)
+        return halt 404, "No such message" unless message
+        halt 200, message.to_json
       end
 
       post '/:realm/messages/:kind' do |realm, kind|

@@ -15,15 +15,6 @@ describe Hermes::V1::MessagesController do
     Hermes::V1::MessagesController
   end
 
-  post '/:realm/test/:kind' do |realm, kind|
-    provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
-    if provider.test!
-      halt 200, "Provider is fine"
-    else
-      halt 500, "Provider unavailable"
-    end
-  end
-
   describe 'POST /:realm/test/:kind' do
     it 'returns 200 when provider for :kind is OK' do
       stub_request(:post, 'http://msggw.dextella.net/BatchService').to_return(
@@ -91,5 +82,19 @@ describe Hermes::V1::MessagesController do
     end
   end
 
+  describe "GET /:realm/messages/:uid" do
+    it "gives error if the realm is misconfigured" do
+      get("/foo/messages/post.hermes_message:test$1234")
+      last_response.status.should eq 404
+    end
+    it "returns the post if everything set up right" do
+      get("/test/messages/post.hermes_message:test$1234")
+      last_response.status.should eq 200
+    end
+    it "returns a 404 if the post was not found" do
+      get("/test/messages/post.hermes_message:test$4321")
+      last_response.status.should eq 404
+    end
+  end
 
 end

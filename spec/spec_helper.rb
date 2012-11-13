@@ -30,6 +30,9 @@ RSpec.configure do |config|
     stub_grove_post!
     stub_grove_get_post!
     stub_grove_update_success!
+    stub_custom_callback_success!
+    stub_grove_get_post_success!
+    stub_grove_get_post_failure!
   end
 end
 
@@ -89,4 +92,20 @@ def stub_grove_update_success!
   stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test$1234/tags/delivered").
   with(:body => "{\"session\":\"some_checkpoint_god_session_for_test_realm\"}", :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
       to_return(:status => 200, :body => '{"post": {"uid": "post.hermes_message:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}, "tags": ["in_progress", "delivered"]}}')
+end
+
+def stub_custom_callback_success!
+  stub_request(:post, "http://example.com/?status=delivered").
+     with(:headers => {'Host'=>'example.com:80'}).
+     to_return(:status => 200, :body => "Roger that", :headers => {})
+end
+
+def stub_grove_get_post_success!
+  stub_request(:get, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test$1234?session=some_checkpoint_god_session_for_test_realm").
+    to_return(:status => 200, :body => vanilla_sms_message)
+end
+
+def stub_grove_get_post_failure!
+  stub_request(:get, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test$4321?session=some_checkpoint_god_session_for_test_realm").
+    to_return(:status => 404)
 end

@@ -5,6 +5,7 @@ module Hermes
   class Configuration
 
     class ProviderNotFound < StandardError; end
+    class SessionNotFound < StandardError; end
 
     include Singleton
 
@@ -34,7 +35,11 @@ module Hermes
     end
 
     def session_for_realm(realm)
-      @providers[realm.to_sym][:session]
+      begin
+        @providers[realm.to_sym][:session]
+      rescue
+        raise SessionNotFound.new("A session for realm '#{realm}' was not found.")
+      end
     end
 
     def provider_for_realm_and_kind(realm, kind)

@@ -33,9 +33,9 @@ module Hermes
       self['tags'] || []
     end
 
-    def self.find(uid, realm)
+    def self.find(realm, uid)
       begin
-        new(grove(realm).get(uid)['post'])
+        new(grove(realm).get("/posts/#{uid}")['post'])
       rescue Pebblebed::HttpNotFoundError
         return nil
       end
