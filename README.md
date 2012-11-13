@@ -5,7 +5,7 @@ Hermes is the god of external message delivery.
 
 It can be configured to send whatever - with various providers.
 
-Messages are stored as restricted Grove posts, only available for a god session on that realm.
+Messages are stored as restricted Grove posts (post.hermes_message), and is only available for a god session on that realm.
 
 ## Configuration
 

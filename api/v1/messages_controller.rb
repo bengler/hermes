@@ -68,10 +68,10 @@ module Hermes
         path << ".#{attrs['path']}" if attrs['path']
         message = message_from_attrs(attrs.tap{|hs| hs.delete(:path)})
         post = connector.grove.post(
-          "/posts/post.#{kind}_message:#{path}",
+          "/posts/post.hermes_message:#{path}",
           {
             :post => {
-              :document => message,
+              :document => message.merge(:kind => kind),
               :restricted => true,
               :tags => ["inprogress"],
               :external_id => Message.external_id_prefix(provider) <<
