@@ -13,8 +13,12 @@ module Hermes
 
       register Sinatra::Pebblebed
 
-      error ::Hermes::Configuration::ProviderNotFound do
-        404
+      error ::Hermes::Configuration::ProviderNotFound do |e|
+        return halt 404, e.message
+      end
+
+      error ::Hermes::OptionMissingError do |e|
+        return halt 400, e.message
       end
 
       error StandardError, Exception do |e|
@@ -31,37 +35,12 @@ module Hermes
 
       before do
         @configuration = Configuration.instance
+        cache_control :private, :no_cache, :no_store, :must_revalidate
+        headers "Content-Type" => "application/json; charset=utf8"
       end
 
-      helpers do
-        def logger
-          LOGGER
-        end
-
-        def receipt_url(profile)
-          # FIXME: Make configurable
-          case ENV['RACK_ENV']
-            when 'development'
-              # Set up a tunnel on samla.park.origo.no port 10900 to receive receipts
-              "http://origo.tunnel.o5.no/api/hermes/v1/#{profile}/receipt"
-            when 'staging'
-              "http://hermes.o5.no/api/hermes/v1/#{profile}/receipt"
-            else
-              "http://hermes.staging.o5.no/hermes/v1/#{profile}/receipt"
-          end
-        end
-      end
-
-      get '/stats' do
-        pg :statistics, :locals => {:statistics => Message.statistics}
-      end
-
-      get '/:profile/stats' do |profile|
-        pg :statistics, :locals => {:statistics => Message.statistics(:profile => profile)}
-      end
-
-      post '/:profile/test' do |profile|
-        provider = @configuration.provider_for_profile(profile)
+      post '/:realm/test/:kind' do |realm, kind|
+        provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
         if provider.test!
           halt 200, "Provider is fine"
         else
@@ -69,65 +48,104 @@ module Hermes
         end
       end
 
-      get '/:profile/messages/:id' do |profile, id|
-        message = Message.where(:profile => profile).where(:id => id).first
-        if message
-          pg :message, :locals => {:message => message}
-        else
-          404
+      get '/:realm/messages/:id' do |realm, id|
+        require_god
+        message = Message.where(:id => id)
+        if message.any?
+          if message.first.realm == realm
+            return pg :message, :locals => {:message => message.first}
+          end
         end
+        halt 404, "No such message"
       end
 
-      post '/:profile/messages' do |profile|
-        provider = @configuration.provider_for_profile(profile)
-
+      post '/:realm/messages/:kind' do |realm, kind|
+        require_god
+        provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
+        connector = pebblebed_connector(realm, current_identity)
         attrs = JSON.parse(request.env['rack.input'].read)
-
-        id = provider.send_short_message!(
-          :recipient_number => attrs['recipient_number'],
-          :sender_number => attrs['sender_number'],
-          :rate => {
-            :currency => (attrs['rate'] || {})['currency'],
-            :amount => (attrs['rate'] || {})['amount']
-          },
-          :body => attrs['body'],
-          :receipt_url => receipt_url(profile),
-          :bill => attrs['bill'])
-
-        message = Message.create!(
-          :vendor_id => id,
-          :profile => profile,
-          :status => 'in_progress',
-          :recipient_number => attrs['recipient_number'],
-          :callback_url => attrs['callback_url'],
-          :bill => attrs['bill'])
-
-        response.status = 202
-        response.headers['Location'] = url("#{profile}/#{message.id}")
-        response.headers['Content-Type'] = 'text/plain'
-        message.id.to_s
+        path = "#{realm}"
+        path << ".#{attrs['path']}" if attrs['path']
+        message = message_from_attrs(attrs.tap{|hs| hs.delete(:path)})
+        post = connector.grove.post(
+          "/posts/post.hermes_message:#{path}",
+          {
+            :post => {
+              :document => message.merge(:kind => kind),
+              :restricted => true,
+              :tags => ["inprogress"],
+              :external_id => Message.external_id_prefix(provider) <<
+                provider.send_message!(
+                  message.tap{|hs| hs.delete(:callback_url)}.
+                    merge(:receipt_url => receipt_url(realm, kind.to_sym)))
+            }
+          }
+        )
+        halt 200, post.to_json
       end
 
-      post '/:profile/receipt' do |profile|
-        provider = @configuration.provider_for_profile(profile)
+      post '/:realm/receipt/:kind' do |realm, kind|
+        provider = @configuration.provider_for_realm_and_kind(realm, kind)
         raw = request.env['rack.input'].read if request.env['rack.input']
         raw ||= ''
         begin
-          result = provider.parse_receipt(request.path_info, raw)
+          result = provider.parse_receipt(request.path_info, raw, params)
         rescue Exception => e
           logger.error("Ignoring exception during receipt parsing: #{e}")
         else
           if result[:id] and result[:status]
-            message = Message.
-              where(:profile => profile).
-              where(:vendor_id => result[:id]).first
+            message = Message.find_by_external_id(Message.external_id_prefix(provider) << result[:id], realm)
             if message
-              message.status = result[:status]
-              message.save!
+              message.add_tag!(result[:status])
             end
           end
         end
         ''
+      end
+
+      helpers do
+
+        def message_from_attrs(attrs)
+          hash = {
+            :recipient_number => attrs['recipient_number'],
+            :sender_number => attrs['sender_number'],
+            :recipient_email => attrs['recipient_email'],
+            :sender_email => attrs['sender_email'],
+            :subject => attrs['subject'],
+            :text => attrs['text'],
+            :html => attrs['html'],
+            :callback_url => attrs['callback_url']
+          }
+          if attrs['rate']
+            hash.merge!(
+              :rate => {
+                :currency => (attrs['rate'])['currency'],
+                :amount => (attrs['rate'])['amount']
+              })
+          end
+          hash.select{|k,v| !v.blank?}
+        end
+
+        def pebblebed_connector(realm, checkpoint_identity)
+          Pebblebed::Connector.new(@configuration.session_for_realm(realm)) if realm == checkpoint_identity.realm
+        end
+
+        def logger
+          LOGGER
+        end
+
+        def receipt_url(realm, kind)
+          # FIXME: Make configurable
+          case ENV['RACK_ENV']
+            when 'development'
+              # Set up a tunnel on samla.park.origo.no port 10900 to receive receipts
+              "http://origo.tunnel.o5.no/api/hermes/v1/#{realm}/receipt/#{kind}"
+            when 'staging'
+              "http://hermes.o5.no/api/hermes/v1/#{realm}/receipt/#{kind}"
+            else
+              "http://hermes.staging.o5.no/hermes/v1/#{realm}/receipt/#{kind}"
+          end
+        end
       end
 
     end

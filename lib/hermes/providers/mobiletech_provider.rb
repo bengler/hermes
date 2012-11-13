@@ -1,3 +1,5 @@
+require 'active_support/core_ext/hash/keys'
+
 module Hermes
   module Providers
 
@@ -17,15 +19,15 @@ module Hermes
       attr_reader :default_sender_number
 
       def initialize(options = {})
-        options.assert_valid_keys(:cpid, :default_prefix, :default_sender_country, :secret,
-          :default_sender_number)
-        
+        options.assert_valid_keys(:cpid, :default_prefix,
+          :default_sender_country, :secret, :default_sender_number)
+
         @cpid = options[:cpid].to_s if options[:cpid]
         raise ConfigurationError, "CPID must be specified" unless @cpid
 
         @secret = options[:secret]
         raise ConfigurationError, "Secret must be specified" unless @secret
-        
+
         @default_prefix = options[:default_prefix] || DEFAULT_PREFIX
         @default_sender_country = options[:default_sender_country] || DEFAULT_SENDER_COUNTRY
         @default_sender_number = options[:default_sender_number]
@@ -33,9 +35,9 @@ module Hermes
         @connection = Excon.new(URL)
       end
 
-      def send_short_message!(options)
+      def send_message!(options)
         options.assert_valid_keys(
-          :receipt_url, :rate, :recipient_number, :sender_number, :body, :timeout, :bill)
+          :receipt_url, :rate, :recipient_number, :sender_number, :text, :timeout, :bill)
         tid = generate_tid
         Timeout.timeout(options[:timeout] || 30) do
           body = build_request(tid, options)
@@ -63,7 +65,7 @@ module Hermes
       # Test whether provider is functional. Returns true or false.
       def test!
         begin
-          send_short_message!(:recipient_number => '_', :body => '')
+          send_message!(:recipient_number => '_', :text => '')
         rescue Excon::Errors::Error
           false
         rescue MessageRejectedError
@@ -73,7 +75,7 @@ module Hermes
         end
       end
 
-      def parse_receipt(url, raw_data)
+      def parse_receipt(url, raw_data, params=nil)
         document = Nokogiri::XML(raw_data, nil, nil, NOKOGIRI_PARSE_OPTIONS)
         cpid = document.xpath("/BatchReport/CpId").text
         if cpid != @cpid
@@ -102,7 +104,7 @@ module Hermes
       rescue Nokogiri::XML::SyntaxError => e
         raise InvalidReceiptError, "Invalid receipt from Mobiletech: #{raw_data}"
       end
-        
+
       private
 
         URL = 'http://msggw.dextella.net'.freeze
@@ -112,7 +114,7 @@ module Hermes
         FALSE_RESPONSE = 'false'.freeze
 
         DEFAULT_SENDER_COUNTRY = 'NO'.freeze
-      
+
         DEFAULT_PREFIX = '47'
 
         NOKOGIRI_PARSE_OPTIONS =
@@ -163,7 +165,7 @@ module Hermes
                     xml.text @cpid
                   end
                   xml['bat'].defaultText do
-                    xml.text options[:body]
+                    xml.text options[:text]
                   end
                   xml['bat'].messages do
                     xml['mes'].SmsMessage do
@@ -207,7 +209,7 @@ module Hermes
                   end
                   xml['bat'].transId do
                     xml.text tid
-                  end      
+                  end
                 end
               end
             end
@@ -239,7 +241,7 @@ module Hermes
             body = message_from_soap_envelope(body)
           rescue InvalidResponseError
             message = ''
-          else            
+          else
             document = Nokogiri::XML(body, nil, nil, NOKOGIRI_PARSE_OPTIONS)
             message = document.xpath('//faultstring').text
           end
