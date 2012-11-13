@@ -1,13 +1,14 @@
 realm: test
 session: some_checkpoint_god_session_for_test_realm
-sms:
-  provider: Mobiletech
-  cpid: something
-  secret: pebble42
-  default_sender_country: NO
-  default_sender_number: PebbleStack
-  default_prefix: 47
-email:
-  provider: MailGun
-  api_key: some_api_key_for_mailgun
-  mailgun_domain: some_domain_on_mailgun
+implementations:
+  sms:
+    provider: Mobiletech
+    cpid: something
+    secret: pebble42
+    default_sender_country: NO
+    default_sender_number: PebbleStack
+    default_prefix: 47
+  email:
+    provider: MailGun
+    api_key: some_api_key_for_mailgun
+    mailgun_domain: some_domain_on_mailgun

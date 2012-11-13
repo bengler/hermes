@@ -28,7 +28,7 @@ describe MobiletechProvider do
       stub_request(:post, 'http://msggw.dextella.net/BatchService').to_return(
         :body => 'YIP YIP YIP')
       lambda {
-        provider.send_message!(:recipient_number => '12345678', :body => 'test')
+        provider.send_message!(:recipient_number => '12345678', :text => 'test')
       }.should raise_error(MobiletechProvider::InvalidResponseError)
     end
 
@@ -41,7 +41,7 @@ describe MobiletechProvider do
           </soap:Envelope>
         })
       lambda {
-        provider.send_message!(:recipient_number => '12345678', :body => 'test')
+        provider.send_message!(:recipient_number => '12345678', :text => 'test')
       }.should raise_error(MobiletechProvider::InvalidResponseError)
     end
 
@@ -50,7 +50,7 @@ describe MobiletechProvider do
         stub_request(:post, 'http://msggw.dextella.net/BatchService').to_return(
           :status => status)
         lambda {
-          provider.send_message!(:recipient_number => '12345678', :body => 'test')
+          provider.send_message!(:recipient_number => '12345678', :text => 'test')
         }.should raise_error(MobiletechProvider::APIFailureError)
       end
     end
@@ -60,7 +60,7 @@ describe MobiletechProvider do
         stub_request(:post, 'http://msggw.dextella.net/BatchService').to_return(
           :status => status)
         lambda {
-          provider.send_message!(:recipient_number => '12345678', :body => 'test')
+          provider.send_message!(:recipient_number => '12345678', :text => 'test')
         }.should raise_error(MobiletechProvider::InvalidResponseError)
       end
     end
@@ -80,7 +80,7 @@ describe MobiletechProvider do
           </soap:Envelope>
         })
       lambda {
-        provider.send_message!(:recipient_number => '12345678', :body => 'test')
+        provider.send_message!(:recipient_number => '12345678', :text => 'test')
       }.should raise_error(MobiletechProvider::APIFailureError, /dadgummit!/)
     end
 
@@ -102,7 +102,7 @@ describe MobiletechProvider do
           </soap:Envelope>
         })
       lambda {
-        provider.send_message!(:recipient_number => '12345678', :body => 'test')
+        provider.send_message!(:recipient_number => '12345678', :text => 'test')
       }.should raise_error(MobiletechProvider::MessageRejectedError, /No default text provided/)
       stub.should have_requested(:post, 'http://msggw.dextella.net/BatchService')
     end
@@ -119,7 +119,7 @@ describe MobiletechProvider do
           </soap:Envelope>
         })
       lambda {
-        provider.send_message!(:recipient_number => '12345678', :body => 'test')
+        provider.send_message!(:recipient_number => '12345678', :text => 'test')
       }.should raise_error(MobiletechProvider::InvalidResponseError)
       stub.should have_requested(:post, 'http://msggw.dextella.net/BatchService')
     end
@@ -144,7 +144,7 @@ describe MobiletechProvider do
       
       id = provider.send_message!(
         :recipient_number => '12345678',
-        :body => 'test',
+        :text => 'test',
         :sender_number => '12345678',
         :receipt_url => 'http://example.org/')
       id.should =~ /.+/
@@ -202,7 +202,7 @@ describe MobiletechProvider do
       })
       lambda {
         provider.send_message!(
-          :recipient_number => '+4740471730', :body => 'test', :timeout => 0.1)
+          :recipient_number => '+4740471730', :text => 'test', :timeout => 0.1)
       }.should raise_error(Timeout::Error)
       stub.should have_requested(:post, 'http://msggw.dextella.net/BatchService')
     end

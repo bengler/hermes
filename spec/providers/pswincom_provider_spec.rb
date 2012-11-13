@@ -29,21 +29,21 @@ describe PSWinComProvider do
       stub_request(:post, 'https://sms.pswin.com/http4sms/sendRef.asp').to_return(
         :body => "1\nFoo\nBar")
       lambda {
-        provider.send_message!(:recipient_number => '12345678', :body => 'test')
+        provider.send_message!(:recipient_number => '12345678', :text => 'test')
       }.should raise_error(PSWinComProvider::MessageRejectedError)
     end
 
     it "returns a reference value if the message was sent" do
       stub_request(:post, 'https://sms.pswin.com/http4sms/sendRef.asp').to_return(
         :body => "0\nOK\n4A4B0034DB")
-      provider.send_message!(:recipient_number => '12345678', :body => 'test').should == "4A4B0034DB"
+      provider.send_message!(:recipient_number => '12345678', :text => 'test').should == "4A4B0034DB"
     end
 
     it "returns a error if no reference was returned" do
       stub_request(:post, 'https://sms.pswin.com/http4sms/sendRef.asp').to_return(
         :body => "0\nOK")
       lambda {
-        provider.send_message!(:recipient_number => '12345678', :body => 'test')
+        provider.send_message!(:recipient_number => '12345678', :text => 'test')
       }.should raise_error(PSWinComProvider::InvalidResponseError)
     end
 
@@ -52,7 +52,7 @@ describe PSWinComProvider do
                with(:body => {"PW"=>"bar", "RCPREQ"=>"Y", "RCV"=>"4712345678", "SND"=>"", "TXT"=>"V\xE6rste bl\xE5 d\xF8den", "USER"=>"foo"},
                     :headers => {'Content-Type'=>'application/x-www-form-urlencoded'}).
                to_return(:status => 200, :body => "0\nOK\n123123", :headers => {})
-      provider.send_message!(:recipient_number => '12345678', :body => 'Værste blå døden')
+      provider.send_message!(:recipient_number => '12345678', :text => 'Værste blå døden')
       a_request(:post, "https://sms.pswin.com/http4sms/sendRef.asp").
         with(:body => "USER=foo&PW=bar&RCV=4712345678&SND=&TXT=V%E6rste+bl%E5+d%F8den&RCPREQ=Y").should have_been_made
     end
@@ -62,7 +62,7 @@ describe PSWinComProvider do
         stub_request(:post, 'https://sms.pswin.com/http4sms/sendRef.asp').to_return(
           :status => status)
         lambda {
-          provider.send_message!(:recipient_number => '12345678', :body => 'test')
+          provider.send_message!(:recipient_number => '12345678', :text => 'test')
         }.should raise_error(PSWinComProvider::APIFailureError)
       end
     end
@@ -72,7 +72,7 @@ describe PSWinComProvider do
         stub_request(:post, 'https://sms.pswin.com/http4sms/sendRef.asp').to_return(
           :status => status)
         lambda {
-          provider.send_message!(:recipient_number => '12345678', :body => 'test')
+          provider.send_message!(:recipient_number => '12345678', :text => 'test')
         }.should raise_error(PSWinComProvider::InvalidResponseError)
       end
     end
@@ -83,7 +83,7 @@ describe PSWinComProvider do
       })
       lambda {
         provider.send_message!(
-          :recipient_number => '+4740471730', :body => 'test', :timeout => 0.1)
+          :recipient_number => '+4740471730', :text => 'test', :timeout => 0.1)
       }.should raise_error(Timeout::Error)
       stub.should have_requested(:post, 'https://sms.pswin.com/http4sms/sendRef.asp')
     end

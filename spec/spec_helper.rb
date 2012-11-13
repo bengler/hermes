@@ -60,21 +60,21 @@ def stub_mobiletech_success!
     })
 end
 def vanilla_sms_message
-  '{"post": {"uid": "post.sms:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}}, "tags": ["in_progress"] }'
+  '{"post": {"uid": "post.sms_message:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}}, "tags": ["in_progress"] }'
 end
 
 def stub_grove_get_post!
-  stub_request(:get, "http://hermes.dev/api/grove/v1/posts/post.sms:test?session=some_checkpoint_god_session_for_test_realm").
+  stub_request(:get, "http://hermes.dev/api/grove/v1/posts/post.sms_message:test?session=some_checkpoint_god_session_for_test_realm").
            to_return(:status => 200, :body => vanilla_sms_message)
 end
 
 def stub_grove_post!
-  stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.sms:test").
+  stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.sms_message:test").
     to_return(:status => 200, :body => vanilla_sms_message)
 end
 
 def stub_grove_update!
-  stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.sms:test$1234").
+  stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.sms_message:test$1234").
     with(:body => vanilla_sms_message)
 end
 
@@ -85,9 +85,8 @@ end
 
 def stub_grove_update_success!
   stub_request(:get, "http://hermes.dev/api/grove/v1/posts/*?external_id=mobiletech_provider_id:vroom&session=some_checkpoint_god_session_for_test_realm").
-    to_return(:status => 200, :body => '{"post": {"uid": "post.sms:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}, "tags": ["in_progress"]}}')
-  stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.sms:test$1234/tags/delivered").
+    to_return(:status => 200, :body => '{"post": {"uid": "post.sms_message:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}, "tags": ["in_progress"]}}')
+  stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.sms_message:test$1234/tags/delivered").
   with(:body => "{\"session\":\"some_checkpoint_god_session_for_test_realm\"}", :headers => {'Accept'=>'application/json', 'Content-Type'=>'application/json'}).
-      to_return(:status => 200, :body => '{"post": {"uid": "post.sms:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}, "tags": ["in_progress", "delivered"]}}')
+      to_return(:status => 200, :body => '{"post": {"uid": "post.sms_message:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}, "tags": ["in_progress", "delivered"]}}')
 end
-
