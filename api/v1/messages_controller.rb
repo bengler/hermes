@@ -141,9 +141,9 @@ module Hermes
               # Set up a tunnel on samla.park.origo.no port 10900 to receive receipts
               "http://origo.tunnel.o5.no/api/hermes/v1/#{realm}/receipt/#{kind}"
             when 'staging'
-              "http://hermes.o5.no/api/hermes/v1/#{realm}/receipt/#{kind}"
+              "http://hermes.staging.o5.no/api/hermes/v1/#{realm}/receipt/#{kind}"
             else
-              "http://hermes.staging.o5.no/hermes/v1/#{realm}/receipt/#{kind}"
+              "http://hermes.o5.no/hermes/v1/#{realm}/receipt/#{kind}"
           end
         end
       end
