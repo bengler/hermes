@@ -59,8 +59,32 @@ module Hermes
         halt 404, "No such message"
       end
 
+      post '/:realm/messages/:kind' do |realm, kind|
+        require_god
+        provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
+        connector = pebblebed_connector(realm, current_identity)
+        attrs = JSON.parse(request.env['rack.input'].read)
+        path = "#{realm}"
+        path << ".#{attrs['path']}" if attrs['path']
+        message = message_from_attrs(attrs.tap{|hs| hs.delete(:path)})
+        post = connector.grove.post(
+          "/posts/post.#{kind}_message:#{path}",
+          {
+            :post => {
+              :document => message,
+              :restricted => true,
+              :tags => ["inprogress"],
+              :external_id => Message.external_id_prefix(provider) <<
+                provider.send_message!(
+                  message.tap{|hs| hs.delete(:callback_url)}.
+                    merge(:receipt_url => receipt_url(realm, kind.to_sym)))
+            }
+          }
+        )
+        halt 200, post.to_json
+      end
+
       post '/:realm/receipt/:kind' do |realm, kind|
-        logger.error(request)
         provider = @configuration.provider_for_realm_and_kind(realm, kind)
         raw = request.env['rack.input'].read if request.env['rack.input']
         raw ||= ''
@@ -80,6 +104,27 @@ module Hermes
       end
 
       helpers do
+
+        def message_from_attrs(attrs)
+          hash = {
+            :recipient_number => attrs['recipient_number'],
+            :sender_number => attrs['sender_number'],
+            :recipient_email => attrs['recipient_email'],
+            :sender_email => attrs['sender_email'],
+            :subject => attrs['subject'],
+            :text => attrs['text'],
+            :html => attrs['html'],
+            :callback_url => attrs['callback_url']
+          }
+          if attrs['rate']
+            hash.merge!(
+              :rate => {
+                :currency => (attrs['rate'])['currency'],
+                :amount => (attrs['rate'])['amount']
+              })
+          end
+          hash.select{|k,v| !v.blank?}
+        end
 
         def pebblebed_connector(realm, checkpoint_identity)
           Pebblebed::Connector.new(@configuration.session_for_realm(realm)) if realm == checkpoint_identity.realm
