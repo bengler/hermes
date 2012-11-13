@@ -7,20 +7,8 @@ Interface
 Sending messages to a single recipient:
 
 ```ruby
-send_short_message!(options)
+send_message!(options)
 ```
-
-Options must be a hash of the following:
-
-* `:recipient` (required): Recipient number. Either an unprefix number (12345678) or a prefixed number (+4712345678).
-* `:body`: Body text.
-* `:receipt_url`: the callback URL that the provider will ping with the delivery receipt.
-* `:rate`: a hash:
-  * `:currency` (required): currency name, eg. USD.
-  * `:amount` (required): amount in that currency * 100. Eg., to specify 1 USD, specify `100`.
-* `:sender`: the sender number or text. May not be supported by all providers.
-* `:timeout`: timeout, in seconds, for the sending to complete.
-* `:bill`: a string representing an entity that should be billed for sending the message.
 
 The provider must return a vendor-specific string key that can be used to query the status of a message delivery.
 
@@ -31,7 +19,7 @@ test!
 Test whether the provider's connection is functional. Returns true or false.
 
 ```ruby
-parse_receipt(url, raw_body)
+parse_receipt(url, raw_body, params)
 ```
 
 This method must parse a receipt callback. It must return a hash:
@@ -67,3 +55,16 @@ To administer the callback to Hermes, please log in to the account web on: https
 PS: Please note that the account must be enabled for the delivery reports
 feature (callbacks) by PSWincom first! Otherwise you will get a invalid
 response from the PSWinCom API, and no callback (even though messages are delivered).
+
+
+Mailgun
+----------
+
+This provider supports the following configuration variables:
+
+api_key: key-8xybyxgfrbgmeg82mfzplrcux6cxg4o8
+mailgun_domain: dna.mailgun.org
+
+* `:api_key` (required): The Mailgun API-key.
+* `:mailgun_domain` (required): The Mailgun Domain.
+* `:default_sender_email`: The default sender email, if no sender is specified.
