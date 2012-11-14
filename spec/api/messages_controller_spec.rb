@@ -87,13 +87,16 @@ describe Hermes::V1::MessagesController do
       get("/foo/messages/post.hermes_message:test$1234")
       last_response.status.should eq 404
     end
-    it "returns the post if everything set up right" do
-      get("/test/messages/post.hermes_message:test$1234")
-      last_response.status.should eq 200
-    end
     it "returns a 404 if the post was not found" do
       get("/test/messages/post.hermes_message:test$4321")
       last_response.status.should eq 404
+      stub_grove_get_post_failure!.should have_been_requested
+    end
+    it "returns the post if everything set up right" do
+      get("/test/messages/post.hermes_message:test$1234")
+      last_response.status.should eq 200
+      JSON.parse(last_response.body)['uid'].should eq "post.hermes_message:test$1234"
+      stub_grove_get_post_success!.should have_been_requested
     end
   end
 

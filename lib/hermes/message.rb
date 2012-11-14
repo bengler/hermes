@@ -35,7 +35,7 @@ module Hermes
 
     def self.find(realm, uid)
       begin
-        new(grove(realm).get("/posts/#{uid}")['post'])
+        message = new(grove(realm).get("/posts/#{uid}")['post'])
       rescue Pebblebed::HttpNotFoundError
         return nil
       end
