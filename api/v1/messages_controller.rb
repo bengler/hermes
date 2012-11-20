@@ -62,10 +62,9 @@ module Hermes
         require_god
         provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
         connector = pebblebed_connector(realm, current_identity)
-        attrs = JSON.parse(request.env['rack.input'].read)
         path = "#{realm}"
-        path << ".#{attrs['path']}" if attrs['path']
-        message = message_from_attrs(attrs.tap{|hs| hs.delete(:path)})
+        path << ".#{params['path']}" if params['path']
+        message = message_from_params(params.tap{|hs| hs.delete(:path)})
         post = connector.grove.post(
           "/posts/post.hermes_message:#{path}",
           {
@@ -104,22 +103,22 @@ module Hermes
 
       helpers do
 
-        def message_from_attrs(attrs)
+        def message_from_params(params)
           hash = {
-            :recipient_number => attrs['recipient_number'],
-            :sender_number => attrs['sender_number'],
-            :recipient_email => attrs['recipient_email'],
-            :sender_email => attrs['sender_email'],
-            :subject => attrs['subject'],
-            :text => attrs['text'],
-            :html => attrs['html'],
-            :callback_url => attrs['callback_url']
+            :recipient_number => params['recipient_number'],
+            :sender_number => params['sender_number'],
+            :recipient_email => params['recipient_email'],
+            :sender_email => params['sender_email'],
+            :subject => params['subject'],
+            :text => params['text'],
+            :html => params['html'],
+            :callback_url => params['callback_url']
           }
-          if attrs['rate']
+          if params['rate']
             hash.merge!(
               :rate => {
-                :currency => (attrs['rate'])['currency'],
-                :amount => (attrs['rate'])['amount']
+                :currency => (params['rate'])['currency'],
+                :amount => (params['rate'])['amount']
               })
           end
           hash.select{|k,v| !v.blank?}
