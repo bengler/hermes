@@ -58,6 +58,17 @@ module Hermes
         halt 200, message.to_json
       end
 
+      # post email
+      # params = {
+      #   :recipient_number => params['recipient_number'],
+      #   :sender_number => params['sender_number'],
+      #   :recipient_email => params['recipient_email'],
+      #   :sender_email => params['sender_email'],
+      #   :subject => params['subject'],
+      #   :text => params['text'],
+      #   :html => params['html'],
+      #   :callback_url => params['callback_url']
+      # }
       post '/:realm/messages/:kind' do |realm, kind|
         require_god
         provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
