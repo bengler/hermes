@@ -76,20 +76,24 @@ module Hermes
         path = "#{realm}"
         path << ".#{params['path']}" if params['path']
         message = message_from_params(params.tap{|hs| hs.delete(:path)})
-        post = connector.grove.post(
-          "/posts/post.hermes_message:#{path}",
-          {
-            :post => {
-              :document => message.merge(:kind => kind),
-              :restricted => true,
-              :tags => ["inprogress"],
-              :external_id => Message.external_id_prefix(provider) <<
-                provider.send_message!(
-                  message.tap{|hs| hs.delete(:callback_url)}.
-                    merge(:receipt_url => receipt_url(realm, kind.to_sym)))
+        begin
+          post = connector.grove.post(
+            "/posts/post.hermes_message:#{path}",
+            {
+              :post => {
+                :document => message.merge(:kind => kind),
+                :restricted => true,
+                :tags => ["inprogress"],
+                :external_id => Message.external_id_prefix(provider) <<
+                  provider.send_message!(
+                    message.tap{|hs| hs.delete(:callback_url)}.
+                      merge(:receipt_url => receipt_url(realm, kind.to_sym)))
+              }
             }
-          }
-        )
+          )
+        rescue Pebblebed::HttpError => e
+          return halt e.status, e.message
+        end
         halt 200, post.to_json
       end
 
