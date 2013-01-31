@@ -1,5 +1,6 @@
 session: hermesapplication3029480weruoiweuroiuer0239ruwoieruowieuroweiur238uriuriru
-actual_sending_excluded_from_env: ["staging"]
+deny_actual_sending_from_environments:
+    - staging
 implementations:
   sms:
     provider: PSWinCom

@@ -5,7 +5,7 @@ coverage/
 .DS_Store
 .rvmrc
 .idea
-config/realms/*
+config/realms/*.yml
 config/site.rb
 /_trash
 /.brow
