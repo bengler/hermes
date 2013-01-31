@@ -21,6 +21,8 @@ Create the file ./config/realms/test.yml with the content:
 
   ```
   session: hermesapplicationfb8f11fjeiwjoefijwe40e82efa7d3895954b4537317689a0960e35c67076
+  deny_actual_sending_from_environments:
+    - staging
   implementations:
     sms:
       provider: PSWinCom

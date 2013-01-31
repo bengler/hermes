@@ -1,5 +1,7 @@
 realm: test
 session: some_checkpoint_god_session_for_test_realm
+deny_actual_sending_from_environments:
+    - staging
 implementations:
   sms:
     provider: Mobiletech

@@ -22,7 +22,7 @@ module Hermes
         realm = File.basename(file_name.gsub(/\.yml$/, ''))
         File.open(file_name) do |file|
           config = YAML.load(file)
-          @providers[realm.to_sym] = {:session => config['session']}
+          @providers[realm.to_sym] = {:session => config['session'], :deny_sending_from => config['deny_actual_sending_from_environments']}
           if config['implementations']
             config['implementations'].each do |k,v|
               provider_class = find_provider_class(config['implementations'][k].delete('provider'))
@@ -47,6 +47,13 @@ module Hermes
         return @providers[realm.to_sym][kind.to_sym]
       end
       raise ProviderNotFound.new("A provider for '#{kind}' on realm '#{realm}' was not found.")
+    end
+
+    def actual_sending_allowed?(realm)
+      if @providers[realm.to_sym][:deny_sending_from]
+       return !@providers[realm.to_sym][:deny_sending_from].include?(ENV['RACK_ENV'])
+      end
+      true
     end
 
     def find_provider_class(name)
