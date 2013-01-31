@@ -77,6 +77,16 @@ module Hermes
         path << ".#{params['path']}" if params['path']
         message = message_from_params(params.tap{|hs| hs.delete(:path)})
         begin
+          if @configuration.actual_sending_allowed?(realm)
+            external_id =  Message.external_id_prefix(provider) <<
+                            provider.send_message!(
+                              message.tap{|hs| hs.delete(:callback_url)}.
+                                merge(:receipt_url => receipt_url(realm, kind.to_sym)))
+          else
+            external_id = Message.external_id_prefix(provider) << Time.now.to_i.to_s
+            LOGGER.warn("Actual sending is not performed in #{ENV['RACK_ENV']} environment. " <<
+              "Simulating external_id #{external_id} from provider")
+          end
           post = connector.grove.post(
             "/posts/post.hermes_message:#{path}",
             {
@@ -84,13 +94,11 @@ module Hermes
                 :document => message.merge(:kind => kind),
                 :restricted => true,
                 :tags => ["inprogress"],
-                :external_id => Message.external_id_prefix(provider) <<
-                  provider.send_message!(
-                    message.tap{|hs| hs.delete(:callback_url)}.
-                      merge(:receipt_url => receipt_url(realm, kind.to_sym)))
+                :external_id => external_id
               }
             }
           )
+          LOGGER.warn("Sent #{kind}-message: #{post.to_hash.inspect}")
         rescue Pebblebed::HttpError => e
           return halt e.status, e.message
         end
