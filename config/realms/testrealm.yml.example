@@ -1,0 +1,14 @@
+session: hermesapplication3029480weruoiweuroiuer0239ruwoieruowieuroweiur238uriuriru
+actual_sending_excluded_from_env: ["staging"]
+implementations:
+  sms:
+    provider: PSWinCom
+    user: test
+    password: y23432049898
+    default_sender_country: NO
+    default_sender_number: TestRealm
+    default_prefix: 47
+  email:
+    provider: MailGun # Login: dev@bengler.no / pip56pip
+    api_key: key-3249ieureow3u83u8uer8u38ru3
+    mailgun_domain: testrealm.mailgun.org
