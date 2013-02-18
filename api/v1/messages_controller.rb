@@ -52,12 +52,29 @@ module Hermes
         end
       end
 
+      get '/:realm/messages/latest' do |realm|
+        unless ENV['RACK_ENV'] == "production"
+          messages = []
+          begin
+            messages = Message.find(realm, "post.hermes_message:*")
+          rescue Exception => e
+            raise e.inspect
+            LOGGER.exception e if LOGGER.respond_to?(:exception)
+            return halt 500, "Could not get messages, inspect logs"
+          end
+          halt 200, messages.to_json
+        else
+          halt 403, "Not allowed for production environment!"
+        end
+      end
+
       get '/:realm/messages/:uid' do |realm, uid|
+        require_god
         message = nil
         begin
-          message = Message.find(realm, uid)
+          message = Message.get(realm, uid)
         rescue Exception => e
-          LOGGER.exception e if LOGGER.responds_to?(:exception)
+          LOGGER.exception e if LOGGER.respond_to?(:exception)
           return halt 500, "Could not get message, inspect logs"
         end
         return halt 404, "No such message" unless message
