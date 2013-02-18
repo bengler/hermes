@@ -53,3 +53,14 @@ We may then POST messages with the API:
 ``/api/hermes/v1/test/messages/email`` and ``/api/hermes/v1/test/messages/sms``
 
 The last part of the URL maps directly to the key in the config under ``implementations``
+
+### Testing and staging
+
+You probably don't want to send actual SMS or email messages in environments that is not production.
+You may prohibit actual sending by specifying this environmen in the realm's config under
+```
+deny_actual_sending_from_environments:
+    - staging
+```
+For any environment except "production", you may view messages sent by Hermes from this API endpoint:
+``http://[host]/api/hermes/v1/[realm]/messages/latest``
