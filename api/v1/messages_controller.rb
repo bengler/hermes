@@ -53,7 +53,13 @@ module Hermes
       end
 
       get '/:realm/messages/:uid' do |realm, uid|
-        message = Message.find(realm, uid)
+        message = nil
+        begin
+          message = Message.find(realm, uid)
+        rescue Exception => e
+          LOGGER.exception e if LOGGER.responds_to?(:exception)
+          return halt 500, "Could not get message, inspect logs"
+        end
         return halt 404, "No such message" unless message
         halt 200, message.to_json
       end

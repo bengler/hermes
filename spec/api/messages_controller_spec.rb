@@ -85,7 +85,7 @@ describe Hermes::V1::MessagesController do
   describe "GET /:realm/messages/:uid" do
     it "gives error if the realm is misconfigured" do
       get("/foo/messages/post.hermes_message:test$1234")
-      last_response.status.should eq 404
+      last_response.status.should eq 500
     end
     it "returns a 404 if the post was not found" do
       get("/test/messages/post.hermes_message:test$4321")
