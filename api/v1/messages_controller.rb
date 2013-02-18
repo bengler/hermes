@@ -46,7 +46,6 @@ module Hermes
           begin
             messages = Message.find(realm, "post.hermes_message:*")
           rescue Exception => e
-            raise e.inspect
             LOGGER.exception e if LOGGER.respond_to?(:exception)
             return halt 500, "Could not get messages, inspect logs"
           end
