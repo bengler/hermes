@@ -1,10 +1,4 @@
 GIT
-  remote: git@github.com:bengler/bengler_test_helper.git
-  revision: e9258320a096beeaa6b1bdae33252f290886f9bd
-  specs:
-    bengler_test_helper (0.0.2)
-
-GIT
   remote: git@github.com:bengler/pebbles-cors.git
   revision: d51dc16e96bb7534da7e4dae2e311c8a31b7429a
   specs:
@@ -102,7 +96,6 @@ PLATFORMS
 DEPENDENCIES
   activesupport (~> 3.2.8)
   airbrake (~> 3.1.4)
-  bengler_test_helper!
   excon (~> 0.12.0)
   httpclient
   nokogiri (~> 1.5.2)

@@ -15,10 +15,6 @@ gem 'httpclient'
 gem 'airbrake', '~> 3.1.4', :require => false
 gem 'pebbles-uid'
 
-group :test, :development do
-  gem 'bengler_test_helper', :git => "git@github.com:bengler/bengler_test_helper.git"
-end
-
 group :test do
   gem 'rspec', '~> 2.8'
   gem 'rack-test'
