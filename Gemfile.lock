@@ -49,7 +49,6 @@ GEM
       queryparams
       yajl-ruby
     pebbles-uid (0.0.9)
-    pg (0.13.2)
     queryparams (0.0.3)
     rack (1.5.2)
     rack-contrib (1.1.0)
@@ -102,7 +101,6 @@ DEPENDENCIES
   pebblebed (~> 0.0.9)
   pebbles-cors!
   pebbles-uid
-  pg (~> 0.13.2)
   rack (~> 1.4)
   rack-contrib (~> 1.1.0)
   rack-test
