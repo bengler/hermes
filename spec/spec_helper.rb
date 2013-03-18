@@ -109,3 +109,17 @@ def stub_grove_get_post_failure!
   stub_request(:get, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test$4321?session=some_checkpoint_god_session_for_test_realm").
     to_return(:status => 404)
 end
+
+def stub_mailgun_post!
+  stub_request(:post, "https://api:some_api_key_for_mailgun@api.mailgun.net/v2/some_domain_on_mailgun/messages").
+           with(:body => {"from"=>"No-reply <no-reply@some_domain_on_mailgun>", "html"=>"<p>Yip</p>", "subject"=>"Foo", "text"=>"Yip", "to"=>"test@test.com"},
+                :headers => {'Authorization'=>'Basic YXBpOnNvbWVfYXBpX2tleV9mb3JfbWFpbGd1bg==', 'Content-Type'=>'application/x-www-form-urlencoded'}).
+           to_return(:status => 200, :body => '{"message": "Queued. Thank you.", "id": "<20111114174239.25659.5817@samples.mailgun.org>"}', :headers => {'Content-Type'=>'application/json'})
+end
+
+def stub_mailgun_force_post!
+  stub_request(:post, "https://api:some_api_key_for_mailgun@api.mailgun.net/v2/some_domain_on_mailgun/messages").
+           with(:body => {"from"=>"No-reply <no-reply@some_domain_on_mailgun>", "html"=>"<p>Yip</p>", "subject"=>"Foo", "text"=>"Yip", "to"=>"jan@banan.com"},
+                :headers => {'Authorization'=>'Basic YXBpOnNvbWVfYXBpX2tleV9mb3JfbWFpbGd1bg==', 'Content-Type'=>'application/x-www-form-urlencoded'}).
+           to_return(:status => 200, :body => '{"message": "Queued. Thank you.", "id": "<20111114174239.25659.5817@samples.mailgun.org>"}', :headers => {'Content-Type'=>'application/json'})
+end

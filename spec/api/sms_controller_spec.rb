@@ -21,7 +21,7 @@ describe Hermes::V1::MessagesController do
       it 'rejects unknown realm' do
         post_body "/doobie/messages/sms", {}, JSON.dump(
           :recipient_number => '12345678',
-          :body => 'Yip')
+          :text => 'Yip')
         last_response.status.should == 404
       end
 
@@ -29,7 +29,7 @@ describe Hermes::V1::MessagesController do
 
         post_body "/test/messages/sms", {}, JSON.dump(
           :recipient_number => '12345678',
-          :body => 'Yip')
+          :text => 'Yip')
         last_response.status.should eq 200
         stub_grove_post!.should have_been_requested
       end

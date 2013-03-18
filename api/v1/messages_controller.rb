@@ -131,8 +131,8 @@ module Hermes
         begin
           if @configuration.actual_sending_allowed?(realm) or params[:force]
             if params[:force]
-              message[:recipient_email] = params[:force]
-              message[:recipient_number] = params[:force]
+              message[:recipient_email] = params[:force] if kind == "email"
+              message[:recipient_number] = params[:force] if kind == "sms"
             end
             external_id =  Message.external_id_prefix(provider) <<
                             provider.send_message!(
