@@ -31,6 +31,17 @@ module Hermes
         headers "Content-Type" => "application/json; charset=utf8"
       end
 
+      # @apidoc
+      # Test a provider implementation for a realm.
+      #
+      # @category Hermes/Public
+      # @path /api/hermes/v1/:realm/test/:kind
+      # @http POST
+      # @example /api/hermes/v1/apdm/test/email
+      # @required [String] realm The realm for the implementaton.
+      # @required [String] kind The implementation kind: 'sms' or 'email'
+      # @status 200 Provider is fine
+      # @status 500 Provider unavailable
       post '/:realm/test/:kind' do |realm, kind|
         provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
         if provider.test!
@@ -40,6 +51,16 @@ module Hermes
         end
       end
 
+      # @apidoc
+      # Get latest messages sent in a realm. Note: only works in non-production mode.
+      # This is used for reading not actually sent messages in development/staging environment.
+      #
+      # @category Hermes/Public
+      # @path /api/hermes/v1/:realm/messages/latest
+      # @http GET
+      # @example /api/hermes/v1/apdm/messages/latest
+      # @required [String] realm The realm sending messages for.
+      # @status 200 The twenty latest messages
       get '/:realm/messages/latest' do |realm|
         unless ENV['RACK_ENV'] == "production"
           messages = []
@@ -55,6 +76,16 @@ module Hermes
         end
       end
 
+      # @apidoc
+      # Get a message from a UID to read status etc.
+      #
+      # @category Hermes/Public
+      # @path /api/hermes/v1/:realm/messages/:uid
+      # @http GET
+      # @example /api/hermes/v1/apdm/messages/post.hermes_message:apdm.vanilla$616447
+      # @required [String] realm The realm sending messages for.
+      # @required [String] uid The message UID
+      # @status 200 The message as stored in Grove with status of the message stored in the 'tags' field.
       get '/:realm/messages/:uid' do |realm, uid|
         require_god
         message = nil
@@ -68,17 +99,28 @@ module Hermes
         halt 200, message.to_json
       end
 
-      # post email
-      # params = {
-      #   :recipient_number => params['recipient_number'],
-      #   :sender_number => params['sender_number'],
-      #   :recipient_email => params['recipient_email'],
-      #   :sender_email => params['sender_email'],
-      #   :subject => params['subject'],
-      #   :text => params['text'],
-      #   :html => params['html'],
-      #   :callback_url => params['callback_url']
-      # }
+      # @apidoc
+      # Send a message of type :kind. Please note that options may vary depending on the type of message.
+      # For a e-mail message, relevant options are: 'recipient_email', 'sender_email', subject', 'text' and 'html'
+      # For a sms-message, relevant options are: 'sender_number', 'recipient_number', 'text'
+      # All other options are common for all kind of messages.
+      #
+      # @category Hermes/Public
+      # @path /api/hermes/v1/:realm/messages/:kind
+      # @http POST
+      # @example /api/hermes/v1/apdm/messages/email
+      # @required [String] realm The realm sending messages for.
+      # @required [String] kind Kind of message - 'sms' or 'email'.
+      # @optional [String] recipient_number The number of the recipient if 'sms' message.
+      # @optional [String] sender_number The number or shortname of the sender if 'sms' message.
+      # @optional [String] sender_email The email address of the sender if 'email' message. Can be of format 'Some name <someone@somwhere.com>' or just 'someone@somwhere.com'.
+      # @optional [String] recipient_email The email address of the recipient if 'email' message. Can be of format 'Some name <someone@somwhere.com>' or just 'someone@somwhere.com'.
+      # @optional [String] subject The email subject if 'email' message.
+      # @optional [String] text The message text for 'sms' message or 'email' plain text version.
+      # @optional [String] html The html message text for 'email' message.
+      # @optional [String] force A recipient mobile number or email address to send the message to, for testing purposes. Overrides what's given in the recipient parameters.
+      # @optional [String] callback_url A URL which will be called when the message is delivered.
+      # @status 200 The message as stored in Grove with status of the message stored in the 'tags' field.
       post '/:realm/messages/:kind' do |realm, kind|
         require_god
         provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
@@ -87,7 +129,11 @@ module Hermes
         path << ".#{params['path']}" if params['path']
         message = message_from_params(params.tap{|hs| hs.delete(:path)})
         begin
-          if @configuration.actual_sending_allowed?(realm)
+          if @configuration.actual_sending_allowed?(realm) or params[:force]
+            if params[:force]
+              message[:recipient_email] = params[:force]
+              message[:recipient_number] = params[:force]
+            end
             external_id =  Message.external_id_prefix(provider) <<
                             provider.send_message!(
                               message.tap{|hs| hs.delete(:callback_url)}.
@@ -115,6 +161,22 @@ module Hermes
         halt 200, post.to_json
       end
 
+
+      # @apidoc
+      # Endpoint for providers to callback the message status. This is a enpoint that
+      # is used internally by Hermes, and not part of the public API.
+      # When implementing new providers, you set up the provider service to do callbacks
+      # of message statuses to this endpoint. Each provider implements it own parameters,
+      # this is done with provider.parse_receipt, specifically implemented for each
+      # provider.
+      #
+      # @category Hermes/Private
+      # @path /api/hermes/v1/:realm/receipt/:kind
+      # @http POST
+      # @example /api/hermes/v1/apdm/receipt/email
+      # @required [String] realm The realm sending messages for.
+      # @required [String] kind The kind of message, 'email', 'sms'
+      # @status 200
       post '/:realm/receipt/:kind' do |realm, kind|
         provider = @configuration.provider_for_realm_and_kind(realm, kind)
         raw = request.env['rack.input'].read if request.env['rack.input']
