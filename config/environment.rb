@@ -23,10 +23,11 @@ end
 require File.expand_path('config/pebblebed.rb')
 
 %w(
-  lib/hermes
-  api/v1
+  lib/hermes/*.rb
+  lib/hermes/providers/*.rb
+  api/v1/*.rb
 ).each do |path|
-  Dir.glob(File.expand_path("../../#{path}/**/*.rb", __FILE__)).each do |f|
+  Dir.glob(File.expand_path("../../#{path}", __FILE__)).each do |f|
     require f
   end
 end

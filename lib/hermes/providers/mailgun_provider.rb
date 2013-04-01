@@ -9,11 +9,8 @@ module Hermes
       attr_reader :api_key
       attr_reader :mailgun_domain
 
-      class MailGunError < Exception; end
-      class ConfigurationError < MailGunError; end
+      class MailGunError < ProviderError; end
       class APIFailureError < MailGunError; end
-      class InvalidResponseError < MailGunError; end
-      class InvalidReceiptError < MailGunError; end
 
       def initialize(options = {})
         options.assert_valid_keys(:api_key, :mailgun_domain)

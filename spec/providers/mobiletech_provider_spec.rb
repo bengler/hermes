@@ -228,7 +228,7 @@ describe MobiletechProvider do
             <CpId>9999</CpId>
           </BatchReport>
         })
-      }.should raise_error(MobiletechProvider::ReceiptProviderMismatchError)
+      }.should raise_error(MobiletechProvider::InvalidReceiptError)
     end
 
     it "rejects receipt missing transaction ID" do
