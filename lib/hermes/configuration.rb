@@ -22,11 +22,14 @@ module Hermes
         realm = File.basename(file_name.gsub(/\.yml$/, ''))
         File.open(file_name) do |file|
           config = YAML.load(file)
-          @providers[realm.to_sym] = {:session => config['session'], :deny_sending_from => config['deny_actual_sending_from_environments']}
-          if config['implementations']
-            config['implementations'].each do |k,v|
-              provider_class = find_provider_class(config['implementations'][k].delete('provider'))
-              provider = provider_class.new(config['implementations'][k].symbolize_keys)
+          @providers[realm.to_sym] = {
+            session: config['session'],
+            deny_sending_from: config['deny_actual_sending_from_environments']
+          }
+          if (impls = config['implementations'])
+            impls.each_pair do |k, v|
+              provider_class = find_provider_class(v.delete('provider'))
+              provider = provider_class.new(v.symbolize_keys)
               @providers[realm.to_sym].merge!(k.to_sym => provider)
             end
           end

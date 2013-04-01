@@ -123,51 +123,53 @@ module Hermes
       # @status 200 The message as stored in Grove with status of the message stored in the 'tags' field.
       post '/:realm/messages/:kind' do |realm, kind|
         require_god
-        provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
-        connector = pebblebed_connector(realm, current_identity)
-        path = "#{realm}"
-        path << ".#{params['path']}" if params['path']
-        message = message_from_params(params.tap{|hs| hs.delete(:path)})
-        begin
-          if @configuration.actual_sending_allowed?(realm) or params[:force]
-            if params[:force]
-              message[:recipient_email] = params[:force] if kind == "email"
-              message[:recipient_number] = params[:force] if kind == "sms"
-            end
-            external_id =  Message.external_id_prefix(provider) <<
-                            provider.send_message!(
-                              message.tap{|hs| hs.delete(:callback_url)}.
-                                merge(:receipt_url => receipt_url(realm, kind.to_sym)))
-          else
-            external_id = Message.external_id_prefix(provider) << Time.now.to_i.to_s
-            LOGGER.warn("Actual sending is not performed in #{ENV['RACK_ENV']} environment. " <<
-              "Simulating external_id #{external_id} from provider")
-          end
-          post = connector.grove.post(
-            "/posts/post.hermes_message:#{path}",
-            {
-              :post => {
-                :document => message.merge(:kind => kind),
-                :restricted => true,
-                :tags => ["inprogress"],
-                :external_id => external_id
-              }
-            }
-          )
-          LOGGER.warn("Sent #{kind}-message: #{post.to_hash.inspect}")
-        rescue Pebblebed::HttpError => e
-          return halt e.status, e.message
-        end
-        halt 200, post.to_json
-      end
 
+        provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
+
+        message = message_from_params(params.except(:path))
+
+        raw_message = message.dup
+        raw_message.delete(:callback_url)
+        raw_message[:receipt_url] = receipt_url(realm, kind.to_sym)
+
+        if @configuration.actual_sending_allowed?(realm) or params[:force]
+          if params[:force]
+            raw_message[:recipient_email] = params[:force] if kind == "email"
+            raw_message[:recipient_number] = params[:force] if kind == "sms"
+          end
+          id = provider.send_message!(raw_message)
+          external_id = Message.build_external_id(provider, id)
+        else
+          external_id = Message.build_external_id(provider, Time.now.to_i.to_s)
+          logger.warn("Actual sending is not performed in #{ENV['RACK_ENV']} environment. " \
+            "Simulating external_id #{external_id} from provider")
+        end
+
+        begin
+          post = pebblebed_connector(realm, current_identity).grove.post(
+            "/posts/post.hermes_message:" + [realm, params[:path]].compact.join('.'),
+            post: {
+              document: message.merge(kind: kind),
+              restricted: true,
+              tags: ["inprogress"],
+              external_id: external_id
+            })
+        rescue Pebblebed::HttpError => e
+          # FIXME: This is way too generous
+          return halt e.status, e.message
+        else
+          json_data = post.to_json
+          logger.info("Sent message (#{kind} via #{provider.class.name}): #{json_data}")
+          halt 200, json_data
+        end
+      end
 
       # @apidoc
       # Endpoint for providers to callback the message status. This is a enpoint that
       # is used internally by Hermes, and not part of the public API.
       # When implementing new providers, you set up the provider service to do callbacks
       # of message statuses to this endpoint. Each provider implements it own parameters,
-      # this is done with provider.parse_receipt, specifically implemented for each
+      # this is done with `provider.parse_receipt`, specifically implemented for each
       # provider.
       #
       # @category Hermes/Private
@@ -200,27 +202,30 @@ module Hermes
 
         def message_from_params(params)
           hash = {
-            :recipient_number => params['recipient_number'],
-            :sender_number => params['sender_number'],
-            :recipient_email => params['recipient_email'],
-            :sender_email => params['sender_email'],
-            :subject => params['subject'],
-            :text => params['text'],
-            :html => params['html'],
-            :callback_url => params['callback_url']
+            recipient_number: params['recipient_number'],
+            sender_number: params['sender_number'],
+            recipient_email: params['recipient_email'],
+            sender_email: params['sender_email'],
+            subject: params['subject'],
+            text: params['text'],
+            html: params['html'],
+            callback_url: params['callback_url']
           }
           if params['rate']
-            hash.merge!(
-              :rate => {
-                :currency => (params['rate'])['currency'],
-                :amount => (params['rate'])['amount']
-              })
+            hash[:rate] = {
+              currency: (params['rate'])['currency'],
+              amount: (params['rate'])['amount']
+            }
           end
-          hash.select{|k,v| !v.blank?}
+          hash.select { |k, v| !v.blank? }
         end
 
         def pebblebed_connector(realm, checkpoint_identity)
-          Pebblebed::Connector.new(@configuration.session_for_realm(realm)) if realm == checkpoint_identity.realm
+          if realm == checkpoint_identity.realm
+            Pebblebed::Connector.new(@configuration.session_for_realm(realm))
+          else
+            raise ArgumentError, "Wrong realm #{realm.inspect}"
+          end
         end
 
         def logger
