@@ -29,6 +29,18 @@ This method must parse a receipt callback. It must return a hash:
 * `:vendor_status`: Vendor-specific status code or string.
 * `:vendor_message`: Optional human-readable explanation for the vendor status.
 
+Vianett
+----------
+
+This provider supports the following configuration variables:
+
+* `:username` (required): The CPID.
+* `:password` (required): API secret.
+* `:default_sender`: A hash of:
+   * `:number`: Number of default sender.
+   * `:type`: Either `:short_code`, `:alphanumeric` or `:msisdn` (default).
+* `:default_prefix`: Prefix to use for numbers when no country prefix has been specified. Defaults to `47`.
+
 Mobiletech
 ----------
 
