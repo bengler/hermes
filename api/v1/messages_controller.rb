@@ -66,8 +66,8 @@ module Hermes
           messages = []
           begin
             messages = Message.find(realm, "post.hermes_message:*")
-          rescue Exception => e
-            LOGGER.exception e if LOGGER.respond_to?(:exception)
+          rescue => e
+            logger.exception e if logger.respond_to?(:exception)
             return halt 500, "Could not get messages, inspect logs"
           end
           halt 200, messages.to_json
@@ -91,8 +91,8 @@ module Hermes
         message = nil
         begin
           message = Message.get(realm, uid)
-        rescue Exception => e
-          LOGGER.exception e if LOGGER.respond_to?(:exception)
+        rescue => e
+          logger.exception e if logger.respond_to?(:exception)
           return halt 500, "Could not get message, inspect logs"
         end
         return halt 404, "No such message" unless message
