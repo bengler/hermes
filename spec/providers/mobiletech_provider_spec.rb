@@ -9,7 +9,7 @@ describe MobiletechProvider do
     MobiletechProvider.new(:cpid => '1234', :secret => 'tjoms')
   end
 
-  describe "#send_message!" do
+  describe "#initialize" do
 
     it 'can be configured with minimal configuration' do
       provider = MobiletechProvider.new(:cpid => '1234', :secret => 'tjoms')
@@ -23,6 +23,10 @@ describe MobiletechProvider do
     it 'rejects missing required secret in configuration' do
       lambda { MobiletechProvider.new({:cpid => '1234'}) }.should raise_error
     end
+
+  end
+
+  describe "#send_message!" do
 
     it "treats gateway non-SOAP response as invalid responses" do
       stub_request(:post, 'http://msggw.dextella.net/BatchService').to_return(
