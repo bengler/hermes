@@ -25,7 +25,8 @@ require File.expand_path('config/pebblebed.rb')
 %w(
   lib/hermes/*.rb
   lib/hermes/providers/*.rb
-  api/v1/*.rb
+  api/v1.rb
+  api/v1/**/*.rb
 ).each do |path|
   Dir.glob(File.expand_path("../../#{path}", __FILE__)).each do |f|
     require f
