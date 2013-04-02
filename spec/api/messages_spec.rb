@@ -10,9 +10,9 @@ describe 'Messages' do
   end
 
   describe "GET /:realm/messages/:uid" do
-    it "gives error if the realm is misconfigured" do
+    it "returns 404 if the realm does not exist" do
       get("/foo/messages/post.hermes_message:test$1234")
-      last_response.status.should eq 500
+      last_response.status.should eq 404
     end
 
     it "returns a 404 if the post was not found" do
@@ -31,7 +31,7 @@ describe 'Messages' do
 
   describe "Test modes" do
     it 'does not send when deny_actual_sending_from_environments is set for test env.' do
-      Hermes::Configuration.instance.stub(:actual_sending_allowed?).and_return false
+      Hermes::Realm.any_instance.stub(:perform_sending?).and_return false
       post "/test/messages/email", {
         :recipient_email => 'test@test.com',
         :subject => "Foo",
@@ -44,7 +44,7 @@ describe 'Messages' do
     end
 
     it "supports test mode 'force'" do
-      Hermes::Configuration.instance.stub(:actual_sending_allowed?).and_return false
+      Hermes::Realm.any_instance.stub(:perform_sending?).and_return false
       stub_mailgun_force_post!
       post "/test/messages/email", {
         :force => 'jan@banan.com',

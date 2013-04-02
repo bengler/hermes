@@ -11,6 +11,7 @@ require 'excon'
 require 'securerandom'
 require 'singleton'
 require 'active_support/all'
+require 'pathname'
 
 ENV['RACK_ENV'] ||= "development"
 environment = ENV['RACK_ENV']

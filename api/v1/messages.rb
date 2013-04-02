@@ -40,13 +40,7 @@ module Hermes
     # @status 200 The message as stored in Grove with status of the message stored in the 'tags' field.
     get '/:realm/messages/:uid' do |realm, uid|
       require_god
-      message = nil
-      begin
-        message = Message.get(realm, uid)
-      rescue => e
-        logger.exception e if logger.respond_to?(:exception)
-        return halt 500, "Could not get message, inspect logs"
-      end
+      message = Message.get(realm, uid)
       return halt 404, "No such message" unless message
       halt 200, message.to_json
     end
@@ -76,30 +70,30 @@ module Hermes
     post '/:realm/messages/:kind' do |realm, kind|
       require_god
 
-      provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
+      @realm, @provider = realm_and_provider(realm, kind)
 
       message = message_from_params(params.except(:path))
 
       raw_message = message.dup
       raw_message.delete(:callback_url)
-      raw_message[:receipt_url] = receipt_url(realm, kind.to_sym)
+      raw_message[:receipt_url] = @realm.receipt_url || legacy_receipt_url(@realm, kind.to_sym)
 
-      if @configuration.actual_sending_allowed?(realm) or params[:force]
+      if @realm.perform_sending? or params[:force]
         if params[:force]
           raw_message[:recipient_email] = params[:force] if kind == "email"
           raw_message[:recipient_number] = params[:force] if kind == "sms"
         end
-        id = provider.send_message!(raw_message)
-        external_id = Message.build_external_id(provider, id)
+        id = @provider.send_message!(raw_message)
+        external_id = Message.build_external_id(@provider, id)
       else
-        external_id = Message.build_external_id(provider, Time.now.to_i.to_s)
+        external_id = Message.build_external_id(@provider, Time.now.to_i.to_s)
         logger.warn("Actual sending is not performed in #{ENV['RACK_ENV']} environment. " \
           "Simulating external_id #{external_id} from provider")
       end
 
       begin
-        post = pebblebed_connector(realm, current_identity).grove.post(
-          "/posts/post.hermes_message:" + [realm, params[:path]].compact.join('.'),
+        post = pebblebed_connector(@realm, current_identity).grove.post(
+          "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.'),
           post: {
             document: message.merge(kind: kind),
             restricted: true,
@@ -111,7 +105,7 @@ module Hermes
         return halt e.status, e.message
       else
         json_data = post.to_json
-        logger.info("Sent message (#{kind} via #{provider.class.name}): #{json_data}")
+        logger.info("Sent message (#{kind} via #{@provider.class.name}): #{json_data}")
         halt 200, json_data
       end
     end
@@ -138,8 +132,8 @@ module Hermes
         hash.select { |k, v| !v.blank? }
       end
 
-      def receipt_url(realm, kind)
-        # FIXME: Make configurable
+      def legacy_receipt_url(realm, kind)
+        # FIXME: Put in config
         case ENV['RACK_ENV']
           when 'development'
             # Set up a tunnel on samla.park.origo.no port 10900 to receive receipts

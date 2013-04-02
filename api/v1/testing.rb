@@ -15,8 +15,8 @@ module Hermes
     # @status 200 Provider is fine
     # @status 500 Provider unavailable
     post '/:realm/test/:kind' do |realm, kind|
-      provider = @configuration.provider_for_realm_and_kind(realm, kind.to_sym)
-      if provider.test!
+      @realm, @provider = realm_and_provider(realm, kind)
+      if @provider.test!
         halt 200, "Provider is fine"
       else
         halt 500, "Provider unavailable"

@@ -18,8 +18,8 @@ describe 'Email' do
         :text => 'Yip',
         :html => '<p>Yip</p>'
       }
-      stub_mailgun_post!.should have_been_requested
       last_response.status.should eq 200
+      stub_mailgun_post!.should have_been_requested
       stub_grove_post!.should have_been_requested
     end
   end

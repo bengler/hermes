@@ -42,12 +42,16 @@ module StubbingHelper
 
   def stub_grove_get_post!
     stub_request(:get, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test?session=some_checkpoint_god_session_for_test_realm").
-             to_return(status: 200, body: vanilla_sms_message)
+      to_return(
+        status: 200,
+        body: vanilla_sms_message)
   end
 
   def stub_grove_post!
     stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test").
-      to_return(status: 200, body: vanilla_sms_message)
+      to_return(
+        status: 200,
+        body: vanilla_sms_message)
   end
 
   def stub_grove_update!

@@ -15,4 +15,7 @@ module Hermes
   # An exception thrown when a server response was malformed.
   class InvalidResponseError < ProviderError; end
 
+  # Invalid option to provider method.
+  class OptionMissingError < ProviderError; end
+
 end

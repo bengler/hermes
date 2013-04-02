@@ -11,11 +11,7 @@ module Hermes
 
     register Sinatra::Pebblebed
 
-    error ::Hermes::Configuration::ProviderNotFound do |e|
-      return halt 404, e.message
-    end
-
-    error ::Hermes::Configuration::SessionNotFound do |e|
+    error ::Hermes::ProviderNotFound, ::Hermes::RealmNotFound do |e|
       return halt 404, e.message
     end
 
@@ -29,21 +25,25 @@ module Hermes
       headers "Content-Type" => "application/json; charset=utf8"
     end
 
-    helpers do
+    private
+
+      def realm_and_provider(realm_name, provider_kind)
+        realm = @configuration.realm(realm_name)
+        provider = realm.provider(provider_kind)
+        return realm, provider
+      end
 
       def pebblebed_connector(realm, checkpoint_identity)
-        if realm == checkpoint_identity.realm
-          Pebblebed::Connector.new(@configuration.session_for_realm(realm))
-        else
-          raise ArgumentError, "Wrong realm #{realm.inspect}"
+        unless realm.name == checkpoint_identity.realm
+          halt 500, "Wrong realm #{realm.name.inspect}, " \
+            "expected #{checkpoint_identity.realm.inspect}"
         end
+        Pebblebed::Connector.new(realm.session_key)
       end
 
       def logger
         LOGGER
       end
-
-    end
 
   end
 end

@@ -44,7 +44,7 @@ module Hermes
     private
 
       def do_receipt(realm, kind, request, params)
-        provider = @configuration.provider_for_realm_and_kind(realm, kind)
+        realm, provider = realm_and_provider(realm, kind)
 
         if (stream = request.env['rack.input'])
           raw = stream.read
@@ -59,7 +59,7 @@ module Hermes
           logger.info("Receipt status: #{result.inspect}")
           if result[:id] and result[:status]
             if (message = Message.find_by_external_id(
-              Message.build_external_id(provider, result[:id]), realm))
+              Message.build_external_id(provider, result[:id]), realm.name))
               message.add_tag!(result[:status])
             end
           end
