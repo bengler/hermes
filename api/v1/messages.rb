@@ -72,7 +72,27 @@ module Hermes
 
       @realm, @provider = realm_and_provider(realm, kind)
 
-      message = message_from_params(params.except(:path))
+      message = {
+        text: params[:text],
+        callback_url: params[:callback_url]
+      }
+      case kind.to_sym
+        when :sms
+          message[:recipient_number] = params[:recipient_number]
+          message[:sender_number] = params[:sender_number]
+          if (rate = params[:rate]) and rate.is_a?(Hash)
+            message[:rate] = {
+              currency: rate[:currency],
+              amount: rate[:amount]
+            }
+          end
+        when :email
+          message[:recipient_email] = params[:recipient_email]
+          message[:sender_email] = params[:sender_email]
+          message[:subject] = params[:subject]
+          message[:html] = params[:html]
+      end
+      message.select! { |k, v| !v.blank? }
 
       raw_message = message.dup
       raw_message.delete(:callback_url)
@@ -111,26 +131,6 @@ module Hermes
     end
 
     private
-
-      def message_from_params(params)
-        hash = {
-          recipient_number: params['recipient_number'],
-          sender_number: params['sender_number'],
-          recipient_email: params['recipient_email'],
-          sender_email: params['sender_email'],
-          subject: params['subject'],
-          text: params['text'],
-          html: params['html'],
-          callback_url: params['callback_url']
-        }
-        if params['rate']
-          hash[:rate] = {
-            currency: (params['rate'])['currency'],
-            amount: (params['rate'])['amount']
-          }
-        end
-        hash.select { |k, v| !v.blank? }
-      end
 
       def legacy_receipt_url(realm, kind)
         # FIXME: Put in config
