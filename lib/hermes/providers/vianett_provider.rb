@@ -53,11 +53,13 @@ module Hermes
         id = generate_id
         Timeout.timeout(options[:timeout] || 30) do
           params = build_params(id, options)
-          logger.info "[Vianett] Posting outgoing: #{params.inspect}"
-          check_response(
-            @connection.post(
-              path: OUTGOING_PATH,
-              query: params))
+          with_retrying do
+            logger.info "[Vianett] Posting outgoing: #{params.inspect}"
+            check_response(
+              @connection.post(
+                path: OUTGOING_PATH,
+                query: params))
+          end
         end
         id
       end
@@ -118,6 +120,21 @@ module Hermes
 
         def logger
           LOGGER
+        end
+
+        def with_retrying(&block)
+          retries_left = 10
+          begin
+            yield
+          rescue Excon::Errors::SocketError => e
+            if retries_left > 0
+              logger.error("Failed with exception, will retry: #{e}")
+              sleep(0.5)
+              retry
+            else
+              raise
+            end
+          end
         end
 
         def check_response(response)
