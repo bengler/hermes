@@ -96,7 +96,7 @@ module Hermes
 
       raw_message = message.dup
       raw_message.delete(:callback_url)
-      raw_message[:receipt_url] = @realm.receipt_url || legacy_receipt_url(@realm, kind.to_sym)
+      raw_message[:receipt_url] = "http://#{request.host}:#{request.port}/api/hermes/v1/#{realm}/receipt/#{kind}"
 
       message_tags = ["inprogress"]
 
@@ -130,21 +130,6 @@ module Hermes
         })
       halt 200, post.to_json
     end
-
-    private
-
-      def legacy_receipt_url(realm, kind)
-        # FIXME: Put in config
-        case ENV['RACK_ENV']
-          when 'development'
-            # Set up a tunnel on samla.park.origo.no port 10900 to receive receipts
-            "http://origo.tunnel.o5.no/api/hermes/v1/#{realm}/receipt/#{kind}"
-          when 'staging'
-            "http://hermes.staging.o5.no/api/hermes/v1/#{realm}/receipt/#{kind}"
-          else
-            "http://hermes.o5.no/hermes/v1/#{realm}/receipt/#{kind}"
-        end
-      end
 
   end
 end
