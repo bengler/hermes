@@ -24,6 +24,14 @@ end
 Pebblebed.config do
   service :checkpoint, :version => 1
   service :grove, :version => 1
+  host case ENV['RACK_ENV']
+    when 'staging' then
+      'pebbles.staging.o5.no'
+    when 'production' then
+      'pebbles.o5.no'
+    else
+      'hermes.dev'
+  end
 end
 
 %w(
