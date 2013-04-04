@@ -90,6 +90,7 @@ module Hermes
     end
 
     def realm(name)
+      name = name.to_s
       if (realm = @realms[name])
         return realm
       else
