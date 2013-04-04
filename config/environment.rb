@@ -21,7 +21,10 @@ unless defined?(LOGGER)
   LOGGER.level = Logger::INFO
 end
 
-require File.expand_path('config/pebblebed.rb')
+Pebblebed.config do
+  service :checkpoint, :version => 1
+  service :grove, :version => 1
+end
 
 %w(
   lib/hermes/*.rb

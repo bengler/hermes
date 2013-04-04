@@ -19,6 +19,10 @@ require 'pp'
 
 set :environment, :test
 
+Pebblebed.config do
+  host 'hermes.dev'
+end
+
 LOGGER.level = Logger::FATAL
 
 Dir.glob(File.expand_path('../helpers/*.rb', __FILE__)).each do |f|
