@@ -60,7 +60,7 @@ module Hermes
 
     def self.grove(realm_name)
       Pebblebed::Connector.new(
-        Hermes::Configuration.instance.realm(realm_name).session_key, PebbleContext.host)
+        Hermes::Configuration.instance.realm(realm_name).session_key, HostContext.host)
     end
 
     private
