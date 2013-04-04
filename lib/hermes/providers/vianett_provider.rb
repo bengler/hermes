@@ -52,10 +52,12 @@ module Hermes
 
         id = generate_id
         Timeout.timeout(options[:timeout] || 30) do
+          params = build_params(id, options)
+          logger.info "[Vianett] Posting outgoing: #{params.inspect}"
           check_response(
             @connection.post(
               path: OUTGOING_PATH,
-              query: build_params(id, options)))
+              query: params))
         end
         id
       end
@@ -113,6 +115,10 @@ module Hermes
 
         BASE_URI = 'https://smsc.vianett.no/'.freeze
         OUTGOING_PATH = '/V3/CPA/MT/MT.ashx'.freeze
+
+        def logger
+          LOGGER
+        end
 
         def check_response(response)
           unless response.body.present?
