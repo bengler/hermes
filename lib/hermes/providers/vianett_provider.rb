@@ -42,8 +42,6 @@ module Hermes
             :type => default_sender[:type].try(:to_sym) || :msisdn
           }.freeze
         end
-
-        @connection = Excon.new(BASE_URI)
       end
 
       def send_message!(options)
@@ -56,7 +54,7 @@ module Hermes
           with_retrying do
             logger.info "[Vianett] Posting outgoing: #{params.inspect}"
             check_response(
-              @connection.post(
+              Excon.new(BASE_URI).post(
                 path: OUTGOING_PATH,
                 query: params))
           end
