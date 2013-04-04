@@ -20,7 +20,7 @@ require 'pp'
 set :environment, :test
 
 Pebblebed.config do
-  host 'hermes.dev'
+  host 'example.org'
 end
 
 LOGGER.level = Logger::FATAL

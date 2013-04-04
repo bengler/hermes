@@ -41,21 +41,21 @@ module StubbingHelper
   end
 
   def stub_grove_get_post!
-    stub_request(:get, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test?session=some_checkpoint_god_session_for_test_realm").
+    stub_request(:get, "http://example.org/api/grove/v1/posts/post.hermes_message:test?session=some_checkpoint_god_session_for_test_realm").
       to_return(
         status: 200,
         body: vanilla_sms_message)
   end
 
   def stub_grove_post!
-    stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test").
+    stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test").
       to_return(
         status: 200,
         body: vanilla_sms_message)
   end
 
   def stub_grove_update!
-    stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test$1234").
+    stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test$1234").
       with(body: vanilla_sms_message)
   end
 
@@ -67,12 +67,12 @@ module StubbingHelper
   end
 
   def stub_grove_update_success!
-    stub_request(:get, "http://hermes.dev/api/grove/v1/posts/*?external_id=mobiletech_provider_id:vroom&session=some_checkpoint_god_session_for_test_realm").
+    stub_request(:get, "http://example.org/api/grove/v1/posts/*?external_id=mobiletech_provider_id:vroom&session=some_checkpoint_god_session_for_test_realm").
       to_return(
         status: 200,
         body: '{"post": {"uid": "post.hermes_message:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}, "tags": ["in_progress"]}}')
 
-    stub_request(:post, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test$1234/tags/delivered").
+    stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test$1234/tags/delivered").
       with(
         body: "{\"session\":\"some_checkpoint_god_session_for_test_realm\"}",
         headers: {'Accept' => 'application/json', 'Content-Type' => 'application/json'}).
@@ -91,14 +91,14 @@ module StubbingHelper
   end
 
   def stub_grove_get_post_success!
-    stub_request(:get, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test$1234?session=some_checkpoint_god_session_for_test_realm").
+    stub_request(:get, "http://example.org/api/grove/v1/posts/post.hermes_message:test$1234?session=some_checkpoint_god_session_for_test_realm").
       to_return(
         status: 200,
         body: vanilla_sms_message)
   end
 
   def stub_grove_get_post_failure!
-    stub_request(:get, "http://hermes.dev/api/grove/v1/posts/post.hermes_message:test$4321?session=some_checkpoint_god_session_for_test_realm").
+    stub_request(:get, "http://example.org/api/grove/v1/posts/post.hermes_message:test$4321?session=some_checkpoint_god_session_for_test_realm").
       to_return(status: 404)
   end
 

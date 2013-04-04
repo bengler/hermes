@@ -38,7 +38,7 @@ module Hermes
           halt 500, "Wrong realm #{realm.name.inspect}, " \
             "expected #{checkpoint_identity.realm.inspect}"
         end
-        Pebblebed::Connector.new(realm.session_key)
+        Pebblebed::Connector.new(realm.session_key, host: request.host)
       end
 
       def logger
