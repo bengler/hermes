@@ -5,13 +5,8 @@ module Hermes
 
     class MobiletechProvider
 
-      class MobiletechError < Exception; end
-      class ConfigurationError < Exception; end
-      class InvalidResponseError < MobiletechError; end
-      class InvalidReceiptError < MobiletechError; end
-      class MessageRejectedError < MobiletechError; end
+      class MobiletechError < ProviderError; end
       class APIFailureError < MobiletechError; end
-      class ReceiptProviderMismatchError < MobiletechError; end
 
       attr_reader :cpid
       attr_reader :default_prefix
@@ -75,11 +70,11 @@ module Hermes
         end
       end
 
-      def parse_receipt(url, raw_data, params=nil)
+      def parse_receipt(url, raw_data, params = nil)
         document = Nokogiri::XML(raw_data, nil, nil, NOKOGIRI_PARSE_OPTIONS)
         cpid = document.xpath("/BatchReport/CpId").text
         if cpid != @cpid
-          raise ReceiptProviderMismatchError, "Expected receipt for provider with CPID #{@cpid}, got for #{cpid.inspect}"
+          raise InvalidReceiptError, "Expected receipt for provider with CPID #{@cpid}, got for #{cpid.inspect}"
         end
         tid = document.xpath("/BatchReport/TransactionId").text
         if tid.empty?

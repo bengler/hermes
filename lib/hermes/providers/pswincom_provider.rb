@@ -12,12 +12,8 @@ module Hermes
       DEFAULT_SENDER_COUNTRY = 'NO'.freeze
       DEFAULT_PREFIX = '47'.freeze
 
-      class PSWinComError < Exception; end
-      class ConfigurationError < PSWinComError; end
+      class PSWinComError < ProviderError; end
       class APIFailureError < PSWinComError; end
-      class InvalidResponseError < PSWinComError; end
-      class MessageRejectedError < PSWinComError; end
-      class InvalidReceiptError < PSWinComError; end
 
       def initialize(options = {})
         options.assert_valid_keys(:user, :password, :default_sender_number, :default_prefix, :default_sender_country)

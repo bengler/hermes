@@ -54,13 +54,13 @@ module Hermes
       end
     end
 
-    def self.external_id_prefix(provider)
-      "#{provider.class.name.underscore.split('/').last}_id:"
+    def self.build_external_id(provider, content)
+      "#{provider.class.name.underscore.split('/').last}_id:#{content}"
     end
 
-    def self.grove(realm)
-      session = Hermes::Configuration.instance.session_for_realm(realm)
-      grove = Pebblebed::Connector.new(session).grove
+    def self.grove(realm_name)
+      Pebblebed::Connector.new(
+        Hermes::Configuration.instance.realm(realm_name).session_key).grove
     end
 
     private

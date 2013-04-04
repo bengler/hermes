@@ -29,6 +29,18 @@ This method must parse a receipt callback. It must return a hash:
 * `:vendor_status`: Vendor-specific status code or string.
 * `:vendor_message`: Optional human-readable explanation for the vendor status.
 
+Vianett
+----------
+
+This provider supports the following configuration variables:
+
+* `:username` (required): The CPID.
+* `:password` (required): API secret.
+* `:default_sender`: A hash of:
+   * `:number`: Number of default sender.
+   * `:type`: Either `:short_code`, `:alphanumeric` or `:msisdn` (default).
+* `:default_prefix`: Prefix to use for numbers when no country prefix has been specified. Defaults to `47`.
+
 Mobiletech
 ----------
 
@@ -41,7 +53,7 @@ This provider supports the following configuration variables:
 * `:default_prefix`: Prefix to use for numbers when no country prefix has been specified. Defaults to `47`.
 
 PSWinCom
-----------
+--------
 
 This provider supports the following configuration variables:
 
@@ -56,14 +68,10 @@ PS: Please note that the account must be enabled for the delivery reports
 feature (callbacks) by PSWincom first! Otherwise you will get a invalid
 response from the PSWinCom API, and no callback (even though messages are delivered).
 
-
 Mailgun
-----------
+-------
 
 This provider supports the following configuration variables:
-
-api_key: key-8xybyxgfrbgmeg82mfzplrcux6cxg4o8
-mailgun_domain: dna.mailgun.org
 
 * `:api_key` (required): The Mailgun API-key.
 * `:mailgun_domain` (required): The Mailgun Domain.
