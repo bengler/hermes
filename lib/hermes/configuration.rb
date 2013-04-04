@@ -79,7 +79,7 @@ module Hermes
       if root.is_a?(String)
         root = Pathname.new(root)
       else
-        root ||= Pathname.new(__FILE__).expand_path('../../..')
+        root ||= Pathname.new(__FILE__) + '../../..'
       end
 
       Pathname.glob(root.join('config/realms/*.yml')).each do |file_name|
