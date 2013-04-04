@@ -59,8 +59,15 @@ module Hermes
     end
 
     def self.grove(realm_name)
+      # FIXME: Don't configure here
       Pebblebed::Connector.new(
-        Hermes::Configuration.instance.realm(realm_name).session_key).grove
+        Hermes::Configuration.instance.realm(realm_name).session_key,
+        host: case ENV['RACK_ENV']
+          when 'production' then 'pebbles.o5.no'
+          when 'staging' then 'pebbles.staging.o5.no'
+          when 'test' then 'example.org'
+          else 'hermes.dev'
+        end).grove
     end
 
     private
