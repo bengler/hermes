@@ -19,6 +19,10 @@ module Hermes
       return halt 400, e.message
     end
 
+    not_found do
+      halt 404, 'Not found'
+    end
+
     before do
       @configuration = Configuration.instance
       cache_control :private, :no_cache, :no_store, :must_revalidate
