@@ -111,6 +111,8 @@ module Hermes
           "Simulating external_id #{external_id} from provider")
       end
 
+      logger.info("Sent message (#{kind} via #{@provider.class.name}): #{message.inspect}")
+
       post = pebblebed_connector(@realm, current_identity).grove.post(
         "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.'),
         post: {
@@ -119,7 +121,6 @@ module Hermes
           tags: ["inprogress"],
           external_id: external_id
         })
-      logger.info("Sent message (#{kind} via #{@provider.class.name}): #{message.inspect}")
       
       halt 200, post.to_json
     end
