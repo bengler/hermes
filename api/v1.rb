@@ -12,14 +12,17 @@ module Hermes
     register Sinatra::Pebblebed
 
     error ::Timeout::Error do |e|
+      logger.error "Timeout"
       return halt 503, 'Timeout'
     end
 
     error ::Hermes::ProviderNotFound, ::Hermes::RealmNotFound do |e|
+      logger.error e.message
       return halt 404, e.message
     end
 
     error ::Hermes::OptionMissingError do |e|
+      logger.error e.message
       return halt 400, e.message
     end
 
