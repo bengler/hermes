@@ -119,10 +119,9 @@ module Hermes
           tags: ["inprogress"],
           external_id: external_id
         })
-
-      json_data = post.to_json
-      logger.info("Sent message (#{kind} via #{@provider.class.name}): #{json_data}")
-      halt 200, json_data
+      logger.info("Sent message (#{kind} via #{@provider.class.name}): #{message.inspect}")
+      
+      halt 200, post.to_json
     end
 
     private
