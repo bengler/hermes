@@ -32,6 +32,10 @@ module Hermes
 
     before do
       @configuration = Configuration.instance
+
+      LOGGER.info "Processing #{request.url}"
+      LOGGER.info "Params: #{params.inspect}"
+
       cache_control :private, :no_cache, :no_store, :must_revalidate
       headers "Content-Type" => "application/json; charset=utf8"
     end
