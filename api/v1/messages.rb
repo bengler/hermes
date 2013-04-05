@@ -111,23 +111,18 @@ module Hermes
           "Simulating external_id #{external_id} from provider")
       end
 
-      begin
-        post = pebblebed_connector(@realm, current_identity).grove.post(
-          "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.'),
-          post: {
-            document: message.merge(kind: kind),
-            restricted: true,
-            tags: ["inprogress"],
-            external_id: external_id
-          })
-      rescue Pebblebed::HttpError => e
-        # FIXME: This is way too generous
-        return halt e.status, e.message
-      else
-        json_data = post.to_json
-        logger.info("Sent message (#{kind} via #{@provider.class.name}): #{json_data}")
-        halt 200, json_data
-      end
+      post = pebblebed_connector(@realm, current_identity).grove.post(
+        "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.'),
+        post: {
+          document: message.merge(kind: kind),
+          restricted: true,
+          tags: ["inprogress"],
+          external_id: external_id
+        })
+
+      json_data = post.to_json
+      logger.info("Sent message (#{kind} via #{@provider.class.name}): #{json_data}")
+      halt 200, json_data
     end
 
     private
