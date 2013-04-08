@@ -16,15 +16,17 @@ The provider must return a vendor-specific string key that can be used to query 
 test!
 ```
 
-Test whether the provider's connection is functional. Returns true or false.
+### Receipt parsing
+
+*Optional*. This method must parse a receipt callback obtained from the provider.
 
 ```ruby
-parse_receipt(url, raw_body, params)
+parse_receipt(params, rack_request)
 ```
 
-This method must parse a receipt callback. It must return a hash:
+It must return a hash:
 
-* `:id` (required): The ID of the transaction, as returned by `send_short_message!`.
+* `:id` (required): The ID of the transaction, as returned by `send_message!`.
 * `:status` (required): A symbol representing the current status, one of `:in_progress`, `:delivered`, `:unknown` or `:failed`.
 * `:vendor_status`: Vendor-specific status code or string.
 * `:vendor_message`: Optional human-readable explanation for the vendor status.

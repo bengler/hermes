@@ -83,36 +83,36 @@ describe PSWinComProvider do
 
     it "rejects receipt with bad syntax" do
       lambda {
-        provider.parse_receipt("/", "FOO=BAR")
+        provider.parse_receipt({}, request_with_input_stream("FOO=BAR"))
       }.should raise_error(PSWinComProvider::InvalidReceiptError)
     end
 
     it "rejects receipt missing transaction ID" do
       lambda {
-        provider.parse_receipt("/", "STATE=DELIVRD")
+        provider.parse_receipt({}, request_with_input_stream("STATE=DELIVRD"))
       }.should raise_error(PSWinComProvider::InvalidReceiptError)
     end
 
     it "parses success" do
-      result = provider.parse_receipt("/", "ID=1&RCV=4795126548&REF=338166433&STATE=DELIVRD&DELIVERYTIME=2012.09.05+12%3a45%3a33")
+      result = provider.parse_receipt({}, request_with_input_stream("ID=1&RCV=4795126548&REF=338166433&STATE=DELIVRD&DELIVERYTIME=2012.09.05+12%3a45%3a33"))
       result[:id].should eq "338166433"
       result[:status].should == :delivered
     end
 
     it "parses failure" do
-      result = provider.parse_receipt("/", "ID=1&RCV=4795126548&REF=338166433&STATE=FAILED&DELIVERYTIME=2012.09.05+12%3a45%3a33")
+      result = provider.parse_receipt({}, request_with_input_stream("ID=1&RCV=4795126548&REF=338166433&STATE=FAILED&DELIVERYTIME=2012.09.05+12%3a45%3a33"))
       result[:id].should eq "338166433"
       result[:status].should == :failed
     end
 
     it "parses unknown" do
-      result = provider.parse_receipt("/", "ID=1&RCV=4795126548&REF=338166433&STATE=FOO&DELIVERYTIME=2012.09.05+12%3a45%3a33")
+      result = provider.parse_receipt({}, request_with_input_stream("ID=1&RCV=4795126548&REF=338166433&STATE=FOO&DELIVERYTIME=2012.09.05+12%3a45%3a33"))
       result[:id].should eq "338166433"
       result[:status].should == :unknown
     end
 
     it "parses in progress" do
-      result = provider.parse_receipt("/", "ID=1&RCV=4795126548&REF=338166433&STATE=UNDELIV&DELIVERYTIME=2012.09.05+12%3a45%3a33")
+      result = provider.parse_receipt({}, request_with_input_stream("ID=1&RCV=4795126548&REF=338166433&STATE=UNDELIV&DELIVERYTIME=2012.09.05+12%3a45%3a33"))
       result[:id].should eq "338166433"
       result[:status].should == :in_progress
     end

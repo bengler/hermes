@@ -45,14 +45,8 @@ module Hermes
 
       def do_receipt(realm, kind, request, params)
         realm, provider = realm_and_provider(realm, kind)
-
-        if (stream = request.env['rack.input'])
-          raw = stream.read
-        end
-
         begin
-          result = provider.parse_receipt(request.path_info, raw,
-            params.with_indifferent_access)
+          result = provider.parse_receipt(params.with_indifferent_access, request)
         rescue => e
           logger.error("Ignoring exception during receipt parsing: #{e}")
         else

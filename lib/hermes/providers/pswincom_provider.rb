@@ -59,7 +59,13 @@ module Hermes
         end
       end
 
-      def parse_receipt(url, raw_data, params=nil)
+      def parse_receipt(params, request)
+        if (stream = request.env['rack.input'])
+          raw_data = stream.read
+        else
+          raise ArgumentError, "Input stream required"
+        end
+
         parsed_data = CGI::parse(raw_data)
         tid = parsed_data["REF"].first
         result = {:id => tid}

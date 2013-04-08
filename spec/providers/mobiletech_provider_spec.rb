@@ -206,43 +206,43 @@ describe MobiletechProvider do
 
     it "rejects receipt with bad XML syntax" do
       lambda {
-        provider.parse_receipt("/", "<? x")
+        provider.parse_receipt({}, request_with_input_stream("<? x"))
       }.should raise_error(MobiletechProvider::InvalidReceiptError)
     end
 
     it "rejects receipt from wrong CPID" do
       lambda {
-        provider.parse_receipt("/", %{
+        provider.parse_receipt({}, request_with_input_stream(%{
           <BatchReport>
             <CpId>9999</CpId>
           </BatchReport>
-        })
+        }))
       }.should raise_error(MobiletechProvider::InvalidReceiptError)
     end
 
     it "rejects receipt missing transaction ID" do
       lambda {
-        provider.parse_receipt("/", %{
+        provider.parse_receipt({}, request_with_input_stream(%{
           <BatchReport>
             <CpId>1234</CpId>
           </BatchReport>
-        })
+        }))
       }.should raise_error(MobiletechProvider::InvalidReceiptError)
     end
 
     it "rejects receipt missing counts" do
       lambda {
-        provider.parse_receipt("/", %{
+        provider.parse_receipt({}, request_with_input_stream(%{
           <BatchReport>
             <CpId>1234</CpId>
             <TransactionId>SOME_UNIQUE_KEY</TransactionId>
           </BatchReport>
-        })
+        }))
       }.should raise_error(MobiletechProvider::InvalidReceiptError)
     end
 
     it "parses success" do
-      result = provider.parse_receipt("/", %{
+      result = provider.parse_receipt({}, request_with_input_stream(%{
         <BatchReport>
           <CpId>1234</CpId>
           <TransactionId>SOME_UNIQUE_KEY</TransactionId>
@@ -264,13 +264,13 @@ describe MobiletechProvider do
           <Failed>0</Failed>
           <Unknown>0</Unknown>
         </BatchReport>
-      })
+      }))
       result[:id].should == 'SOME_UNIQUE_KEY'
       result[:status].should == :delivered
     end
 
     it "parses failure" do
-      result = provider.parse_receipt("/", %{
+      result = provider.parse_receipt({}, request_with_input_stream(%{
         <BatchReport>
           <CpId>1234</CpId>
           <TransactionId>SOME_UNIQUE_KEY</TransactionId>
@@ -291,7 +291,7 @@ describe MobiletechProvider do
           <Failed>1</Failed>
           <Unknown>0</Unknown>
         </BatchReport>
-      })
+      }))
       result[:id].should == 'SOME_UNIQUE_KEY'
       result[:status].should == :failed
       result[:vendor_status].should == '500'
@@ -299,7 +299,7 @@ describe MobiletechProvider do
     end
 
     it "parses unknown" do
-      result = provider.parse_receipt("/", %{
+      result = provider.parse_receipt({}, request_with_input_stream(%{
         <BatchReport>
           <CpId>1234</CpId>
           <TransactionId>SOME_UNIQUE_KEY</TransactionId>
@@ -308,13 +308,13 @@ describe MobiletechProvider do
           <Failed>0</Failed>
           <Unknown>1</Unknown>
         </BatchReport>
-      })
+      }))
       result[:id].should == 'SOME_UNIQUE_KEY'
       result[:status].should == :unknown
     end
 
     it "parses in progress" do
-      result = provider.parse_receipt("/", %{
+      result = provider.parse_receipt({}, request_with_input_stream(%{
         <BatchReport>
           <CpId>1234</CpId>
           <TransactionId>SOME_UNIQUE_KEY</TransactionId>
@@ -323,7 +323,7 @@ describe MobiletechProvider do
           <Failed>0</Failed>
           <Unknown>0</Unknown>
         </BatchReport>
-      })
+      }))
       result[:id].should == 'SOME_UNIQUE_KEY'
       result[:status].should == :in_progress
     end
