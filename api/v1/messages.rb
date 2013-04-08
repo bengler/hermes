@@ -97,25 +97,18 @@ module Hermes
       raw_message = message.dup
       raw_message.delete(:callback_url)
       raw_message[:receipt_url] = "http://#{request.host}:#{request.port}/api/hermes/v1/#{realm}/receipt/#{kind}"
+      if params[:force]
+        raw_message[:recipient_email] = params[:force] if kind == "email"
+        raw_message[:recipient_number] = params[:force] if kind == "sms"
+      end
 
       message_tags = ["inprogress"]
-
-      if @realm.perform_sending? or params[:force]
-        if params[:force]
-          raw_message[:recipient_email] = params[:force] if kind == "email"
-          raw_message[:recipient_number] = params[:force] if kind == "sms"
-        end
-        begin
-          id = @provider.send_message!(raw_message)
-          external_id = Message.build_external_id(@provider, id)
-        rescue Hermes::InvalidResponseError => e
-          logger.exception e if logger.respond_to?(:exception)
-          message_tags = ["failed"]
-        end
-      else
-        external_id = Message.build_external_id(@provider, Time.now.to_i.to_s)
-        logger.warn("Actual sending is not performed in #{ENV['RACK_ENV']} environment. " \
-          "Simulating external_id #{external_id} from provider")
+      begin
+        id = @provider.send_message!(raw_message)
+        external_id = Message.build_external_id(@provider, id)
+      rescue Hermes::InvalidResponseError => e
+        logger.exception e if logger.respond_to?(:exception)
+        message_tags = ["failed"]
       end
 
       logger.info("Sent message (#{kind} via #{@provider.class.name}): #{message.inspect}")

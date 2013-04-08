@@ -38,26 +38,32 @@ module Hermes
       @providers.freeze
     end
 
-    def perform_sending?
-      @perform_sending
-    end
-
     def format_grove_key(external_id, path)
       "post.hermes_message:#{@name}.#{external_id}#{path}"
     end
 
     def provider(kind)
-      kind = kind.to_sym
-      if (provider = @providers[kind])
-        return provider
+      if @perform_sending
+        kind = kind.to_sym
+        provider = @providers[kind]
+        unless provider
+          raise ProviderNotFound.new(self, kind)
+        end
       else
-        raise ProviderNotFound.new(self, kind)
+        logger.warn("Sending is disabled #{ENV['RACK_ENV']} environment, " \
+          "will silently ignore outgoing messages.")
+        provider = NullProvider.new
       end
+      provider
     end
 
     attr_reader :name
     attr_reader :providers
     attr_reader :session_key
+
+    private
+
+      def logger; LOGGER; end
 
   end
 
