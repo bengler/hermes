@@ -22,30 +22,28 @@ module Hermes
       end
 
       def send_message!(options)
-        options.assert_valid_keys(:receipt_url, :sender_email, :recipient_email, :subject, :text, :html, :timeout)
+        options.assert_valid_keys(:receipt_url, :sender_email, :recipient_email, :subject, :text, :html)
         raise Hermes::OptionMissingError.new("recipient_email is missing") unless options[:recipient_email]
         raise Hermes::OptionMissingError.new("text is missing") unless options[:text]
-        Timeout.timeout(options[:timeout] || 30) do
-          url = "https://api.mailgun.net/v2/#{@mailgun_domain}/messages"
-          client =  HTTPClient.new()
-          client.set_auth(nil, "api", @api_key)
-          response = client.post(
-            url,
-            post_data(
-              options[:recipient_email],
-              options[:sender_email] || @default_sender_email,
-              options[:subject],
-              options[:text],
-              options[:html]
-            )
+        url = "https://api.mailgun.net/v2/#{@mailgun_domain}/messages"
+        client =  HTTPClient.new()
+        client.set_auth(nil, "api", @api_key)
+        response = client.post(
+          url,
+          post_data(
+            options[:recipient_email],
+            options[:sender_email] || @default_sender_email,
+            options[:subject],
+            options[:text],
+            options[:html]
           )
-          raise APIFailureError.new(response.body) if [401, 402, 404].include?(response.status)
-          if response.status == 200
-            data = JSON.parse(response.body)
-            return data["id"]
-          else
-            raise InvalidResponseError.new(response.inspect)
-          end
+        )
+        raise APIFailureError.new(response.body) if [401, 402, 404].include?(response.status)
+        if response.status == 200
+          data = JSON.parse(response.body)
+          return data["id"]
+        else
+          raise InvalidResponseError.new(response.inspect)
         end
       end
 

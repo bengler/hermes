@@ -27,25 +27,23 @@ module Hermes
       end
 
       def send_message!(options)
-        options.assert_valid_keys(:receipt_url, :rate, :sender_number, :recipient_number, :text, :timeout, :bill)
+        options.assert_valid_keys(:receipt_url, :rate, :sender_number, :recipient_number, :text, :bill)
         raise Hermes::OptionMissingError.new("recipient_number is missing") unless options[:recipient_number]
         raise Hermes::OptionMissingError.new("text is missing") unless options[:text]
-        Timeout.timeout(options[:timeout] || 30) do
-          response = HTTPClient.new.post(
-            URL,
-            post_data(
-              options[:text],
-              options[:recipient_number],
-              options[:sender_number]
-            )
+        response = HTTPClient.new.post(
+          URL,
+          post_data(
+            options[:text],
+            options[:recipient_number],
+            options[:sender_number]
           )
-          raise APIFailureError.new(response.body) if [310, 312, 500].include?(response.status)
-          raise InvalidResponseError.new(response.body) if [302, 202, 404].include?(response.status)
-          data = response.body.split("\n")
-          raise InvalidResponseError.new(response.body) if data[2].blank?
-          return data[2].strip if data[0].strip == "0" # Return reference ID if status is 0 (valid)
-          raise MessageRejectedError.new(response.body)
-        end
+        )
+        raise APIFailureError.new(response.body) if [310, 312, 500].include?(response.status)
+        raise InvalidResponseError.new(response.body) if [302, 202, 404].include?(response.status)
+        data = response.body.split("\n")
+        raise InvalidResponseError.new(response.body) if data[2].blank?
+        return data[2].strip if data[0].strip == "0" # Return reference ID if status is 0 (valid)
+        raise MessageRejectedError.new(response.body)
       end
 
       # Test whether provider is functional. Returns true or false.

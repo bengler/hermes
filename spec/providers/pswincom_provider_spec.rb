@@ -77,17 +77,6 @@ describe PSWinComProvider do
       end
     end
 
-    it 'supports timeout' do
-      stub = stub_request(:post, 'https://sms.pswin.com/http4sms/sendRef.asp').to_return(lambda { |request|
-        sleep(1)
-      })
-      lambda {
-        provider.send_message!(
-          :recipient_number => '+4740471730', :text => 'test', :timeout => 0.1)
-      }.should raise_error(Timeout::Error)
-      stub.should have_requested(:post, 'https://sms.pswin.com/http4sms/sendRef.asp')
-    end
-
   end
 
   describe '#parse_receipt' do

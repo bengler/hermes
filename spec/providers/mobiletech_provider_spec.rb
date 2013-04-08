@@ -200,17 +200,6 @@ describe MobiletechProvider do
         }
     end
 
-    it 'supports timeout' do
-      stub = stub_request(:post, 'http://msggw.dextella.net/BatchService').to_return(lambda { |request|
-        sleep(1)
-      })
-      lambda {
-        provider.send_message!(
-          :recipient_number => '+4740471730', :text => 'test', :timeout => 0.1)
-      }.should raise_error(Timeout::Error)
-      stub.should have_requested(:post, 'http://msggw.dextella.net/BatchService')
-    end
-
   end
 
   describe '#parse_receipt' do

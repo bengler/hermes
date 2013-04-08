@@ -30,16 +30,6 @@ describe MailGunProvider do
       provider.send_message!(:recipient_email => 'foo@bar.com', :text => 'test').should == "<20111114174239.25659.5817@test.com>"
     end
 
-    it 'supports timeout' do
-      stub = stub_request(:post, 'https://api:foo@api.mailgun.net/v2/test.com/messages').to_return(lambda { |request|
-        sleep(1)
-      })
-      lambda {
-        provider.send_message!(:recipient_email => 'foo@bar.com', :text => 'test', :timeout => 0.1)
-      }.should raise_error(Timeout::Error)
-      stub.should have_requested(:post, 'https://api:foo@api.mailgun.net/v2/test.com/messages')
-    end
-
   end
 
   describe '#parse_receipt' do

@@ -32,27 +32,25 @@ module Hermes
 
       def send_message!(options)
         options.assert_valid_keys(
-          :receipt_url, :rate, :recipient_number, :sender_number, :text, :timeout, :bill)
+          :receipt_url, :rate, :recipient_number, :sender_number, :text, :bill)
         tid = generate_tid
-        Timeout.timeout(options[:timeout] || 30) do
-          body = build_request(tid, options)
-          LOGGER.info "Posting batch to Mobiletech: #{body}"
-          response = @connection.post(
-            :path => BATCH_SERVICE_PATH,
-            :body => body,
-            :headers => {'Content-Type' => 'application/xml'})
-          case response.status
-            when 200, 201
-              parse_result(response.body)
-            when 310
-              raise APIFailureError, "Invalid transaction ID"
-            when 312
-              raise APIFailureError, "Invalid signature"
-            when 500..599
-              parse_error(response.body)
-            else
-              raise InvalidResponseError, "Server responded with status #{response.status}"
-          end
+        body = build_request(tid, options)
+        LOGGER.info "Posting batch to Mobiletech: #{body}"
+        response = @connection.post(
+          :path => BATCH_SERVICE_PATH,
+          :body => body,
+          :headers => {'Content-Type' => 'application/xml'})
+        case response.status
+          when 200, 201
+            parse_result(response.body)
+          when 310
+            raise APIFailureError, "Invalid transaction ID"
+          when 312
+            raise APIFailureError, "Invalid signature"
+          when 500..599
+            parse_error(response.body)
+          else
+            raise InvalidResponseError, "Server responded with status #{response.status}"
         end
         tid
       end

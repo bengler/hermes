@@ -46,18 +46,16 @@ module Hermes
 
       def send_message!(options)
         options.assert_valid_keys(
-          :receipt_url, :sender_number, :recipient_number, :text, :timeout)
+          :receipt_url, :sender_number, :recipient_number, :text)
 
         id = generate_id
-        Timeout.timeout(options[:timeout] || 30) do
-          params = build_params(id, options)
-          with_retrying do
-            logger.info "[Vianett] Posting outgoing: #{params.inspect}"
-            check_response(
-              Excon.new(BASE_URI).post(
-                path: OUTGOING_PATH,
-                query: params))
-          end
+        params = build_params(id, options)
+        with_retrying do
+          logger.info "[Vianett] Posting outgoing: #{params.inspect}"
+          check_response(
+            Excon.new(BASE_URI).post(
+              path: OUTGOING_PATH,
+              query: params))
         end
         id
       end
