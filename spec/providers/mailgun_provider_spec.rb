@@ -7,20 +7,32 @@ include WebMock::API
 describe MailGunProvider do
 
   let :provider do
-    MailGunProvider.new(:api_key => 'foo', :mailgun_domain => 'test.com')
+    MailGunProvider.new(api_key: 'foo', mailgun_domain: 'test.com')
   end
 
-  describe "#send_message!" do
+  describe "#initialize" do
 
     it 'can be configured with minimal configuration' do
-      provider = MailGunProvider.new(:api_key => 'foo', :mailgun_domain => 'test.com')
+      provider = MailGunProvider.new(api_key: 'foo', mailgun_domain: 'test.com')
       provider.api_key.should eq 'foo'
       provider.mailgun_domain.should eq 'test.com'
     end
 
-    it 'rejects missing required api_key in configuration' do
-      lambda { MailGunProvider.new({:subject => 'bar@foo.com'}) }.should raise_error
+    it 'requires API key' do
+      -> {
+        MailGunProvider.new
+      }.should raise_error(ConfigurationError)
     end
+
+    it 'raises ArgumentError on bad keys' do
+      -> {
+        MailGunProvider.new(subject: 'bar@foo.com')
+      }.should raise_error(ArgumentError)
+    end
+
+  end
+
+  describe "#send_message!" do
 
     it "returns a reference value if the message was sent" do
       stub_request(:post, "https://api:foo@api.mailgun.net/v2/test.com/messages").
