@@ -6,6 +6,9 @@ module Hermes
   # Thrown when a receipt is invalid.
   class InvalidReceiptError < ProviderError; end
 
+  # Unexpected gateway error.
+  class GatewayError < ProviderError; end
+
   # An attempted message sending was rejected by the server.
   class MessageRejectedError < ProviderError; end
 

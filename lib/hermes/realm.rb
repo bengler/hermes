@@ -16,9 +16,14 @@ module Hermes
 
     def initialize(name, options = {})
       options = options.symbolize_keys
+      options.assert_valid_keys(
+        :name, :session, :grove_path, :incoming_url, :implementations,
+        :deny_actual_sending_from_environments)
 
       @name = name
       @session_key = options[:session]
+      @grove_path = options[:grove_path]
+      @incoming_url = options[:incoming_url]
 
       @perform_sending = !Array(options[:deny_actual_sending_from_environments]).
         include?(ENV['RACK_ENV'])
@@ -36,10 +41,6 @@ module Hermes
         end
       end
       @providers.freeze
-    end
-
-    def format_grove_key(external_id, path)
-      "post.hermes_message:#{@name}.#{external_id}#{path}"
     end
 
     def provider(kind)
@@ -60,6 +61,8 @@ module Hermes
     attr_reader :name
     attr_reader :providers
     attr_reader :session_key
+    attr_reader :grove_path
+    attr_reader :incoming_url
 
     private
 
