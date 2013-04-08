@@ -174,7 +174,7 @@ module Hermes
             params[:senderaddress] = sender
             params[:senderaddresstype] = sender =~ /\A\s*\+?[0-9\s]+\s*\z/ ? 1 : 5
           elsif (default_sender = @default_sender)
-            case default_sender[:type]
+            case default_sender[:type].try(:to_sym)
               when :short_code
                 params[:senderaddress] = default_sender[:number]
                 params[:senderaddresstype] = 2
