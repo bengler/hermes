@@ -104,6 +104,11 @@ module Hermes
         end
       end
 
+      if params[:force]
+        raw_message[:recipient_email] = params[:force] if kind == "email"
+        raw_message[:recipient_number] = params[:force] if kind == "sms"
+      end
+
       grove_path = "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.')
       grove_post = {
         document: message.merge(kind: kind),

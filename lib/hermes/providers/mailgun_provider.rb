@@ -89,7 +89,7 @@ module Hermes
         end
       end
 
-      def parse_receipt(url, raw_data, params=nil)
+      def parse_receipt(params, request)
         id = params["Message-Id"]
         status = case params["event"]
           when "bounced"

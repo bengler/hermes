@@ -45,22 +45,17 @@ module Hermes
 
       def do_receipt(realm, kind, request, params)
         realm, provider = realm_and_provider(realm, kind)
-        begin
-          result = provider.parse_receipt(params.with_indifferent_access, request)
-        rescue => e
-          logger.error("Ignoring exception during receipt parsing: #{e}")
-        else
-          logger.info("Receipt status: #{result.inspect}")
-          if result[:id] and result[:status]
-            if (message = Message.find_by_external_id(
-              Message.build_external_id(provider, result[:id]), realm.name))
-              message.add_tag!(result[:status])
-            end
-          end
-        end
 
-        if provider.respond_to?(:ack_receipt)
-          provider.ack_receipt(result, self)
+        result = provider.parse_receipt(params.with_indifferent_access, request)
+        logger.info("Receipt status: #{result.inspect}")
+        if result[:id] and result[:status]
+          if (message = Message.find_by_external_id(
+            Message.build_external_id(provider, result[:id]), realm.name))
+            message.add_tag!(result[:status])
+          end
+          if provider.respond_to?(:ack_receipt)
+            provider.ack_receipt(result, self)
+          end
         end
 
         halt 200, ''

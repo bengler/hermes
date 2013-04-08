@@ -82,19 +82,19 @@ describe MailGunProvider do
   describe '#parse_receipt' do
 
     it "parses success" do
-      result = provider.parse_receipt("/", {}, {"Message-Id" => "338166433", "event" => "delivered"})
+      result = provider.parse_receipt({"Message-Id" => "338166433", "event" => "delivered"}, nil)
       result[:id].should eq "338166433"
       result[:status].should == :delivered
     end
 
     it "parses failure" do
-      result = provider.parse_receipt("/", {}, {"Message-Id" => "338166433", "event" => "dropped"})
+      result = provider.parse_receipt({"Message-Id" => "338166433", "event" => "dropped"}, nil)
       result[:id].should eq "338166433"
       result[:status].should == :failed
     end
 
     it "parses unknown" do
-      result = provider.parse_receipt("/", {}, {"Message-Id" => "338166433", "event" => "fofofofo"})
+      result = provider.parse_receipt({"Message-Id" => "338166433", "event" => "fofofofo"}, nil)
       result[:id].should eq "338166433"
       result[:status].should == :unknown
     end
