@@ -95,9 +95,13 @@ module Hermes
       raw_message = message.dup
       raw_message.delete(:callback_url)
       raw_message[:receipt_url] = "http://#{request.host}:#{request.port}/api/hermes/v1/#{realm}/receipt/#{kind}"
-      if params[:force]
-        raw_message[:recipient_email] = params[:force] if kind == "email"
-        raw_message[:recipient_number] = params[:force] if kind == "sms"
+      if (forced_value = params[:force])
+        case kind
+          when 'email'
+            raw_message[:recipient_email] = forced_value
+          when 'sms'
+            raw_message[:recipient_number] = forced_value
+        end
       end
 
       grove_path = "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.')
