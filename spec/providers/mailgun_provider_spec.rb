@@ -34,12 +34,47 @@ describe MailGunProvider do
 
   describe "#send_message!" do
 
-    it "returns a reference value if the message was sent" do
+    it "posts message and returns ID" do
       stub_request(:post, "https://api:foo@api.mailgun.net/v2/test.com/messages").
-        with(:body => {"from"=>"No-reply <no-reply@test.com>", "html"=>"", "subject"=>"", "text"=>"test", "to"=>"foo@bar.com"},
-             :headers => {'Authorization'=>'Basic YXBpOmZvbw==', 'Content-Type'=>'application/x-www-form-urlencoded'}).
-          to_return(:status => 200, :body => {:message => "Queued. Thank you.", :id => "<20111114174239.25659.5817@test.com>"}.to_json, :headers => {})
-      provider.send_message!(:recipient_email => 'foo@bar.com', :text => 'test').should == "<20111114174239.25659.5817@test.com>"
+        with(
+          body: {
+            from: "No-reply <no-reply@test.com>",
+            html: "",
+            subject: "",
+            text: "test",
+            to: "foo@bar.com"
+          },
+          headers: {
+            'Authorization' => 'Basic YXBpOmZvbw==',
+            'Content-Type' => 'application/x-www-form-urlencoded'
+          }).
+        to_return(
+          status: 200,
+          body: {
+            message: "Queued. Thank you.",
+            id: "<20111114174239.25659.5817@test.com>"
+          }.to_json,
+          headers: {})
+
+      provider.send_message!(
+        recipient_email: 'foo@bar.com', text: 'test').should eq "<20111114174239.25659.5817@test.com>"
+    end
+
+    it "translates error into RecipientRejectedError" do
+      stub_request(:post, "https://api:foo@api.mailgun.net/v2/test.com/messages").
+        to_return(
+          status: 400,
+          body: {
+            message: "'to' parameter is not a valid address, you dick.",
+          }.to_json)
+
+      -> {
+        provider.send_message!(
+          recipient_email: 'foo@bar.com', text: 'test')
+      }.should raise_error(RecipientRejectedError) { |e|
+        e.recipient.should eq "foo@bar.com"
+        e.reason.should eq "'to' parameter is not a valid address, you dick."
+      }
     end
 
   end

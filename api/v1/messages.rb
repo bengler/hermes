@@ -3,6 +3,11 @@
 module Hermes
   class V1 < Sinatra::Base
 
+    error RecipientRejectedError do |e|
+      logger.error e.message
+      return halt 400, e.message
+    end
+
     # @apidoc
     # Get latest messages sent in a realm. Note: only works in non-production mode.
     # This is used for reading not actually sent messages in development/staging environment.

@@ -9,8 +9,15 @@ module Hermes
       attr_reader :api_key
       attr_reader :mailgun_domain
 
-      class MailGunError < ProviderError; end
-      class APIFailureError < MailGunError; end
+      class MailGunException < ProviderError; end
+
+      class APIFailureError < MailGunException
+        def initialize(message, status_code)
+          super("#{message} (#{status_code})")
+          @message, @status_code = message, status_code
+        end
+        attr_reader :message, :status_code
+      end
 
       def initialize(options = {})
         options.assert_valid_keys(:api_key, :mailgun_domain)
@@ -38,12 +45,34 @@ module Hermes
             options[:html]
           )
         )
-        raise APIFailureError.new(response.body) if [401, 402, 404].include?(response.status)
-        if response.status == 200
-          data = JSON.parse(response.body)
-          return data["id"]
-        else
-          raise InvalidResponseError.new(response.inspect)
+        case response.status
+          when 200
+            begin
+              return JSON.parse(response.body)['id']
+            rescue
+              raise InvalidResponseError, "Invalid JSON from server"
+            end
+          when 400
+            begin
+              json = JSON.parse(response.body)
+            rescue
+              raise InvalidResponseError, "Invalid JSON from server in HTTP 400 response"
+            else
+              if (message = json['message'])
+                case message
+                  when /\A'to' parameter is not a valid address/
+                    raise RecipientRejectedError.new(options[:recipient_email], message)
+                end
+              end
+              raise APIFailureError.new(message, response.status)
+            end
+          else
+            begin
+              message = JSON.parse(response.body)['message']
+            rescue
+              message = "HTTP error #{response.status}"
+            end
+            raise APIFailureError.new(message, response.status)
         end
       end
 
@@ -53,7 +82,7 @@ module Hermes
           send_message!(:recipient_email => '_', :subject => 'meh')
         rescue Excon::Errors::Error
           false
-        rescue MessageRejectedError
+        rescue MessageRejectedError, RecipientRejectedError
           true
         else
           false  # Gateway is being weird, should never accept that message

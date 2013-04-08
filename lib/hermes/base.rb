@@ -18,4 +18,16 @@ module Hermes
   # Invalid option to provider method.
   class OptionMissingError < ProviderError; end
 
+  # Thrown when recipient is not valid.
+  class RecipientRejectedError < ProviderError
+
+    def initialize(recipient, reason)
+      super("Recipient '#{recipient}' rejected: #{reason}")
+      @recipient, @reason = recipient, reason
+    end
+
+    attr_reader :recipient, :reason
+
+  end
+
 end
