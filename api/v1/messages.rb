@@ -63,6 +63,7 @@ module Hermes
     # @optional [String] html The html message text for 'email' message.
     # @optional [String] force A recipient mobile number or email address to send the message to, for testing purposes. Overrides what's given in the recipient parameters.
     # @optional [String] callback_url A URL which will be called when the message is delivered.
+    # @optional [String] path Grove path to post internal message to.
     # @status 200 The message as stored in Grove with status of the message stored in the 'tags' field.
     post '/:realm/messages/:kind' do |realm, kind|
       require_god
