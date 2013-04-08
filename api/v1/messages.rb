@@ -102,26 +102,25 @@ module Hermes
         raw_message[:recipient_number] = params[:force] if kind == "sms"
       end
 
-      message_tags = ["inprogress"]
+      grove_path = "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.')
+      grove_post = {
+        document: message.merge(kind: kind),
+        restricted: true
+      }
+
       begin
         id = @provider.send_message!(raw_message)
-        external_id = Message.build_external_id(@provider, id)
-      rescue Hermes::InvalidResponseError => e
-        logger.exception e if logger.respond_to?(:exception)
-        message_tags = ["failed"]
+      rescue ProviderError
+        logger.info("Provider failed to send message (#{kind} via #{@provider.class.name}): #{message.inspect}")
+        grove_post[:tags] = ['failed']
+        pebblebed_connector(@realm, current_identity).grove.post(grove_path, post: grove_post)
+        raise
+      else
+        logger.info("Sent message (#{kind} via #{@provider.class.name}): #{message.inspect}")
+        grove_post[:tags] = ['inprogress']
+        grove_post[:external_id] = Message.build_external_id(@provider, id)
+        pebblebed_connector(@realm, current_identity).grove.post(grove_path, post: grove_post).to_json
       end
-
-      logger.info("Sent message (#{kind} via #{@provider.class.name}): #{message.inspect}")
-
-      post = pebblebed_connector(@realm, current_identity).grove.post(
-        "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.'),
-        post: {
-          document: message.merge(kind: kind),
-          restricted: true,
-          tags: message_tags,
-          external_id: external_id
-        })
-      halt 200, post.to_json
     end
 
   end
