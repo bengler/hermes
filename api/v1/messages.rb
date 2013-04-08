@@ -19,18 +19,10 @@ module Hermes
     # @required [String] realm The realm sending messages for.
     # @status 200 The twenty latest messages
     get '/:realm/messages/latest' do |realm|
-      unless ENV['RACK_ENV'] == "production"
-        messages = []
-        begin
-          messages = Message.find(realm, "post.hermes_message:*")
-        rescue => e
-          logger.exception e if logger.respond_to?(:exception)
-          return halt 500, "Could not get messages, inspect logs"
-        end
-        halt 200, messages.to_json
-      else
-        halt 403, "Not allowed for production environment!"
+      if ENV['RACK_ENV'] == "production"
+        halt 403, "Not allowed in production environment"
       end
+      Message.find(realm, "post.hermes_message:*").to_json
     end
 
     # @apidoc
