@@ -12,4 +12,9 @@ module RackHelper
     request
   end
 
+  def post_body(path, params, body, env = {})
+    body = JSON.dump(body) if body.is_a?(Hash)
+    post(path, params, env.merge('rack.input' => StringIO.new(body)))
+  end
+
 end

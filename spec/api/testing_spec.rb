@@ -9,29 +9,47 @@ describe 'Testing' do
     Hermes::V1
   end
 
-  describe 'POST /:realm/test/:kind' do
-    it 'returns 200 when provider for :kind is OK' do
-      stub_request(:post, 'http://msggw.dextella.net/BatchService').to_return(
-        :status => 200,
-        :body => %{
-          <?xml version="1.0"?>
-          <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
-            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-            <soap:Body>
-              <invokeBatchReply xmlns="http://mobiletech.com/dextella/msggw">
-                <bid xmlns="http://batch.common.msggw.dextella.mobiletech.com">1</bid>
-                <errorMessages xmlns="http://batch.common.msggw.dextella.mobiletech.com">
-                  <string xmlns="http://mobiletech.com/dextella/msggw">Oops</string>
-                </errorMessages>
-                <response xmlns="http://batch.common.msggw.dextella.mobiletech.com">Danger, Will Robinson</response>
-                <validBatch xmlns="http://batch.common.msggw.dextella.mobiletech.com">false</validBatch>
-              </invokeBatchReply>
-            </soap:Body>
-          </soap:Envelope>
-        })
-      post '/test/test/sms'
-      last_response.status.should == 200
+  let :realm do
+    Realm.new('test', {
+      session: 'some_checkpoint_god_session_for_test_realm',
+      implementations: {
+        sms: {
+          provider: 'Null'
+        },
+        email: {
+          provider: 'Null'
+        }
+      }
+    })
+  end
+
+  before :each do
+    Configuration.instance.add_realm('test', realm)
+  end
+
+  %w(sms email).each do |kind|
+    describe "POST /:realm/test/#{kind}" do
+
+      it 'returns 200 when provider returns true' do
+        NullProvider.any_instance.
+          should_receive(:test!).
+          with().
+          once.
+          and_return(true)
+        post "/test/test/#{kind}"
+        last_response.status.should == 200
+      end
+
+      it 'returns 500 when provider returns false' do
+        NullProvider.any_instance.
+          should_receive(:test!).
+          with().
+          once.
+          and_return(false)
+        post "/test/test/#{kind}"
+        last_response.status.should == 500
+      end
+
     end
   end
 

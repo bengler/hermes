@@ -31,8 +31,12 @@ module Hermes
       Pathname.glob(root.join('config/realms/*.yml')).each do |file_name|
         name = File.basename(file_name.to_s.gsub(/\.yml$/, ''))
         config = YAML.load(File.open(file_name, 'r:utf-8'))
-        @realms[name] = Realm.new(name, config)
+        add_realm(name, Realm.new(name, config))
       end
+    end
+
+    def add_realm(name, realm)
+      @realms[name] = realm
     end
 
     def realm(name)

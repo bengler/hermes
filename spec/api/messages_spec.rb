@@ -9,40 +9,69 @@ describe 'Messages' do
     Hermes::V1
   end
 
+  let :realm do
+    Realm.new('test', {
+      session: 'some_checkpoint_god_session_for_test_realm',
+      implementations: {
+        sms: {
+          provider: 'Null'
+        }
+      }
+    })
+  end
+
+  before :each do
+    Configuration.instance.add_realm('test', realm)
+  end
+
   describe "GET /:realm/messages/:uid" do
+
     it "returns 404 if the realm does not exist" do
       get("/foo/messages/post.hermes_message:test$1234")
       last_response.status.should eq 404
     end
 
     it "returns a 404 if the post was not found" do
+      grove_get_stub = stub_request(:get, "http://example.org/api/grove/v1/posts/post.hermes_message:test$4321").
+        with(
+          query: hash_including(
+            session: "some_checkpoint_god_session_for_test_realm"
+          )
+        ).
+        to_return(status: 404)
+
       get("/test/messages/post.hermes_message:test$4321")
       last_response.status.should eq 404
-      stub_grove_get_post_failure!.should have_been_requested
+
+      grove_get_stub.should have_been_requested
     end
 
     it "returns the post if everything set up right" do
+      grove_get_stub = stub_request(:get, "http://example.org/api/grove/v1/posts/post.hermes_message:test$1234").
+        with(
+          query: hash_including(
+            session: "some_checkpoint_god_session_for_test_realm"
+          )
+        ).to_return(
+          status: 200,
+          body: {
+            post: {
+              uid: "post.hermes_message:test$1234",
+              document: {
+                body: "fofo",
+                callback_url: "http://example.com/"
+              },
+              tags: ["in_progress"]
+            }
+          }.to_json)
+
       get("/test/messages/post.hermes_message:test$1234")
       last_response.status.should eq 200
       JSON.parse(last_response.body)['uid'].should eq "post.hermes_message:test$1234"
-      stub_grove_get_post_success!.should have_been_requested
-    end
-  end
 
-  describe "Test modes" do
-    it "supports test mode 'force'" do
-      stub_mailgun_force_post!
-      post "/test/messages/email", {
-        :force => 'jan@banan.com',
-        :recipient_email => 'test@test.com',
-        :subject => "Foo",
-        :text => 'Yip',
-        :html => '<p>Yip</p>'
-      }
-      stub_mailgun_force_post!.should have_been_requested
-      last_response.status.should eq 200
-      stub_grove_post!.should have_been_requested
+      grove_get_stub.should have_been_requested
     end
+
   end
 
 end

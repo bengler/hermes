@@ -1,9 +1,5 @@
 module StubbingHelper
 
-  def post_body(path, params, body, env = {})
-    post(path, params, env.merge('rack.input' => StringIO.new(body)))
-  end
-
   def pebbles_connector
     Pebblebed::Connector.new("some_checkpoint_god_session_for_test_realm")
   end
@@ -63,30 +59,6 @@ module StubbingHelper
     stub_request(:get, "http://example.org/api/checkpoint/v1/identities/me?").
       to_return(status: 200,
         body: '{"identity":{"id":2751025,"god":true,"created_at":"2012-10-23T16:27:45+02:00","realm":"test","provisional":false,"fingerprints":["some_checkpoint_god_session_for_test_realm"]},"accounts":["facebook"],"profile":{"provider":"facebook","nickname":"skogsmaskin","name":"Per-Kristian Nordnes","profile_url":null,"image_url":"http://graph.facebook.com/552821200/picture?type=square","description":null}}',
-        headers: {})
-  end
-
-  def stub_grove_update_success!
-    stub_request(:get, "http://example.org/api/grove/v1/posts/*?external_id=mobiletech_provider_id:vroom&session=some_checkpoint_god_session_for_test_realm").
-      to_return(
-        status: 200,
-        body: '{"post": {"uid": "post.hermes_message:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}, "tags": ["in_progress"]}}')
-
-    stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test$1234/tags/delivered").
-      with(
-        body: "{\"session\":\"some_checkpoint_god_session_for_test_realm\"}",
-        headers: {'Accept' => 'application/json', 'Content-Type' => 'application/json'}).
-      to_return(
-        status: 200,
-        body: '{"post": {"uid": "post.hermes_message:test$1234", "document": {"body": "fofo", "callback_url": "http://example.com/"}, "tags": ["in_progress", "delivered"]}}')
-  end
-
-  def stub_custom_callback_success!
-    stub_request(:post, "http://example.com/?status=delivered").
-      with(headers: {'Host' => 'example.com:80'}).
-      to_return(
-        status: 200,
-        body: "Roger that",
         headers: {})
   end
 
