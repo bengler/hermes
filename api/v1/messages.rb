@@ -98,13 +98,20 @@ module Hermes
       raw_message.delete(:callback_url)
       raw_message[:receipt_url] = @realm.receipt_url || legacy_receipt_url(@realm, kind.to_sym)
 
+      message_tags = ["inprogress"]
+
       if @realm.perform_sending? or params[:force]
         if params[:force]
           raw_message[:recipient_email] = params[:force] if kind == "email"
           raw_message[:recipient_number] = params[:force] if kind == "sms"
         end
-        id = @provider.send_message!(raw_message)
-        external_id = Message.build_external_id(@provider, id)
+        begin
+          id = @provider.send_message!(raw_message)
+          external_id = Message.build_external_id(@provider, id)
+        rescue Hermes::InvalidResponseError => e
+          logger.exception e if logger.respond_to?(:exception)
+          message_tags = ["failed"]
+        end
       else
         external_id = Message.build_external_id(@provider, Time.now.to_i.to_s)
         logger.warn("Actual sending is not performed in #{ENV['RACK_ENV']} environment. " \
@@ -118,10 +125,9 @@ module Hermes
         post: {
           document: message.merge(kind: kind),
           restricted: true,
-          tags: ["inprogress"],
+          tags: message_tags,
           external_id: external_id
         })
-      
       halt 200, post.to_json
     end
 
