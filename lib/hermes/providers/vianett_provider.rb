@@ -36,11 +36,14 @@ module Hermes
         @password = options[:password]
         raise ConfigurationError, "'password' must be specified" unless @password
 
-        if (default_sender = options[:default_sender]) && default_sender[:number]
-          @default_sender = {
-            :number => default_sender[:number],
-            :type => default_sender[:type].try(:to_sym) || :msisdn
-          }.freeze
+        if (default_sender = options[:default_sender])
+          default_sender.symbolize_keys!
+          if default_sender[:number]
+            @default_sender = {
+              number: default_sender[:number],
+              type: default_sender[:type].try(:to_sym) || :msisdn
+            }.freeze
+          end
         end
       end
 
@@ -174,7 +177,7 @@ module Hermes
             params[:senderaddress] = sender
             params[:senderaddresstype] = sender =~ /\A\s*\+?[0-9\s]+\s*\z/ ? 1 : 5
           elsif (default_sender = @default_sender)
-            case default_sender[:type].try(:to_sym)
+            case default_sender[:type]
               when :short_code
                 params[:senderaddress] = default_sender[:number]
                 params[:senderaddresstype] = 2
