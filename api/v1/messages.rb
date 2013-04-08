@@ -19,18 +19,10 @@ module Hermes
     # @required [String] realm The realm sending messages for.
     # @status 200 The twenty latest messages
     get '/:realm/messages/latest' do |realm|
-      unless ENV['RACK_ENV'] == "production"
-        messages = []
-        begin
-          messages = Message.find(realm, "post.hermes_message:*")
-        rescue => e
-          logger.exception e if logger.respond_to?(:exception)
-          return halt 500, "Could not get messages, inspect logs"
-        end
-        halt 200, messages.to_json
-      else
-        halt 403, "Not allowed for production environment!"
+      if ENV['RACK_ENV'] == "production"
+        halt 403, "Not allowed in production environment"
       end
+      Message.find(realm, "post.hermes_message:*").to_json
     end
 
     # @apidoc
@@ -71,6 +63,7 @@ module Hermes
     # @optional [String] html The html message text for 'email' message.
     # @optional [String] force A recipient mobile number or email address to send the message to, for testing purposes. Overrides what's given in the recipient parameters.
     # @optional [String] callback_url A URL which will be called when the message is delivered.
+    # @optional [String] path Grove path to post internal message to.
     # @status 200 The message as stored in Grove with status of the message stored in the 'tags' field.
     post '/:realm/messages/:kind' do |realm, kind|
       require_god
@@ -102,9 +95,13 @@ module Hermes
       raw_message = message.dup
       raw_message.delete(:callback_url)
       raw_message[:receipt_url] = "http://#{request.host}:#{request.port}/api/hermes/v1/#{realm}/receipt/#{kind}"
-      if params[:force]
-        raw_message[:recipient_email] = params[:force] if kind == "email"
-        raw_message[:recipient_number] = params[:force] if kind == "sms"
+      if (forced_value = params[:force])
+        case kind
+          when 'email'
+            raw_message[:recipient_email] = forced_value
+          when 'sms'
+            raw_message[:recipient_number] = forced_value
+        end
       end
 
       grove_path = "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.')

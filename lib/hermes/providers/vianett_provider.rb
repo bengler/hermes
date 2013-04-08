@@ -5,10 +5,8 @@ module Hermes
 
     class VianettProvider
 
-      class VianettException < ProviderError; end
-
-      # Base class for API errors.
-      class APIError < VianettException
+      # Thrown if gateway fails.
+      class InternalError < GatewayError
         def initialize(message, status_code, refno)
           super("#{message} (#{status_code})")
           @message, @status_code, @refno = message, status_code, refno
@@ -16,11 +14,14 @@ module Hermes
         attr_reader :message, :status_code, :refno
       end
 
-      # Thrown when the API fails with an unexpected error.
-      class InternalError < APIError; end
-
       # Thrown when the API rejects a message, eg. due to invalid data.
-      class MessageRejectedError < APIError; end
+      class MessageRejectedError < ::Hermes::MessageRejectedError
+        def initialize(message, status_code, refno)
+          super("#{message} (#{status_code})")
+          @message, @status_code, @refno = message, status_code, refno
+        end
+        attr_reader :message, :status_code, :refno
+      end
 
       attr_reader :user_name
       attr_reader :password
@@ -112,6 +113,34 @@ module Hermes
           "<ack refno='#{id}' errorcode='0'></ack>"
       end
 
+      def parse_message(params, request)
+        raise ArgumentError, "Invalid message" unless
+          params[:sourceaddr].present? and
+          params[:destinationaddr].present? and
+          params[:refno].present? and
+          params[:message].present?
+
+        return {
+          id: "vianett.#{params[:refno]}",
+          sending_number: params[:sourceaddr],
+          recipient_number: params[:destinationaddr],
+          text: [params[:prefix], params[:message]].compact.join(' '),
+          vendor: {
+            refno: params[:refno],
+            operator: params[:operator],
+            retry_count: params[:retrycount],
+            prefix: params[:prefix]
+          }
+        }
+      end
+
+      def ack_message(message, controller)
+        refno = result[:vendor][:refno]
+        controller.halt 200,
+          "<?xml version='1.0'?>" \
+          "<ack refno='#{refno}' errorcode='0'></ack>"
+      end
+
       private
 
         BASE_URI = 'https://smsc.vianett.no/'.freeze
@@ -152,11 +181,11 @@ module Hermes
                 when '5000'
                   raise InternalError.new(
                     ack.content.present? ? ack.content : "Unknown error",
-                    ack['errorcode'].to_i, ack['refno'].try(:to_i))
+                    ack['errorcode'].to_i, ack['refno'])
                 else
                   raise MessageRejectedError.new(
                     ack.content.present? ? ack.content : "Unknown error",
-                    ack['errorcode'].to_i, ack['refno'].try(:to_i))
+                    ack['errorcode'].to_i, ack['refno'])
               end
             else
               raise InvalidResponseError, "Server returned invalid body: #{response.body.inspect}"
@@ -165,6 +194,12 @@ module Hermes
         end
 
         def build_params(id, options)
+          [:recipient_number, :text].each do |key|
+            unless options[key].present?
+              raise ArgumentError, "Missing or empty value for #{key}"
+            end
+          end
+
           params = {
             msgid: id,
             username: @username,

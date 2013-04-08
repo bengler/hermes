@@ -68,7 +68,13 @@ module Hermes
         end
       end
 
-      def parse_receipt(url, raw_data, params = nil)
+      def parse_receipt(params, request)
+        if (stream = request.env['rack.input'])
+          raw_data = stream.read
+        else
+          raise ArgumentError, "Input stream required"
+        end
+
         document = Nokogiri::XML(raw_data, nil, nil, NOKOGIRI_PARSE_OPTIONS)
         cpid = document.xpath("/BatchReport/CpId").text
         if cpid != @cpid

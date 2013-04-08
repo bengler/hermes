@@ -32,10 +32,7 @@ end
 RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.include StubbingHelper
-
-  config.before :each do
-    Hermes::Configuration.instance.load!(File.expand_path('..', __FILE__))
-  end
+  config.include RackHelper
 
   config.before :each do
     WebMock.reset!
@@ -46,9 +43,5 @@ RSpec.configure do |config|
     stub_grove_update!
     stub_grove_post!
     stub_grove_get_post!
-    stub_grove_update_success!
-    stub_custom_callback_success!
-    stub_grove_get_post_success!
-    stub_grove_get_post_failure!
   end
 end

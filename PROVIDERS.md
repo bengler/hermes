@@ -1,36 +1,75 @@
-Messaging provider interface
-============================
+# Provider interface
 
-Interface
----------
+## Interface
 
-Sending messages to a single recipient:
+Providers must support the following methods.
 
-```ruby
-send_message!(options)
-```
+### Sending
 
-The provider must return a vendor-specific string key that can be used to query the status of a message delivery.
+*Required*. Sends messages to a single recipient.
 
 ```ruby
-test!
+def send_message!(options)
 ```
 
-Test whether the provider's connection is functional. Returns true or false.
+The provider must return a single vendor-specific string key that can be used to query the status of a message delivery.
+
+### Testing
+
+*Required*.  Test whether the provider's connection is functional. Returns true or false.
 
 ```ruby
-parse_receipt(url, raw_body, params)
+def test!
 ```
 
-This method must parse a receipt callback. It must return a hash:
+### Receipt parsing
 
-* `:id` (required): The ID of the transaction, as returned by `send_short_message!`.
+*Optional*. This method must parse a receipt callback obtained from the provider.
+
+```ruby
+parse_receipt(params, rack_request)
+```
+
+It must return a hash:
+
+* `:id` (required): The ID of the transaction, as returned by `send_message!`.
 * `:status` (required): A symbol representing the current status, one of `:in_progress`, `:delivered`, `:unknown` or `:failed`.
 * `:vendor_status`: Vendor-specific status code or string.
 * `:vendor_message`: Optional human-readable explanation for the vendor status.
 
-Vianett
-----------
+### Receipt acking
+
+*Optional*. If the provider needs to respond to the receipt, then this method can be implemented.
+
+```
+ack_receipt(receipt_result, controller)
+```
+
+Here, `receipt_result` is the data returned from `parse_receipt`, and `controller` is the Sinatra controller.
+
+### Incoming messages
+
+*Optional*. This method must parse an incoming message obtained from the provider.
+
+```ruby
+parse_message(params, rack_request)
+```
+
+It must return a hash with data compatible with `send_message!`. Note that the ID returned in the `:id` key is a vendor-provided ID.
+
+### Incoming message acking
+
+*Optional*. If the provider needs to respond to the incoming message, then this method can be implemented.
+
+```
+ack_message(message, controller)
+```
+
+Here, `message` is the data returned from `parse_message`, and `controller` is the Sinatra controller.
+
+## Providers
+
+### Vianett
 
 This provider supports the following configuration variables:
 
@@ -41,10 +80,9 @@ This provider supports the following configuration variables:
    * `:type`: Either `:short_code`, `:alphanumeric` or `:msisdn` (default).
 * `:default_prefix`: Prefix to use for numbers when no country prefix has been specified. Defaults to `47`.
 
-Mobiletech
-----------
+### Mobiletech
 
-This provider supports the following configuration variables:
+*Deprecated, superceded by Vianett*. This provider supports the following configuration variables:
 
 * `:cpid` (required): The CPID.
 * `:secret` (required): API secret.
@@ -52,8 +90,7 @@ This provider supports the following configuration variables:
 * `:default_sender`: Sender number to use by default. Defaults to the nothing (ie., the gateway default).
 * `:default_prefix`: Prefix to use for numbers when no country prefix has been specified. Defaults to `47`.
 
-PSWinCom
---------
+### PSWinCom
 
 This provider supports the following configuration variables:
 
@@ -64,12 +101,12 @@ This provider supports the following configuration variables:
 * `:default_prefix`: Prefix to use for numbers when no country prefix has been specified. Defaults to `47`.
 
 To administer the callback to Hermes, please log in to the account web on: https://accountweb.pswin.com/
-PS: Please note that the account must be enabled for the delivery reports
+
+Please note that the account must be enabled for the delivery reports
 feature (callbacks) by PSWincom first! Otherwise you will get a invalid
 response from the PSWinCom API, and no callback (even though messages are delivered).
 
-Mailgun
--------
+### Mailgun
 
 This provider supports the following configuration variables:
 
