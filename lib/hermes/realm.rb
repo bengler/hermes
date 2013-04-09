@@ -43,6 +43,11 @@ module Hermes
       @providers.freeze
     end
 
+    def pebblebed_connector
+      Pebblebed::Connector.new(
+        Hermes::Configuration.instance.realm(@name).session_key, host: HostContext.host)
+    end
+
     def provider(kind)
       if @perform_sending
         kind = kind.to_sym

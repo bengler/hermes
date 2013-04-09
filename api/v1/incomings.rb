@@ -38,7 +38,7 @@ module Hermes
 
           grove_key = "post.hermes_message:#{realm.name}.#{realm.grove_path}"
 
-          post = pebblebed_connector(realm, current_identity).grove.post("/posts/#{grove_key}",
+          post = realm.pebblebed_connector.grove.post("/posts/#{grove_key}",
             post: {
               document: message.merge(kind: kind),
               restricted: true,
