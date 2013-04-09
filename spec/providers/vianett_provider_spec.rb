@@ -298,7 +298,12 @@ describe Providers::VianettProvider do
       })
     end
 
-    it 'rejects invalid receipt'
+    it 'rejects invalid receipt' do
+      -> {
+        provider.parse_receipt(request_with_params(
+          requesttype: 'doink'))
+      }.should raise_error(InvalidReceiptError)
+    end
 
   end
 
