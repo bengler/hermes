@@ -71,18 +71,9 @@ module Hermes
 
       # TODO: Schedule asynchronously using AMQP
       def notify_callback_url(status)
-        if callback_url
-          uri = URI.parse(callback_url)
-          uri.query << '&' if uri.query
-          uri.query ||= ''
-          uri.query << "status=#{status}"
-          LOGGER.info("Notifying callback #{uri}")
-          begin
-            Timeout.timeout(10) do
-              Excon.post(uri.to_s)
-            end
-          rescue Exception => e
-            LOGGER.error("Callback failed: #{uri}: #{e.class}: #{e.message}")
+        if (url = callback_url)
+          Http.perform_with_retrying(url) do |connection|
+            connection.post(query: {status: status})
           end
         end
         true

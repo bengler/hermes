@@ -23,6 +23,14 @@ module Hermes
         attr_reader :message, :status_code, :refno
       end
 
+      class APIFailureError < GatewayError
+        def initialize(status_code)
+          super("API failed with HTTP #{status_code}")
+          @status_code = status_code
+        end
+        attr_reader :status_code
+      end
+
       class CouldNotFetchMMSDataError < GatewayError; end
 
       attr_reader :user_name
@@ -56,13 +64,17 @@ module Hermes
 
         id = generate_id
         params = build_params(id, options)
-        with_retrying do
-          logger.info "[Vianett] Posting outgoing: #{params.inspect}"
-          check_response(
-            Excon.new(BASE_URI).post(
-              path: OUTGOING_PATH,
-              query: params))
+
+        logger.info "[Vianett] Posting outgoing: #{params.inspect}"
+        response, success = Http.perform_with_retrying(BASE_URI) { |connection|
+          connection.post(path: OUTGOING_PATH, query: params)
+        }
+        if success
+          check_response(response)
+        else
+          raise APIFailureError(response.status)
         end
+
         id
       end
 
@@ -171,42 +183,17 @@ module Hermes
         end
 
         def fetch_mms_url(url)
-          visited = Set.new
-          loop do
-            with_retrying do
-              response = Excon.get(url)
-              if response.status == 200
-                return {
-                  value: response.body,
-                  content_type: response.headers['Content-Type']
-                }
-              elsif response.status == 301 or response.status == 302
-                location = URI.parse(response.headers['Location'])
-                if visited.add?(location)
-                  url = location.to_s
-                else
-                  raise CouldNotFetchMMSDataError, "Redirect loop fetching #{url}"
-                end
-              else
-                raise CouldNotFetchMMSDataError, "Error #{response.status} getting MMS data from #{url}"
-              end
-            end
+          response, success = Http.perform_with_retrying(url)
+          if success
+            return {
+              value: response.body,
+              content_type: response.headers['Content-Type']
+            }
+          else
+            raise CouldNotFetchMMSDataError, "Error #{response.status} getting MMS data from #{url}"
           end
-        end
-
-        def with_retrying(&block)
-          retries_left = 10
-          begin
-            yield
-          rescue Excon::Errors::SocketError => e
-            if retries_left > 0
-              logger.error("Failed with exception, will retry: #{e}")
-              sleep(0.5)
-              retry
-            else
-              raise
-            end
-          end
+        rescue Http::RedirectLoopError => e
+          raise CouldNotFetchMMSDataError, e.message
         end
 
         def check_response(response)

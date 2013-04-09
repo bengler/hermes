@@ -48,8 +48,14 @@ module Hermes
 
           if (url = realm.incoming_url)
             logger.info "Posting incoming message to #{url}"
-            Excon.new(url).post(query: {uid: post['post']['uid']})
+            Http.perform_with_retrying(url) do |connection|
+              connection.post(query: {
+                uid: post['post']['uid']
+              })
+            end
           end
+
+          ''
         end
       end
 
