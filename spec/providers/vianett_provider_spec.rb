@@ -259,8 +259,47 @@ describe Providers::VianettProvider do
   end
 
   describe '#parse_receipt' do
-    it 'parses receipt'
+
+    it 'parses normal receipt' do
+      receipt = provider.parse_receipt(request_with_params(
+        refno: '1',
+        requesttype: 'mtstatus',
+        msgok: 'True',
+        StatusDescription: 'It was delivered, yo',
+        Status: 'DELIVERD',
+        SentDate: '09.04.2013+19:42:44',
+        OperatorID: '280',
+        Msg: 'Blah',
+        Tel: '12345678',
+        FromAlpha: 'doink'))
+      receipt.should eq({
+        id: '1',
+        status: :delivered
+      })
+    end
+
+    it 'parses error receipt' do
+      receipt = provider.parse_receipt(request_with_params(
+        refno: '1',
+        requesttype: 'mtstatus',
+        msgok: 'False',
+        ErrorDescription: 'The customer does not exist',
+        ErrorCode: 'InvalidTel',
+        SentDate: '09.04.2013+19:42:44',
+        OperatorID: '280',
+        Msg: 'Blah',
+        Tel: '12345678',
+        FromAlpha: 'doink'))
+      receipt.should eq({
+        id: '1',
+        status: :failed,
+        vendor_status: 'InvalidTel',
+        vendor_message: 'The customer does not exist'
+      })
+    end
+
     it 'rejects invalid receipt'
+
   end
 
 end

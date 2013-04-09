@@ -96,11 +96,11 @@ module Hermes
                 raise InvalidReceiptError
             end
           when 'mtstatus'
-            result[:vendor_status] = params[:ErrorCode]
-            result[:vendor_message] = params[:ErrorDescription]
             if params[:msgok] =~ /true/i
               result[:status] = :delivered
             else
+              result[:vendor_status] = params[:ErrorCode]
+              result[:vendor_message] = params[:ErrorDescription]
               result[:status] = :failed
             end
           else
