@@ -36,13 +36,15 @@ module Hermes
                 end
               when 502, 503, 504
                 logger.warn "Resource #{url} failed with #{response.status}"
+                sleep(1.0)
               else
                 logger.error "Resource #{url} failed with #{response.status}"
-                break
+                retries_left = 0
             end
           end
         rescue *EXCEPTIONS => e
           logger.warn "Resource #{url} failed with #{e.class}: #{e.message}"
+          sleep(1.0)
           response = nil
         end
 
