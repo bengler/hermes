@@ -36,12 +36,6 @@ RSpec.configure do |config|
 
   config.before :each do
     WebMock.reset!
-
-    # FIXME: Good God, Lemon! (Move into specs!)
     stub_checkpoint_success!
-    stub_mobiletech_success!
-    stub_grove_update!
-    stub_grove_post!
-    stub_grove_get_post!
   end
 end

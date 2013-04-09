@@ -27,6 +27,20 @@ describe 'Email' do
   describe "POST /:realm/messages/email" do
 
     it 'accepts message' do
+      grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test").
+        to_return(
+          status: 200,
+          body: {
+            post: {
+              uid: "post.hermes_message:test$1234",
+              document: {
+                body: "fofo",
+                callback_url: "http://example.com/"
+              },
+              tags: ["in_progress"]
+            }
+          }.to_json)
+
       NullProvider.any_instance.
         should_receive(:send_message!).
         with(
@@ -46,10 +60,25 @@ describe 'Email' do
         :html => '<p>Yip</p>'
       }
       last_response.status.should eq 200
-      stub_grove_post!.should have_been_requested
+
+      grove_post_stub.should have_been_requested
     end
 
     it 'returns 400 on if recipient is rejected' do
+      grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test").
+        to_return(
+          status: 200,
+          body: {
+            post: {
+              uid: "post.hermes_message:test$1234",
+              document: {
+                body: "fofo",
+                callback_url: "http://example.com/"
+              },
+              tags: ["failed"]
+            }
+          }.to_json)
+
       NullProvider.any_instance.
         should_receive(:send_message!) {
           raise RecipientRejectedError.new("test@test.com", "Is not valid")
@@ -66,9 +95,25 @@ describe 'Email' do
       last_response.body.should satisfy { |v|
         v =~ /is not valid/i
       }
+
+      grove_post_stub.should have_been_requested
     end
 
     it "supports test mode 'force'" do
+      grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test").
+        to_return(
+          status: 200,
+          body: {
+            post: {
+              uid: "post.hermes_message:test$1234",
+              document: {
+                body: "fofo",
+                callback_url: "http://example.com/"
+              },
+              tags: ["in_progress"]
+            }
+          }.to_json)
+
       NullProvider.any_instance.
         should_receive(:send_message!).
         with(
@@ -89,7 +134,8 @@ describe 'Email' do
         html: '<p>Yip</p>'
       }
       last_response.status.should eq 200
-      stub_grove_post!.should have_been_requested
+
+      grove_post_stub.should have_been_requested
     end
 
   end
