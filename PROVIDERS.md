@@ -55,7 +55,7 @@ Here, `receipt_result` is the data returned from `parse_receipt`, and `controlle
 parse_message(rack_request)
 ```
 
-It must return a hash with data compatible with `send_message!`. Note that the ID returned in the `:id` key is a vendor-provided ID, and is unique only for that vendor.
+It must return a hash with data compatible with `send_message!`. Note that the ID returned in the `:id` key is a vendor-provided ID, and is unique only for that vendor. Additionally, the method may return a key `:vendor` that contains vendor-specific message information.
 
 ### Incoming message acking
 
