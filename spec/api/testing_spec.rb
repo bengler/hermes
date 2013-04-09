@@ -31,7 +31,7 @@ describe 'Testing' do
     describe "POST /:realm/test/#{kind}" do
 
       it 'returns 200 when provider returns true' do
-        NullProvider.any_instance.
+        Providers::NullProvider.any_instance.
           should_receive(:test!).
           with().
           once.
@@ -41,7 +41,7 @@ describe 'Testing' do
       end
 
       it 'returns 500 when provider returns false' do
-        NullProvider.any_instance.
+        Providers::NullProvider.any_instance.
           should_receive(:test!).
           with().
           once.

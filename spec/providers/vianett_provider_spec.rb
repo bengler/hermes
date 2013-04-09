@@ -1,30 +1,33 @@
 require 'spec_helper'
 
 include Hermes
-include Hermes::Providers
 include WebMock::API
 
-describe VianettProvider do
+describe Providers::VianettProvider do
+
+  let :provider_class do
+    Providers::VianettProvider
+  end
 
   let :provider do
-    VianettProvider.new(username: 'ding', password: 'bat')
+    provider_class.new(username: 'ding', password: 'bat')
   end
 
   describe "#initiailize" do
 
     it 'can be configured with minimal configuration' do
-      VianettProvider.new(
+      provider_class.new(
         username: 'ding',
         password: 'bat')
     end
 
     it 'rejects required parameters' do
-      -> { VianettProvider.new(username: 'ding') }.should raise_error(ConfigurationError)
-      -> { VianettProvider.new(password: 'ding') }.should raise_error(ConfigurationError)
+      -> { provider_class.new(username: 'ding') }.should raise_error(ConfigurationError)
+      -> { provider_class.new(password: 'ding') }.should raise_error(ConfigurationError)
     end
 
     it 'rejects unknown parameters' do
-      -> { VianettProvider.new(
+      -> { provider_class.new(
         username: 'ding',
         password: 'bat',
         to_be_or_not_to_be: "that is the question")
@@ -36,7 +39,7 @@ describe VianettProvider do
   describe "#default_sender" do
 
     it 'returns configured sender' do
-      provider = VianettProvider.new(
+      provider = provider_class.new(
         username: 'ding', password: 'bat', default_sender: {number: 'Boink'})
       provider.default_sender.should eq({number: 'Boink', type: :msisdn})
     end
@@ -234,7 +237,7 @@ describe VianettProvider do
           operator: '1',
           retrycount: '0',
           prefix: ''))
-      }.should raise_error(VianettProvider::CouldNotFetchMMSDataError)
+      }.should raise_error(provider_class::CouldNotFetchMMSDataError)
     end
 
     it 'raises exception on redirect loop fetching MMS data' do
@@ -250,7 +253,7 @@ describe VianettProvider do
           operator: '1',
           retrycount: '0',
           prefix: ''))
-      }.should raise_error(VianettProvider::CouldNotFetchMMSDataError)
+      }.should raise_error(provider_class::CouldNotFetchMMSDataError)
     end
 
   end

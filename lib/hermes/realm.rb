@@ -53,7 +53,7 @@ module Hermes
       else
         logger.warn("Sending is disabled #{ENV['RACK_ENV']} environment, " \
           "will silently ignore outgoing messages.")
-        provider = Hermes::Providers::NullProvider.new
+        provider = Providers::NullProvider.new
       end
       provider
     end

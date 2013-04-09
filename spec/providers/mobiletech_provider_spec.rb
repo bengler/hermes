@@ -1,27 +1,31 @@
 require 'spec_helper'
 
-include Hermes::Providers
+include Hermes
 include WebMock::API
 
-describe MobiletechProvider do
+describe Providers::MobiletechProvider do
+
+  let :provider_class do
+    Providers::MobiletechProvider
+  end
 
   let :provider do
-    MobiletechProvider.new(:cpid => '1234', :secret => 'tjoms')
+    provider_class.new(:cpid => '1234', :secret => 'tjoms')
   end
 
   describe "#initialize" do
 
     it 'can be configured with minimal configuration' do
-      provider = MobiletechProvider.new(:cpid => '1234', :secret => 'tjoms')
+      provider = provider_class.new(:cpid => '1234', :secret => 'tjoms')
       provider.cpid.should == '1234'
     end
 
     it 'rejects missing required CPID in configuration' do
-      lambda { MobiletechProvider.new({:secret => 'tjoms'}) }.should raise_error
+      lambda { provider_class.new({:secret => 'tjoms'}) }.should raise_error
     end
 
     it 'rejects missing required secret in configuration' do
-      lambda { MobiletechProvider.new({:cpid => '1234'}) }.should raise_error
+      lambda { provider_class.new({:cpid => '1234'}) }.should raise_error
     end
 
   end
@@ -33,7 +37,7 @@ describe MobiletechProvider do
         :body => 'YIP YIP YIP')
       lambda {
         provider.send_message!(:recipient_number => '12345678', :text => 'test')
-      }.should raise_error(MobiletechProvider::InvalidResponseError)
+      }.should raise_error(provider_class::InvalidResponseError)
     end
 
     it "treats gateway non-XML response as invalid responses" do
@@ -46,7 +50,7 @@ describe MobiletechProvider do
         })
       lambda {
         provider.send_message!(:recipient_number => '12345678', :text => 'test')
-      }.should raise_error(MobiletechProvider::InvalidResponseError)
+      }.should raise_error(provider_class::InvalidResponseError)
     end
 
     [310, 312, 500].each do |status|
@@ -55,7 +59,7 @@ describe MobiletechProvider do
           :status => status)
         lambda {
           provider.send_message!(:recipient_number => '12345678', :text => 'test')
-        }.should raise_error(MobiletechProvider::APIFailureError)
+        }.should raise_error(provider_class::APIFailureError)
       end
     end
 
@@ -65,7 +69,7 @@ describe MobiletechProvider do
           :status => status)
         lambda {
           provider.send_message!(:recipient_number => '12345678', :text => 'test')
-        }.should raise_error(MobiletechProvider::InvalidResponseError)
+        }.should raise_error(provider_class::InvalidResponseError)
       end
     end
 
@@ -85,7 +89,7 @@ describe MobiletechProvider do
         })
       lambda {
         provider.send_message!(:recipient_number => '12345678', :text => 'test')
-      }.should raise_error(MobiletechProvider::APIFailureError, /dadgummit!/)
+      }.should raise_error(provider_class::APIFailureError, /dadgummit!/)
     end
 
     it 'handles error responses' do
@@ -107,7 +111,7 @@ describe MobiletechProvider do
         })
       lambda {
         provider.send_message!(:recipient_number => '12345678', :text => 'test')
-      }.should raise_error(MobiletechProvider::MessageRejectedError, /No default text provided/)
+      }.should raise_error(provider_class::MessageRejectedError, /No default text provided/)
       stub.should have_requested(:post, 'http://msggw.dextella.net/BatchService')
     end
 
@@ -124,7 +128,7 @@ describe MobiletechProvider do
         })
       lambda {
         provider.send_message!(:recipient_number => '12345678', :text => 'test')
-      }.should raise_error(MobiletechProvider::InvalidResponseError)
+      }.should raise_error(provider_class::InvalidResponseError)
       stub.should have_requested(:post, 'http://msggw.dextella.net/BatchService')
     end
 
@@ -207,7 +211,7 @@ describe MobiletechProvider do
     it "rejects receipt with bad XML syntax" do
       lambda {
         provider.parse_receipt(request_with_input_stream("<? x"))
-      }.should raise_error(MobiletechProvider::InvalidReceiptError)
+      }.should raise_error(provider_class::InvalidReceiptError)
     end
 
     it "rejects receipt from wrong CPID" do
@@ -217,7 +221,7 @@ describe MobiletechProvider do
             <CpId>9999</CpId>
           </BatchReport>
         }))
-      }.should raise_error(MobiletechProvider::InvalidReceiptError)
+      }.should raise_error(provider_class::InvalidReceiptError)
     end
 
     it "rejects receipt missing transaction ID" do
@@ -227,7 +231,7 @@ describe MobiletechProvider do
             <CpId>1234</CpId>
           </BatchReport>
         }))
-      }.should raise_error(MobiletechProvider::InvalidReceiptError)
+      }.should raise_error(provider_class::InvalidReceiptError)
     end
 
     it "rejects receipt missing counts" do
@@ -238,7 +242,7 @@ describe MobiletechProvider do
             <TransactionId>SOME_UNIQUE_KEY</TransactionId>
           </BatchReport>
         }))
-      }.should raise_error(MobiletechProvider::InvalidReceiptError)
+      }.should raise_error(provider_class::InvalidReceiptError)
     end
 
     it "parses success" do

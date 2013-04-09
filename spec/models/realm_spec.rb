@@ -7,14 +7,14 @@ describe Realm do
 
   describe '#provider' do
     it 'returns null provider if environment disables sending' do
-      realm = Hermes::Realm.new('foo', {
+      realm = Realm.new('foo', {
         deny_actual_sending_from_environments: ENV['RACK_ENV']
       })
       realm.provider(:sms).should satisfy { |v|
-        v.is_a?(NullProvider)
+        v.is_a?(Providers::NullProvider)
       }
       realm.provider(:email).should satisfy { |v|
-        v.is_a?(NullProvider)
+        v.is_a?(Providers::NullProvider)
       }
     end
   end

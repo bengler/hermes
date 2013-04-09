@@ -1,28 +1,32 @@
 # encoding: UTF-8
 require 'spec_helper'
 
-include Hermes::Providers
+include Hermes
 include WebMock::API
 
-describe PSWinComProvider do
+describe Providers::PSWinComProvider do
+
+  let :provider_class do
+    Providers::PSWinComProvider
+  end
 
   let :provider do
-    PSWinComProvider.new(:user => 'foo', :password => 'bar')
+    provider_class.new(user: 'foo', password: 'bar')
   end
 
   describe "#send_message!" do
 
     it 'can be configured with minimal configuration' do
-      provider = PSWinComProvider.new(:user => 'foo', :password => 'bar')
+      provider = provider_class.new(:user => 'foo', :password => 'bar')
       provider.user.should == 'foo'
     end
 
     it 'rejects missing required user in configuration' do
-      lambda { PSWinComProvider.new({:password => 'bar'}) }.should raise_error
+      lambda { provider_class.new({:password => 'bar'}) }.should raise_error
     end
 
     it 'rejects missing required password in configuration' do
-      lambda { PSWinComProvider.new({:user => 'foo'}) }.should raise_error
+      lambda { provider_class.new({:user => 'foo'}) }.should raise_error
     end
 
     it "treats gateway response other than 0 as rejected by the server" do
@@ -30,7 +34,7 @@ describe PSWinComProvider do
         :body => "1\nFoo\nBar")
       lambda {
         provider.send_message!(:recipient_number => '12345678', :text => 'test')
-      }.should raise_error(PSWinComProvider::MessageRejectedError)
+      }.should raise_error(provider_class::MessageRejectedError)
     end
 
     it "returns a reference value if the message was sent" do
@@ -44,7 +48,7 @@ describe PSWinComProvider do
         :body => "0\nOK")
       lambda {
         provider.send_message!(:recipient_number => '12345678', :text => 'test')
-      }.should raise_error(PSWinComProvider::InvalidResponseError)
+      }.should raise_error(provider_class::InvalidResponseError)
     end
 
     it "sends message bodies as ISO-8859 Latin 1" do
@@ -63,7 +67,7 @@ describe PSWinComProvider do
           :status => status)
         lambda {
           provider.send_message!(:recipient_number => '12345678', :text => 'test')
-        }.should raise_error(PSWinComProvider::APIFailureError)
+        }.should raise_error(provider_class::APIFailureError)
       end
     end
 
@@ -73,7 +77,7 @@ describe PSWinComProvider do
           :status => status)
         lambda {
           provider.send_message!(:recipient_number => '12345678', :text => 'test')
-        }.should raise_error(PSWinComProvider::InvalidResponseError)
+        }.should raise_error(provider_class::InvalidResponseError)
       end
     end
 
@@ -84,13 +88,13 @@ describe PSWinComProvider do
     it "rejects receipt with bad syntax" do
       lambda {
         provider.parse_receipt(request_with_input_stream("FOO=BAR"))
-      }.should raise_error(PSWinComProvider::InvalidReceiptError)
+      }.should raise_error(provider_class::InvalidReceiptError)
     end
 
     it "rejects receipt missing transaction ID" do
       lambda {
         provider.parse_receipt(request_with_input_stream("STATE=DELIVRD"))
-      }.should raise_error(PSWinComProvider::InvalidReceiptError)
+      }.should raise_error(provider_class::InvalidReceiptError)
     end
 
     it "parses success" do

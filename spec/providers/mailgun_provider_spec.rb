@@ -1,32 +1,36 @@
 # encoding: UTF-8
 require 'spec_helper'
 
-include Hermes::Providers
+include Hermes
 include WebMock::API
 
-describe MailGunProvider do
+describe Providers::MailGunProvider do
+
+  let :provider_class do
+    Providers::MailGunProvider
+  end
 
   let :provider do
-    MailGunProvider.new(api_key: 'foo', mailgun_domain: 'test.com')
+    provider_class.new(api_key: 'foo', mailgun_domain: 'test.com')
   end
 
   describe "#initialize" do
 
     it 'can be configured with minimal configuration' do
-      provider = MailGunProvider.new(api_key: 'foo', mailgun_domain: 'test.com')
+      provider = provider_class.new(api_key: 'foo', mailgun_domain: 'test.com')
       provider.api_key.should eq 'foo'
       provider.mailgun_domain.should eq 'test.com'
     end
 
     it 'requires API key' do
       -> {
-        MailGunProvider.new
+        provider_class.new
       }.should raise_error(ConfigurationError)
     end
 
     it 'raises ArgumentError on bad keys' do
       -> {
-        MailGunProvider.new(subject: 'bar@foo.com')
+        provider_class.new(subject: 'bar@foo.com')
       }.should raise_error(ArgumentError)
     end
 

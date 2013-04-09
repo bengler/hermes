@@ -41,7 +41,7 @@ describe 'Email' do
             }
           }.to_json)
 
-      NullProvider.any_instance.
+      Providers::NullProvider.any_instance.
         should_receive(:send_message!).
         with(
           hash_including(
@@ -79,7 +79,7 @@ describe 'Email' do
             }
           }.to_json)
 
-      NullProvider.any_instance.
+      Providers::NullProvider.any_instance.
         should_receive(:send_message!) {
           raise RecipientRejectedError.new("test@test.com", "Is not valid")
         }.once
@@ -114,7 +114,7 @@ describe 'Email' do
             }
           }.to_json)
 
-      NullProvider.any_instance.
+      Providers::NullProvider.any_instance.
         should_receive(:send_message!).
         with(
           hash_including(
