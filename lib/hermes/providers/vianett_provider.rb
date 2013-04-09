@@ -152,7 +152,8 @@ module Hermes
           result[:type] = :mms
           result[:binary] = {
             content_type: 'application/zip',
-            value: Base64.decode64(params[:mmsdata]).force_encoding('binary')
+            value: Base64.decode64(params[:mmsdata]).force_encoding('binary'),
+            transfer_encoding: :raw
           }
         elsif params[:mmsurl].present?
           result[:type] = :mms
@@ -187,7 +188,8 @@ module Hermes
           if success
             return {
               value: response.body,
-              content_type: response.headers['Content-Type']
+              content_type: response.headers['Content-Type'],
+              transfer_encoding: :raw
             }
           else
             raise CouldNotFetchMMSDataError, "Error #{response.status} getting MMS data from #{url}"

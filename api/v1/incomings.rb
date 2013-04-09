@@ -38,6 +38,11 @@ module Hermes
 
           grove_key = "post.hermes_message:#{realm.name}.#{realm.grove_path}"
 
+          if (binary = message[:binary]) && binary[:transfer_encoding] == :raw
+            binary[:value] = Base64.encode64(binary[:value])
+            binary[:transfer_encoding] = :base64
+          end
+
           post = realm.pebblebed_connector.grove.post("/posts/#{grove_key}",
             post: {
               document: message.merge(kind: kind),

@@ -177,7 +177,8 @@ describe Providers::VianettProvider do
         id: '1',
         binary: {
           content_type: 'application/zip',
-          value: "\x01\x02"
+          value: "\x01\x02",
+          transfer_encoding: :raw
         },
         vendor: {
           refno: '1',
@@ -210,7 +211,8 @@ describe Providers::VianettProvider do
         id: '1',
         binary: {
           content_type: 'application/zip',
-          value: "\x01\x02"
+          value: "\x01\x02",
+          transfer_encoding: :raw
         },
         vendor: {
           refno: '1',
