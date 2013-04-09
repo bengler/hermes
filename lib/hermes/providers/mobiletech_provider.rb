@@ -68,7 +68,7 @@ module Hermes
         end
       end
 
-      def parse_receipt(params, request)
+      def parse_receipt(request)
         if (stream = request.env['rack.input'])
           raw_data = stream.read
         else

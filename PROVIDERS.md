@@ -27,7 +27,7 @@ def test!
 *Optional*. This method must parse a receipt callback obtained from the provider.
 
 ```ruby
-parse_receipt(params, rack_request)
+parse_receipt(rack_request)
 ```
 
 It must return a hash:

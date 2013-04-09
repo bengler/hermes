@@ -85,13 +85,10 @@ describe 'Receipts' do
           headers: {})
 
       Providers::NullProvider.any_instance.
-        should_receive(:parse_receipt) {
-          {id: "1234", status: "delivered"}
-        }.
-        with(
-          hash_including(realm: "test", kind: "sms"),
-          an_instance_of(Sinatra::Request)
-        ).once
+        should_receive(:parse_receipt).
+        with(an_instance_of(Sinatra::Request)).
+        once.
+        and_return({id: "1234", status: "delivered"})
 
       Providers::NullProvider.any_instance.
         should_receive(:ack_receipt) { |params, controller|

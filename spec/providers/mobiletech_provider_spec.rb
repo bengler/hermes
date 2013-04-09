@@ -206,13 +206,13 @@ describe MobiletechProvider do
 
     it "rejects receipt with bad XML syntax" do
       lambda {
-        provider.parse_receipt({}, request_with_input_stream("<? x"))
+        provider.parse_receipt(request_with_input_stream("<? x"))
       }.should raise_error(MobiletechProvider::InvalidReceiptError)
     end
 
     it "rejects receipt from wrong CPID" do
       lambda {
-        provider.parse_receipt({}, request_with_input_stream(%{
+        provider.parse_receipt(request_with_input_stream(%{
           <BatchReport>
             <CpId>9999</CpId>
           </BatchReport>
@@ -222,7 +222,7 @@ describe MobiletechProvider do
 
     it "rejects receipt missing transaction ID" do
       lambda {
-        provider.parse_receipt({}, request_with_input_stream(%{
+        provider.parse_receipt(request_with_input_stream(%{
           <BatchReport>
             <CpId>1234</CpId>
           </BatchReport>
@@ -232,7 +232,7 @@ describe MobiletechProvider do
 
     it "rejects receipt missing counts" do
       lambda {
-        provider.parse_receipt({}, request_with_input_stream(%{
+        provider.parse_receipt(request_with_input_stream(%{
           <BatchReport>
             <CpId>1234</CpId>
             <TransactionId>SOME_UNIQUE_KEY</TransactionId>
@@ -242,7 +242,7 @@ describe MobiletechProvider do
     end
 
     it "parses success" do
-      result = provider.parse_receipt({}, request_with_input_stream(%{
+      result = provider.parse_receipt(request_with_input_stream(%{
         <BatchReport>
           <CpId>1234</CpId>
           <TransactionId>SOME_UNIQUE_KEY</TransactionId>
@@ -270,7 +270,7 @@ describe MobiletechProvider do
     end
 
     it "parses failure" do
-      result = provider.parse_receipt({}, request_with_input_stream(%{
+      result = provider.parse_receipt(request_with_input_stream(%{
         <BatchReport>
           <CpId>1234</CpId>
           <TransactionId>SOME_UNIQUE_KEY</TransactionId>
@@ -299,7 +299,7 @@ describe MobiletechProvider do
     end
 
     it "parses unknown" do
-      result = provider.parse_receipt({}, request_with_input_stream(%{
+      result = provider.parse_receipt(request_with_input_stream(%{
         <BatchReport>
           <CpId>1234</CpId>
           <TransactionId>SOME_UNIQUE_KEY</TransactionId>
@@ -314,7 +314,7 @@ describe MobiletechProvider do
     end
 
     it "parses in progress" do
-      result = provider.parse_receipt({}, request_with_input_stream(%{
+      result = provider.parse_receipt(request_with_input_stream(%{
         <BatchReport>
           <CpId>1234</CpId>
           <TransactionId>SOME_UNIQUE_KEY</TransactionId>

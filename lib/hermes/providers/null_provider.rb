@@ -15,7 +15,7 @@ module Hermes
         true
       end
 
-      def parse_receipt(params, request)
+      def parse_receipt(request)
         {}
       end
 

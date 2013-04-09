@@ -77,7 +77,9 @@ module Hermes
         end
       end
 
-      def parse_receipt(params, request)
+      def parse_receipt(request)
+        params = request.params.symbolize_keys
+
         result = {}
         case params[:requesttype]
           when 'notificationstatus'

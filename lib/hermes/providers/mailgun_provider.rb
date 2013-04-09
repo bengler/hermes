@@ -89,9 +89,9 @@ module Hermes
         end
       end
 
-      def parse_receipt(params, request)
-        id = params["Message-Id"]
-        status = case params["event"]
+      def parse_receipt(request)
+        result = {:id => request.params["Message-Id"]}
+        result[:status] = case request.params["event"]
           when "bounced"
             :failed
           when "delivered"
@@ -101,9 +101,7 @@ module Hermes
           else
             :unknown
         end
-        result = {:id => id}
-        result[:status] = status
-        result[:vendor_message] = params["error"]
+        result[:vendor_message] = request.params["error"]
         result
       end
 
