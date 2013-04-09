@@ -31,7 +31,7 @@ module Hermes
           halt 400, "Provider does not support handling incoming messages"
         end
 
-        message = provider.parse_message(params.with_indifferent_access, request)
+        message = provider.parse_message(request)
         if message.present?
           logger.info("Received message via #{provider.class.name} (#{kind}): #{message.inspect}")
 

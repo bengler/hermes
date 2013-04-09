@@ -52,10 +52,10 @@ Here, `receipt_result` is the data returned from `parse_receipt`, and `controlle
 *Optional*. This method must parse an incoming message obtained from the provider.
 
 ```ruby
-parse_message(params, rack_request)
+parse_message(rack_request)
 ```
 
-It must return a hash with data compatible with `send_message!`. Note that the ID returned in the `:id` key is a vendor-provided ID.
+It must return a hash with data compatible with `send_message!`. Note that the ID returned in the `:id` key is a vendor-provided ID, and is unique only for that vendor.
 
 ### Incoming message acking
 

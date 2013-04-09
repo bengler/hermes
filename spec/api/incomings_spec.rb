@@ -33,13 +33,13 @@ describe 'Receiving' do
 
     it 'it receives the message, stores it and performs callback' do
       Providers::NullProvider.any_instance.
-        should_receive(:parse_message) { |params, request|
-          params.should respond_to(:[])
+        should_receive(:parse_message) { |request|
           request.env['rack.input'].read.should eq "<something></something>"
         }.once.and_return({
           recipient_number: '12345678',
           text: 'Hello',
           id: "666",
+          some_extra_data: "Yikes"
         })
 
       grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test.boink").
@@ -51,6 +51,7 @@ describe 'Receiving' do
                 recipient_number: "12345678",
                 text: "Hello",
                 kind: "sms",
+                some_extra_data: "Yikes",
                 id: "666"
               },
               external_id: "null_provider_id:666",
@@ -96,8 +97,7 @@ describe 'Receiving' do
 
     it 'it receives the message, stores it and performs callback' do
       Providers::NullProvider.any_instance.
-        should_receive(:parse_message) { |params, request|
-          params.should respond_to(:[])
+        should_receive(:parse_message) { |request|
           request.env['rack.input'].read.should eq "<something></something>"
         }.once.and_return({
           recipient_email: 'bob@example.com',

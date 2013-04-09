@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+include Hermes
 include Hermes::Providers
 include WebMock::API
 
@@ -121,6 +122,137 @@ describe VianettProvider do
         provider.send_message!(text: 'Hello')
       }.should raise_error(ArgumentError)
     end
+  end
+
+  describe '#parse_message' do
+
+    it "rejects incomplete message" do
+      original = {sourceaddr: '123', destinationaddr: '234', refno: '1', message: 'Hello'}
+      original.keys.each do |key|
+        -> {
+          provider.parse_message(request_with_params(original.except(key)))
+        }.should raise_error(ArgumentError)
+      end
+    end
+
+    it 'parses SMS message' do
+      message = provider.parse_message(request_with_params(
+        sourceaddr: '123',
+        destinationaddr: '345',
+        refno: '1',
+        message: 'Doink',
+        operator: '1',
+        retrycount: '0',
+        prefix: ''))
+      message.should eq({
+        sender_number: '123',
+        recipient_number: '345',
+        id: '1',
+        text: 'Doink',
+        vendor: {
+          refno: '1',
+          operator: '1',
+          retry_count: 0,
+          prefix: ''
+        },
+        type: :sms
+      })
+    end
+
+    it 'parses MMS message containing Base64 data' do
+      message = provider.parse_message(request_with_params(
+        sourceaddr: '123',
+        destinationaddr: '345',
+        refno: '1',
+        mmsdata: Base64.encode64("\x01\x02"),
+        operator: '1',
+        retrycount: '0',
+        prefix: ''))
+      message.should eq({
+        sender_number: '123',
+        recipient_number: '345',
+        id: '1',
+        binary: {
+          content_type: 'application/zip',
+          value: "\x01\x02"
+        },
+        vendor: {
+          refno: '1',
+          operator: '1',
+          retry_count: 0,
+          prefix: ''
+        },
+        type: :mms
+      })
+    end
+
+    it 'parses MMS message containing URL' do
+      mms_stub = stub_request(:get, 'http://example.org/mms.zip').
+        to_return(
+          status: 200,
+          headers: {"Content-Type" => "application/zip"},
+          body: "\x01\x02")
+
+      message = provider.parse_message(request_with_params(
+        sourceaddr: '123',
+        destinationaddr: '345',
+        refno: '1',
+        mmsurl: "http://example.org/mms.zip",
+        operator: '1',
+        retrycount: '0',
+        prefix: ''))
+      message.should eq({
+        sender_number: '123',
+        recipient_number: '345',
+        id: '1',
+        binary: {
+          content_type: 'application/zip',
+          value: "\x01\x02"
+        },
+        vendor: {
+          refno: '1',
+          operator: '1',
+          retry_count: 0,
+          prefix: ''
+        },
+        type: :mms
+      })
+
+      mms_stub.should have_been_requested
+    end
+
+    it 'raises exception on failure to fetch MMS data' do
+      mms_stub = stub_request(:get, 'http://example.org/mms.zip').
+        to_return(status: 500)
+
+      -> {
+        provider.parse_message(request_with_params(
+          sourceaddr: '123',
+          destinationaddr: '345',
+          refno: '1',
+          mmsurl: "http://example.org/mms.zip",
+          operator: '1',
+          retrycount: '0',
+          prefix: ''))
+      }.should raise_error(VianettProvider::CouldNotFetchMMSDataError)
+    end
+
+    it 'raises exception on redirect loop fetching MMS data' do
+      mms_stub = stub_request(:get, 'http://example.org/mms.zip').
+        to_return(status: 302, headers: {'Location' => 'http://example.org/mms.zip'})
+
+      -> {
+        provider.parse_message(request_with_params(
+          sourceaddr: '123',
+          destinationaddr: '345',
+          refno: '1',
+          mmsurl: "http://example.org/mms.zip",
+          operator: '1',
+          retrycount: '0',
+          prefix: ''))
+      }.should raise_error(VianettProvider::CouldNotFetchMMSDataError)
+    end
+
   end
 
   describe '#parse_receipt' do

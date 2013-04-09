@@ -23,6 +23,8 @@ module Hermes
         attr_reader :message, :status_code, :refno
       end
 
+      class CouldNotFetchMMSDataError < GatewayError; end
+
       attr_reader :user_name
       attr_reader :password
       attr_reader :default_sender
@@ -115,25 +117,41 @@ module Hermes
           "<ack refno='#{id}' errorcode='0'></ack>"
       end
 
-      def parse_message(params, request)
+      def parse_message(request)
+        params = request.params.symbolize_keys
+
         raise ArgumentError, "Invalid message" unless
           params[:sourceaddr].present? and
           params[:destinationaddr].present? and
-          params[:refno].present? and
-          params[:message].present?
+          params[:refno].present?
 
-        return {
-          id: "vianett.#{params[:refno]}",
-          sending_number: params[:sourceaddr],
+        result = {
+          id: params[:refno],
+          sender_number: params[:sourceaddr],
           recipient_number: params[:destinationaddr],
-          text: [params[:prefix], params[:message]].compact.join(' '),
           vendor: {
             refno: params[:refno],
             operator: params[:operator],
-            retry_count: params[:retrycount],
+            retry_count: params[:retrycount].to_i,
             prefix: params[:prefix]
           }
         }
+        if params[:mmsdata].present?
+          result[:type] = :mms
+          result[:binary] = {
+            content_type: 'application/zip',
+            value: Base64.decode64(params[:mmsdata]).force_encoding('binary')
+          }
+        elsif params[:mmsurl].present?
+          result[:type] = :mms
+          result[:binary] = fetch_mms_url(params[:mmsurl])
+        elsif params[:message].present? or params[:prefix].present?
+          result[:type] = :sms
+          result[:text] = [params[:prefix], params[:message]].select(&:present?).join(' ')
+        else
+          raise ArgumentError, "Missing message content"
+        end
+        result
       end
 
       def ack_message(message, controller)
@@ -150,6 +168,30 @@ module Hermes
 
         def logger
           LOGGER
+        end
+
+        def fetch_mms_url(url)
+          visited = Set.new
+          loop do
+            with_retrying do
+              response = Excon.get(url)
+              if response.status == 200
+                return {
+                  value: response.body,
+                  content_type: response.headers['Content-Type']
+                }
+              elsif response.status == 301 or response.status == 302
+                location = URI.parse(response.headers['Location'])
+                if visited.add?(location)
+                  url = location.to_s
+                else
+                  raise CouldNotFetchMMSDataError, "Redirect loop fetching #{url}"
+                end
+              else
+                raise CouldNotFetchMMSDataError, "Error #{response.status} getting MMS data from #{url}"
+              end
+            end
+          end
         end
 
         def with_retrying(&block)
