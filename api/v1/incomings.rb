@@ -25,12 +25,11 @@ module Hermes
 
     private
 
-      def do_incoming(realm, kind)
-        realm, provider = realm_and_provider(realm, kind)
+      def do_incoming(realm_name, kind)
+        realm, provider = realm_and_provider(realm_name, kind)
         unless provider.respond_to?(:parse_message)
           halt 400, "Provider does not support handling incoming messages"
         end
-
         message = provider.parse_message(request)
         if message.present?
           logger.info("Received message via #{provider.class.name} (#{kind}): #{message.inspect}")
