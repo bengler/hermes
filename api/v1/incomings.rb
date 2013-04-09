@@ -46,10 +46,9 @@ module Hermes
               external_id: external_id
             })
 
-          if realm.incoming_url
-            Excon.new(realm.incoming_url).post(query: {
-              uid: post['post']['uid']
-            })
+          if (url = realm.incoming_url)
+            logger.info "Posting incoming message to #{url}"
+            Excon.new(url).post(query: {uid: post['post']['uid']})
           end
         end
       end
