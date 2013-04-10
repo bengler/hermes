@@ -21,7 +21,7 @@ module Hermes
       return halt 404, e.message
     end
 
-    error ::Hermes::OptionMissingError do |e|
+    error ::Hermes::OptionMissingError, InvalidMessageError do |e|
       logger.error e.message
       return halt 400, e.message
     end

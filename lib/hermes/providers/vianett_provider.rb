@@ -132,10 +132,9 @@ module Hermes
       def parse_message(request)
         params = request.params.symbolize_keys
 
-        raise ArgumentError, "Invalid message" unless
-          params[:sourceaddr].present? and
-          params[:destinationaddr].present? and
-          params[:refno].present?
+        raise InvalidMessageError, "Invalid message" unless
+          [:sourceaddr, :destinationaddr, :refno].all? { |k| params[k].present? } and
+          [:message, :prefix, :mmsdata, :mmsurl].any? { |k| params[k].present? }
 
         result = {
           id: params[:refno],
@@ -161,8 +160,6 @@ module Hermes
         elsif params[:message].present? or params[:prefix].present?
           result[:type] = :sms
           result[:text] = [params[:prefix], params[:message]].select(&:present?).join(' ')
-        else
-          raise ArgumentError, "Missing message content"
         end
         result
       end

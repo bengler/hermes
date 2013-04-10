@@ -155,6 +155,16 @@ describe 'Receiving' do
       callback_stub.should have_been_requested
     end
 
+    it 'it rejects incomplete message' do
+      Providers::NullProvider.any_instance.
+        should_receive(:parse_message).once.and_return {
+          raise InvalidMessageError
+        }
+
+      post_body "/test/incoming/sms", {}, %{<something></something>}
+      last_response.status.should eq 400
+    end
+
   end
 
   describe "POST /:realm/incoming/email" do
@@ -215,6 +225,16 @@ describe 'Receiving' do
       last_response.status.should eq 200
 
       callback_stub.should have_been_requested
+    end
+
+    it 'it rejects incomplete message' do
+      Providers::NullProvider.any_instance.
+        should_receive(:parse_message).once.and_return {
+          raise InvalidMessageError
+        }
+
+      post_body "/test/incoming/email", {}, %{<something></something>}
+      last_response.status.should eq 400
     end
 
   end

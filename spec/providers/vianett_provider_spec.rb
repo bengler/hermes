@@ -134,7 +134,7 @@ describe Providers::VianettProvider do
       original.keys.each do |key|
         -> {
           provider.parse_message(request_with_params(original.except(key)))
-        }.should raise_error(ArgumentError)
+        }.should raise_error(InvalidMessageError)
       end
     end
 
