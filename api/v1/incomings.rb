@@ -60,6 +60,10 @@ module Hermes
             end
           end
 
+          if provider.respond_to?(:ack_message)
+            provider.ack_message(message, self)
+          end
+
           ''
         end
       end

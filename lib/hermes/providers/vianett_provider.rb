@@ -165,7 +165,7 @@ module Hermes
       end
 
       def ack_message(message, controller)
-        refno = result[:vendor][:refno]
+        refno = message[:vendor][:refno]
         controller.halt 200,
           "<?xml version='1.0'?>" \
           "<ack refno='#{refno}' errorcode='0'></ack>"

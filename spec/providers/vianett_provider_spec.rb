@@ -260,6 +260,31 @@ describe Providers::VianettProvider do
 
   end
 
+  describe '#ack_message' do
+
+    it 'acks message' do
+      controller = Object.new
+      controller.stub(:halt) do |status, body|
+        nil
+      end
+      controller.should_receive(:halt) { |status, body|
+        status.should eq 200
+        body.should =~ /.*<ack.*refno='1'.*errorcode='0'>.*<\/ack>/m
+      }.once
+
+      provider.ack_message({
+        id: '1',
+        vendor: {
+          refno: '1',
+        },
+        sender_number: '12345678',
+        recipient_number: '12345679',
+        text: 'Hello'
+      }, controller)
+    end
+
+  end
+
   describe '#parse_receipt' do
 
     it 'parses normal receipt' do

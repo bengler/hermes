@@ -31,64 +31,90 @@ describe 'Receiving' do
 
   describe "POST /:realm/incoming/sms" do
 
-    it 'it receives the message, stores it and performs callback' do
-      Providers::NullProvider.any_instance.
-        should_receive(:parse_message) { |request|
-          request.env['rack.input'].read.should eq "<something></something>"
-        }.once.and_return({
-          recipient_number: '12345678',
-          text: 'Hello',
-          id: "666",
-          some_extra_data: "Yikes"
-        })
+    [true, false].each do |acking|
+      context "when provider #{acking ? 'acks' : 'does not ack'}" do
+        it 'it receives the message, stores it and performs callback' do
+          Providers::NullProvider.any_instance.
+            should_receive(:parse_message) { |request|
+              request.env['rack.input'].read.should eq "<something></something>"
+            }.once.and_return({
+              recipient_number: '12345678',
+              text: 'Hello',
+              id: "666",
+              some_extra_data: "Yikes"
+            })
 
-      grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test.boink").
-        with(
-          body: {
-            session: "some_checkpoint_god_session_for_test_realm",
-            post: {
-              document: {
-                recipient_number: "12345678",
-                text: "Hello",
-                kind: "sms",
-                some_extra_data: "Yikes",
-                id: "666"
+          if acking
+            Providers::NullProvider.any_instance.
+              should_receive(:ack_message) { |message, controller|
+                controller.halt 201, "OK"
+              }.
+              with(
+                hash_including(
+                  recipient_number: '12345678',
+                  text: 'Hello',
+                  id: "666",
+                  some_extra_data: "Yikes"),
+                an_instance_of(::Hermes::V1)
+              ).
+              once
+          end
+
+          grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test.boink").
+            with(
+              body: {
+                session: "some_checkpoint_god_session_for_test_realm",
+                post: {
+                  document: {
+                    recipient_number: "12345678",
+                    text: "Hello",
+                    kind: "sms",
+                    some_extra_data: "Yikes",
+                    id: "666"
+                  },
+                  external_id: "null_provider_id:666",
+                  restricted: true,
+                  tags: ["received"]
+                }
               },
-              external_id: "null_provider_id:666",
-              restricted: true,
-              tags: ["received"]
-            }
-          },
-          headers: {
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json'
-          }
-        ).
-        to_return(
-          status: 200,
-          body: {
-            post: {
-              uid: "post.hermes_message:test.boink$1234",
-              document: {
-                body: "Hello",
-              },
-              tags: ["received"]
-            }
-          }.to_json)
+              headers: {
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json'
+              }
+            ).
+            to_return(
+              status: 200,
+              body: {
+                post: {
+                  uid: "post.hermes_message:test.boink$1234",
+                  document: {
+                    body: "Hello",
+                  },
+                  tags: ["received"]
+                }
+              }.to_json)
 
-      callback_stub = stub_request(:post, "http://example.org/incoming").
-        with(
-          query: {
-            uid: "post.hermes_message:test.boink$1234"
-          }
-        ).to_return(
-          status: 200,
-          body: "")
+          callback_stub = stub_request(:post, "http://example.org/incoming").
+            with(
+              query: {
+                uid: "post.hermes_message:test.boink$1234"
+              }
+            ).to_return(
+              status: 200,
+              body: "")
 
-      post_body "/test/incoming/sms", {}, %{<something></something>}
-      last_response.status.should eq 200
+          post_body "/test/incoming/sms", {}, %{<something></something>}
+          if acking
+            last_response.status.should eq 201
+            last_response.body.should eq 'OK'
+          else
+            last_response.status.should eq 200
+            last_response.body.should eq ''
+          end
 
-      callback_stub.should have_been_requested
+          callback_stub.should have_been_requested
+        end
+      end
     end
 
     it 'it converts binary data to Base64' do
@@ -169,62 +195,87 @@ describe 'Receiving' do
 
   describe "POST /:realm/incoming/email" do
 
-    it 'it receives the message, stores it and performs callback' do
-      Providers::NullProvider.any_instance.
-        should_receive(:parse_message) { |request|
-          request.env['rack.input'].read.should eq "<something></something>"
-        }.once.and_return({
-          recipient_email: 'bob@example.com',
-          text: 'Hello',
-          id: "666",
-        })
+    [true, false].each do |acking|
+      context "when provider #{acking ? 'acks' : 'does not ack'}" do
+        it 'it receives the message, stores it and performs callback' do
+          Providers::NullProvider.any_instance.
+            should_receive(:parse_message) { |request|
+              request.env['rack.input'].read.should eq "<something></something>"
+            }.once.and_return({
+              recipient_email: 'bob@example.com',
+              text: 'Hello',
+              id: "666"
+            })
 
-      grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test.boink").
-        with(
-          body: {
-            session: "some_checkpoint_god_session_for_test_realm",
-            post: {
-              document: {
-                recipient_email: "bob@example.com",
-                text: "Hello",
-                kind: "email",
-                id: "666"
+          if acking
+            Providers::NullProvider.any_instance.
+              should_receive(:ack_message) { |message, controller|
+                controller.halt 201, "OK"
+              }.
+              with(
+                hash_including(
+                  recipient_email: 'bob@example.com',
+                  text: 'Hello',
+                  id: "666"),
+                an_instance_of(::Hermes::V1)
+              ).
+              once
+          end
+
+          grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test.boink").
+            with(
+              body: {
+                session: "some_checkpoint_god_session_for_test_realm",
+                post: {
+                  document: {
+                    recipient_email: "bob@example.com",
+                    text: "Hello",
+                    kind: "email",
+                    id: "666"
+                  },
+                  external_id: "null_provider_id:666",
+                  restricted: true,
+                  tags: ["received"]
+                }
               },
-              external_id: "null_provider_id:666",
-              restricted: true,
-              tags: ["received"]
-            }
-          },
-          headers: {
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json'
-          }
-        ).
-        to_return(
-          status: 200,
-          body: {
-            post: {
-              uid: "post.hermes_message:test.boink$1234",
-              document: {
-                body: "Hello",
-              },
-              tags: ["received"]
-            }
-          }.to_json)
+              headers: {
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json'
+              }
+            ).
+            to_return(
+              status: 200,
+              body: {
+                post: {
+                  uid: "post.hermes_message:test.boink$1234",
+                  document: {
+                    body: "Hello",
+                  },
+                  tags: ["received"]
+                }
+              }.to_json)
 
-      callback_stub = stub_request(:post, "http://example.org/incoming").
-        with(
-          query: {
-            uid: "post.hermes_message:test.boink$1234"
-          }
-        ).to_return(
-          status: 200,
-          body: "")
+          callback_stub = stub_request(:post, "http://example.org/incoming").
+            with(
+              query: {
+                uid: "post.hermes_message:test.boink$1234"
+              }
+            ).to_return(
+              status: 200,
+              body: "")
 
-      post_body "/test/incoming/email", {}, %{<something></something>}
-      last_response.status.should eq 200
+          post_body "/test/incoming/email", {}, %{<something></something>}
+          if acking
+            last_response.status.should eq 201
+            last_response.body.should eq 'OK'
+          else
+            last_response.status.should eq 200
+            last_response.body.should eq ''
+          end
 
-      callback_stub.should have_been_requested
+          callback_stub.should have_been_requested
+        end
+      end
     end
 
     it 'it rejects incomplete message' do
