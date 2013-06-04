@@ -8,7 +8,7 @@ module Hermes
       end
 
       def send_message!(options)
-        Time.now.to_i.to_s
+        (Time.now.to_i+([*1..10000].sample)).to_s
       end
 
       def test!
