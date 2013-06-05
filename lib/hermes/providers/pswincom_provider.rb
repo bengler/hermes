@@ -9,20 +9,16 @@ module Hermes
       attr_reader :password
 
       URL = "https://sms.pswin.com/http4sms/sendRef.asp".freeze
-      DEFAULT_SENDER_COUNTRY = 'NO'.freeze
-      DEFAULT_PREFIX = '47'.freeze
 
       class PSWinComError < ProviderError; end
       class APIFailureError < PSWinComError; end
 
       def initialize(options = {})
-        options.assert_valid_keys(:user, :password, :default_sender_number, :default_prefix, :default_sender_country)
+        options.assert_valid_keys(:user, :password, :default_sender_number)
         @user = options[:user]
         raise ConfigurationError, "User must be specified" unless @user
         @password = options[:password]
         raise ConfigurationError, "Password must be specified" unless @password
-        @default_prefix = options[:default_prefix] || DEFAULT_PREFIX
-        @default_sender_country = options[:default_sender_country] || DEFAULT_SENDER_COUNTRY
         @default_sender_number = options[:default_sender_number]
       end
 
@@ -108,19 +104,36 @@ module Hermes
           {
             "USER" => @user,
             "PW" => @password,
-            "RCV" => number_to_msisdn(recipient_number),
-            "SND" => sender_number || @default_sender_number,
+            "RCV" => normalize_number(recipient_number),
+            "SND" => normalize_sender_number(sender_number || @default_sender_number),
             "TXT" => message.encode("iso-8859-1"),
             "RCPREQ" => "Y" # get a unique reference value back
           }
         end
         def number_to_msisdn(number)
           if number =~ /^\+(.*)/
-            return $1
+            $1
           else
-            return "#{@default_prefix}#{number}"
+            number
           end
         end
+
+        def normalize_sender_number(sender_number)
+          if sender_number.match /.*?[a-zA-Z].*?/
+            sender_number
+          else
+            normalize_number(sender_number)
+          end
+        end
+
+        def normalize_number(number)
+          if NorwegianPhone.international?(number)
+            number_to_msisdn(NorwegianPhone.normalize(number))
+          else
+            "47#{NorwegianPhone.normalize(number)}"
+          end
+        end
+
     end
 
   end

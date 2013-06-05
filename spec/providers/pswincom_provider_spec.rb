@@ -11,7 +11,7 @@ describe Providers::PSWinComProvider do
   end
 
   let :provider do
-    provider_class.new(user: 'foo', password: 'bar')
+    provider_class.new(user: 'foo', password: 'bar', :default_sender_number => "Mobiltjenesten")
   end
 
   describe "#send_message!" do
@@ -52,13 +52,12 @@ describe Providers::PSWinComProvider do
     end
 
     it "sends message bodies as ISO-8859 Latin 1" do
-      stub_request(:post, "https://sms.pswin.com/http4sms/sendRef.asp").
-               with(:body => {"PW"=>"bar", "RCPREQ"=>"Y", "RCV"=>"4712345678", "SND"=>"", "TXT"=>"V\xE6rste bl\xE5 d\xF8den", "USER"=>"foo"},
+      sms_sub = stub_request(:post, "https://sms.pswin.com/http4sms/sendRef.asp").
+               with(:body => {"PW"=>"bar", "RCPREQ"=>"Y", "RCV"=>"4712345678", "SND"=>"4915771742338", "TXT"=>"V\xE6rste bl\xE5 d\xF8den", "USER"=>"foo"},
                     :headers => {'Content-Type'=>'application/x-www-form-urlencoded'}).
                to_return(:status => 200, :body => "0\nOK\n123123", :headers => {})
-      provider.send_message!(:recipient_number => '12345678', :text => 'Værste blå døden')
-      a_request(:post, "https://sms.pswin.com/http4sms/sendRef.asp").
-        with(:body => "USER=foo&PW=bar&RCV=4712345678&SND=&TXT=V%E6rste+bl%E5+d%F8den&RCPREQ=Y").should have_been_made
+      provider.send_message!(:sender_number => "+49 (15) 771742338", :recipient_number => '12345678', :text => 'Værste blå døden')
+      sms_sub.should have_been_made
     end
 
     [310, 312, 500].each do |status|
