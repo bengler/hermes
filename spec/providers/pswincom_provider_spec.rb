@@ -60,6 +60,21 @@ describe Providers::PSWinComProvider do
       sms_sub.should have_been_made
     end
 
+    it "normalizes mobile numbers" do
+      sms_sub_1 = stub_request(:post, "https://sms.pswin.com/http4sms/sendRef.asp").
+               with(:body => {"PW"=>"bar", "RCPREQ"=>"Y", "RCV"=>"4712345678", "SND"=>"4915771742338", "TXT"=>"V\xE6rste bl\xE5 d\xF8den", "USER"=>"foo"},
+                    :headers => {'Content-Type'=>'application/x-www-form-urlencoded'}).
+               to_return(:status => 200, :body => "0\nOK\n123123", :headers => {})
+      provider.send_message!(:sender_number => "+49 (15) 771742338", :recipient_number => '12345678', :text => 'Værste blå døden')
+      sms_sub_1.should have_been_made
+      sms_sub_2 = stub_request(:post, "https://sms.pswin.com/http4sms/sendRef.asp").
+               with(:body => {"PW"=>"bar", "RCPREQ"=>"Y", "RCV"=>"4712345678", "SND"=>"HeiDu", "TXT"=>"V\xE6rste bl\xE5 d\xF8den", "USER"=>"foo"},
+                    :headers => {'Content-Type'=>'application/x-www-form-urlencoded'}).
+               to_return(:status => 200, :body => "0\nOK\n123123", :headers => {})
+      provider.send_message!(:sender_number => "HeiDu", :recipient_number => '12345678', :text => 'Værste blå døden')
+      sms_sub_2.should have_been_made
+    end
+
     [310, 312, 500].each do |status|
       it "translates gateway error #{status} into API failures" do
         stub_request(:post, 'https://sms.pswin.com/http4sms/sendRef.asp').to_return(
