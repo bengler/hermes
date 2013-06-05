@@ -12,6 +12,7 @@ gem 'nokogiri', '~> 1.5.2'
 gem 'excon', '~> 0.12.0'
 gem 'httpclient'
 gem 'pebbles-uid'
+gem 'norwegian_phone'
 
 group :test do
   gem 'rspec', '~> 2.8'

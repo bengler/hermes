@@ -234,12 +234,12 @@ module Hermes
             msgid: id,
             username: @username,
             password: @password,
-            Tel: number_to_msisdn(options[:recipient_number]),
+            Tel: normalize_number(options[:recipient_number]),
             msg: options[:text].encode('utf-8')
           }
 
           if (sender = options[:sender_number]) && sender.present?
-            params[:senderaddress] = sender
+            params[:senderaddress] = sender =~ /\A\s*\+?[0-9\s]+\s*\z/ ? normalize_number(sender) : sender
             params[:senderaddresstype] = sender =~ /\A\s*\+?[0-9\s]+\s*\z/ ? 1 : 5
           elsif (default_sender = @default_sender)
             case default_sender[:type]
@@ -250,7 +250,7 @@ module Hermes
                 params[:senderaddress] = default_sender[:number]
                 params[:senderaddresstype] = 5
               when :msisdn
-                params[:senderaddress] = default_sender[:number]
+                params[:senderaddress] = normalize_number(default_sender[:number])
                 params[:senderaddresstype] = 1
             end
           end
@@ -263,6 +263,14 @@ module Hermes
             $1
           else
             number
+          end
+        end
+
+        def normalize_number(number)
+          if NorwegianPhone.international?(number)
+            number_to_msisdn(NorwegianPhone.normalize(number))
+          else
+            "47#{NorwegianPhone.normalize(number)}"
           end
         end
 

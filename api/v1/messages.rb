@@ -77,6 +77,7 @@ module Hermes
       case kind.to_sym
         when :sms
           message[:recipient_number] = params[:recipient_number]
+          halt 400, "Invalid recipient_number: #{params[:recipient_number]}" unless valid_mobile_number?(params[:recipient_number])
           message[:sender_number] = params[:sender_number]
           if (rate = params[:rate]) and rate.is_a?(Hash)
             message[:rate] = {
@@ -127,6 +128,12 @@ module Hermes
         grove_post[:tags] = ['inprogress']
         grove_post[:external_id] = Message.build_external_id(@provider, id)
         pebblebed_connector(@realm, current_identity).grove.post(grove_path, post: grove_post).to_json
+      end
+    end
+
+    helpers do
+      def valid_mobile_number?(number)
+        NorwegianPhone.number_valid?(NorwegianPhone.normalize(number))
       end
     end
 

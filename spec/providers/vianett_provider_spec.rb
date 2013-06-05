@@ -51,23 +51,54 @@ describe Providers::VianettProvider do
       stub_request(:post, 'https://smsc.vianett.no/V3/CPA/MT/MT.ashx').
         with(
           query: hash_including(
-            Tel: '1234',
+            Tel: '4915771742338',
             msg: 'Hello',
             username: 'ding',
             password: 'bat')
         ).to_return(
           status: 200,
           body: '<ack errorcode="200">OK</ack>')
-      result = provider.send_message!(recipient_number: '1234', text: "Hello")
+      result = provider.send_message!(recipient_number: '+49 (15) 771742338', text: "Hello")
       result.class.should be String
       result.present?.should eq true
+    end
+
+    it 'normalizes numbers' do
+      the_stub_1 = stub_request(:post, 'https://smsc.vianett.no/V3/CPA/MT/MT.ashx').
+        with(
+          query: hash_including(
+            Tel: '4915771742338',
+            senderaddress: "HeiDu",
+            senderaddresstype: "5",
+            msg: 'Hello',
+            password: 'bat',
+            username: 'ding')
+        ).to_return(
+          status: 200,
+          body: '<ack errorcode="200">OK</ack>')
+      provider.send_message!(recipient_number: '+49 (15) 771742338', :sender_number => "HeiDu", text: "Hello")
+      the_stub_1.should have_been_requested
+      the_stub_2 = stub_request(:post, 'https://smsc.vianett.no/V3/CPA/MT/MT.ashx').
+        with(
+          query: hash_including(
+            Tel: '4915771742338',
+            senderaddress: "4795126548",
+            senderaddresstype: "1",
+            msg: 'Hello',
+            password: 'bat',
+            username: 'ding')
+        ).to_return(
+          status: 200,
+          body: '<ack errorcode="200">OK</ack>')
+      provider.send_message!(recipient_number: '+49 (15) 771742338', :sender_number => "95126548", text: "Hello")
+      the_stub_2.should have_been_requested
     end
 
     it 'translates server internal error to exception' do
       stub_request(:post, 'https://smsc.vianett.no/V3/CPA/MT/MT.ashx').
         with(
           query: hash_including(
-            Tel: '1234',
+            Tel: '471234',
             msg: 'Hello',
             username: 'ding',
             password: 'bat')
@@ -92,7 +123,7 @@ describe Providers::VianettProvider do
       stub_request(:post, 'https://smsc.vianett.no/V3/CPA/MT/MT.ashx').
         with(
           query: hash_including(
-            Tel: '1234',
+            Tel: '471234',
             msg: 'Hello',
             username: 'ding',
             password: 'bat')
