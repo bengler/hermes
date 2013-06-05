@@ -36,6 +36,7 @@ GEM
     kgio (2.7.4)
     multi_json (1.3.7)
     nokogiri (1.5.5)
+    norwegian_phone (0.0.10)
     pathbuilder (0.0.2)
     pebblebed (0.0.26)
       activesupport
@@ -98,6 +99,7 @@ DEPENDENCIES
   excon (~> 0.12.0)
   httpclient
   nokogiri (~> 1.5.2)
+  norwegian_phone
   pebblebed (~> 0.0.9)
   pebbles-cors!
   pebbles-uid
