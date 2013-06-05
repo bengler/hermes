@@ -51,14 +51,14 @@ describe Providers::VianettProvider do
       stub_request(:post, 'https://smsc.vianett.no/V3/CPA/MT/MT.ashx').
         with(
           query: hash_including(
-            Tel: '1234',
+            Tel: '4915771742338',
             msg: 'Hello',
             username: 'ding',
             password: 'bat')
         ).to_return(
           status: 200,
           body: '<ack errorcode="200">OK</ack>')
-      result = provider.send_message!(recipient_number: '1234', text: "Hello")
+      result = provider.send_message!(recipient_number: '+49 (15) 771742338', text: "Hello")
       result.class.should be String
       result.present?.should eq true
     end
@@ -67,7 +67,7 @@ describe Providers::VianettProvider do
       stub_request(:post, 'https://smsc.vianett.no/V3/CPA/MT/MT.ashx').
         with(
           query: hash_including(
-            Tel: '1234',
+            Tel: '471234',
             msg: 'Hello',
             username: 'ding',
             password: 'bat')
@@ -92,7 +92,7 @@ describe Providers::VianettProvider do
       stub_request(:post, 'https://smsc.vianett.no/V3/CPA/MT/MT.ashx').
         with(
           query: hash_including(
-            Tel: '1234',
+            Tel: '471234',
             msg: 'Hello',
             username: 'ding',
             password: 'bat')
