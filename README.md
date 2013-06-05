@@ -26,9 +26,7 @@ Create the file `config/realms/test.yml` with the content:
       provider: PSWinCom
       user: test
       password: myPassword
-      default_sender_country: NO
       default_sender_number: Test
-      default_prefix: 47
     email:
       provider: MailGun
       api_key: key-2340i230+4230423094i3
