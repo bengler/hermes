@@ -74,13 +74,15 @@ module Hermes
             end
             raise APIFailureError.new(message, response.status)
         end
+      rescue HTTPClient::TimeoutError
+        raise Timeout::Error, "Mailgun API timeout while sending"
       end
 
       # Test whether provider is functional. Returns true or false.
       def test!
         begin
           send_message!(:recipient_email => '_', :subject => 'meh')
-        rescue Excon::Errors::Error
+        rescue Excon::Errors::Error, Timeout::Error
           false
         rescue MessageRejectedError, RecipientRejectedError
           true

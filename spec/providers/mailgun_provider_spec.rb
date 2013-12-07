@@ -81,6 +81,26 @@ describe Providers::MailGunProvider do
       }
     end
 
+    it "translates HTTP timeout error into Timeout::Error" do
+      [
+        HTTPClient::ConnectTimeoutError,
+        HTTPClient::SendTimeoutError,
+        HTTPClient::ReceiveTimeoutError
+      ].each do |exception_class|
+        stub_request(:post, "https://api:foo@api.mailgun.net/v2/test.com/messages").
+          to_return(
+            status: 400,
+            body: ->(*args) {
+              raise exception_class.new("bleh")
+            })
+
+        -> {
+          provider.send_message!(
+            recipient_email: 'foo@bar.com', text: 'test')
+        }.should raise_error(Timeout::Error)
+      end
+    end
+
   end
 
   describe '#parse_receipt' do
