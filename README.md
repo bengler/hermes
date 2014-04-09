@@ -43,8 +43,24 @@ See [this reference](./PROVIDERS.md) for details about available providers for t
 
 With the example above, it's possible to send SMS and email for the `test` realm. We may then post messages with the API, via `POST` requests:
 
-* To send email, `POST` to `/api/hermes/v1/test/messages/email`.
-* To send SMS messages, `POST` to `/api/hermes/v1/test/messages/sms`.
+### Email
+
+To send email, `POST` to `/api/hermes/v1/test/messages/email`. With the [pebblebed](//github.com/bengler/pebblebed) gem:
+
+```ruby
+connector.hermes.post("/endeavor/messages/email", {
+  recipient_email: 'foo@example.com',
+  sender_email: 'no-reply@example.org',
+  subject: "You are hereby invited",
+  text: "You are hereby invited to my awesome party!",
+  html: "You are hereby invited to my <em>awesome</em> party!",
+  path: 'acmecorp.partyapp.invitations'
+})
+```
+
+### SMS
+
+To send SMS messages, `POST` to `/api/hermes/v1/test/messages/sms`.
 
 ## Testing and staging
 
