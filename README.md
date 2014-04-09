@@ -37,7 +37,7 @@ Create the file `config/realms/test.yml` with the content:
 
 The ``session`` key must be a god session that matches the realm in Checkpoint.
 
-See [providers.md](./providers.md) for details about available providers for the `sms` and `email` keys.
+See [this reference](./PROVIDERS.md) for details about available providers for the `sms` and `email` keys.
 
 ## Sending messages
 
