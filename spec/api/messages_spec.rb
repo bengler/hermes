@@ -4,6 +4,7 @@ include WebMock::API
 include Hermes
 
 describe 'Messages' do
+  include Pebblebed::RSpecHelper
 
   def app
     Hermes::V1
@@ -22,6 +23,7 @@ describe 'Messages' do
 
   before :each do
     Configuration.instance.add_realm('test', realm)
+    god!(:realm => 'test')
   end
 
   describe "GET /:realm/messages/:uid" do

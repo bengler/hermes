@@ -16,6 +16,8 @@ require 'excon'
 require 'webmock/rspec'
 require 'stringio'
 require 'pp'
+require 'pebblebed/rspec_helper'
+
 
 set :environment, :test
 

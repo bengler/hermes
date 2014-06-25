@@ -4,6 +4,7 @@ include WebMock::API
 include Hermes
 
 describe 'SMS' do
+  include Pebblebed::RSpecHelper
 
   def app
     Hermes::V1
@@ -25,6 +26,7 @@ describe 'SMS' do
 
   before :each do
     Configuration.instance.add_realm('test', realm)
+    god!(:realm => 'test')
   end
 
   describe "POST /:realm/messages/sms" do

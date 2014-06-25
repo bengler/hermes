@@ -4,6 +4,7 @@ include WebMock::API
 include Hermes
 
 describe 'Email' do
+  include Pebblebed::RSpecHelper
 
   def app
     Hermes::V1
@@ -22,6 +23,7 @@ describe 'Email' do
 
   before :each do
     Configuration.instance.add_realm('test', realm)
+    god!(:realm => 'test')
   end
 
   describe "POST /:realm/messages/email" do
@@ -59,8 +61,8 @@ describe 'Email' do
         :text => 'Yip',
         :html => '<p>Yip</p>'
       }
-      last_response.status.should eq 200
 
+      last_response.status.should eq 200
       grove_post_stub.should have_been_requested
     end
 
