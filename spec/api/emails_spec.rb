@@ -4,7 +4,6 @@ include WebMock::API
 include Hermes
 
 describe 'Email' do
-  include Pebblebed::RSpecHelper
 
   def app
     Hermes::V1

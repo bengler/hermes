@@ -35,6 +35,7 @@ RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.include StubbingHelper
   config.include RackHelper
+  config.include Pebblebed::RSpecHelper
 
   config.before :each do
     WebMock.reset!
