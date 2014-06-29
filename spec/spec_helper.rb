@@ -16,6 +16,8 @@ require 'excon'
 require 'webmock/rspec'
 require 'stringio'
 require 'pp'
+require 'pebblebed/rspec_helper'
+
 
 set :environment, :test
 
@@ -33,6 +35,7 @@ RSpec.configure do |config|
   config.include Rack::Test::Methods
   config.include StubbingHelper
   config.include RackHelper
+  config.include Pebblebed::RSpecHelper
 
   config.before :each do
     WebMock.reset!

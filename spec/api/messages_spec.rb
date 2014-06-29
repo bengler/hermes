@@ -22,6 +22,7 @@ describe 'Messages' do
 
   before :each do
     Configuration.instance.add_realm('test', realm)
+    god!(:realm => 'test')
   end
 
   describe "GET /:realm/messages/:uid" do

@@ -25,6 +25,7 @@ describe 'SMS' do
 
   before :each do
     Configuration.instance.add_realm('test', realm)
+    god!(:realm => 'test')
   end
 
   describe "POST /:realm/messages/sms" do
