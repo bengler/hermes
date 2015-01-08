@@ -19,9 +19,8 @@ module Hermes
     # @required [String] realm The realm sending messages for.
     # @status 200 The twenty latest messages
     get '/:realm/messages/latest' do |realm|
-      if ENV['RACK_ENV'] == "production"
-        halt 403, "Not allowed in production environment"
-      end
+      require_god
+      halt 403, "Not allowed in production environment" if ENV['RACK_ENV'] == "production"
       [200, Message.find(realm, "post.hermes_message:*").to_json]
     end
 
@@ -38,8 +37,8 @@ module Hermes
     get '/:realm/messages/:uid' do |realm, uid|
       require_god
       message = Message.get(realm, uid)
-      return halt 404, "No such message" unless message
-      halt 200, message.to_json
+      halt 404, "No such message" unless message
+      [200, message.to_json]
     end
 
     # @apidoc
