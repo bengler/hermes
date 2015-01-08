@@ -22,7 +22,7 @@ module Hermes
       if ENV['RACK_ENV'] == "production"
         halt 403, "Not allowed in production environment"
       end
-      Message.find(realm, "post.hermes_message:*").to_json
+      [200, Message.find(realm, "post.hermes_message:*").to_json]
     end
 
     # @apidoc
