@@ -63,6 +63,7 @@ module Hermes
     # @optional [String] force A recipient mobile number or email address to send the message to, for testing purposes. Overrides what's given in the recipient parameters.
     # @optional [String] callback_url A URL which will be called when the message is delivered.
     # @optional [String] path Grove path to post internal message to.
+    # @optional [String] batch_label Arbitrary handle decided upon by the client. Use it to later look up the send status of a collection messages.
     # @status 200 The message as stored in Grove with status of the message stored in the 'tags' field.
     post '/:realm/messages/:kind' do |realm, kind|
       require_god
@@ -90,43 +91,24 @@ module Hermes
           message[:html] = params[:html]
       end
       message.select! { |k, v| !v.blank? }
-
-      raw_message = message.dup
-      raw_message.delete(:callback_url)
-      raw_message[:receipt_url] = "http://#{request.host}:#{request.port}/api/hermes/v1/#{realm}/receipt/#{kind}"
-      if (forced_value = params[:force])
-        case kind
-          when 'email'
-            raw_message[:recipient_email] = forced_value
-          when 'sms'
-            raw_message[:recipient_number] = forced_value
-        end
-      end
+      message[:receipt_url] = "http://#{request.host}:#{request.port}/api/hermes/v1/#{realm}/receipt/#{kind}"
 
       if params[:force]
-        raw_message[:recipient_email] = params[:force] if kind == "email"
-        raw_message[:recipient_number] = params[:force] if kind == "sms"
+        message[:recipient_email] = params[:force] if kind == 'email'
+        message[:recipient_number] = params[:force] if kind == 'sms'
       end
 
-      grove_path = "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.')
-      grove_post = {
-        document: message.merge(kind: kind),
-        restricted: true
+      document = message.merge(kind: kind)
+      document[:batch_label] = params[:batch_label] if params[:batch_label]
+      post = {
+        document: document,
+        restricted: true,
+        tags: ['queued']
       }
 
-      begin
-        id = @provider.send_message!(raw_message)
-      rescue ProviderError
-        logger.info("Provider failed to send message (#{kind} via #{@provider.class.name}): #{message.inspect}")
-        grove_post[:tags] = ['failed']
-        pebblebed_connector(@realm, current_identity).grove.post(grove_path, post: grove_post)
-        raise
-      else
-        logger.info("Sent message (#{kind} via #{@provider.class.name}): #{message.inspect}")
-        grove_post[:tags] = ['inprogress']
-        grove_post[:external_id] = Message.build_external_id(@provider, id)
-        pebblebed_connector(@realm, current_identity).grove.post(grove_path, post: grove_post).to_json
-      end
+      path = "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.')
+      result = pebblebed_connector(@realm, current_identity).grove.post(path, post: post)
+      [200, result.to_json]
     end
 
   end
