@@ -15,7 +15,7 @@ gem 'httpclient'
 gem 'pebbles-uid'
 
 group :test do
-  gem 'rspec', '~> 2.8'
+  gem 'rspec', '~> 2.99.0'
   gem 'rack-test'
   gem 'simplecov', :require => false
   gem 'webmock'
