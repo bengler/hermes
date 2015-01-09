@@ -1,6 +1,5 @@
 require 'delegate'
 require 'deepstruct'
-
 require 'pebbles-uid'
 
 module Hermes
@@ -8,6 +7,7 @@ module Hermes
 
     VALID_STATUSES = [
       :failed,
+      :queued,
       :inprogress,
       :delivered,
       :unknown
