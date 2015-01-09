@@ -20,123 +20,62 @@ describe 'Email' do
     })
   end
 
+  let :email_params do
+    {
+      recipient_email: 'test@test.com',
+      sender_email: 'no-reply@test.com',
+      subject: 'Foo',
+      text: 'Yip',
+      html: '<p>Yip</p>'
+    }
+  end
+
   before :each do
     Configuration.instance.add_realm('test', realm)
     god!(:realm => 'test')
   end
 
+
   describe "POST /:realm/messages/email" do
 
-    it 'accepts message' do
-      grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test").
-        to_return(
-          status: 200,
-          body: {
-            post: {
-              uid: "post.hermes_message:test$1234",
-              document: {
-                body: "fofo",
-                callback_url: "http://example.com/"
-              },
-              tags: ["in_progress"]
-            }
-          }.to_json)
+    it 'queues a message' do
+      allow_any_instance_of(Pebblebed::GenericClient).to receive(:post) do |arg1, arg2|
+        arg1.should eq '/posts/post.hermes_message:test'
+        arg2[:post][:document][:recipient_email].should eq 'test@test.com'
+        arg2[:post][:document][:sender_email].should eq 'no-reply@test.com'
+        arg2[:post][:document][:subject].should eq 'Foo'
+        arg2[:post][:document][:text].should eq 'Yip'
+        arg2[:post][:document][:html].should eq '<p>Yip</p>'
+        arg2[:post][:document][:kind].should eq 'email'
+        arg2[:post][:document][:receipt_url].should eq 'http://example.org:80/api/hermes/v1/test/receipt/email'
+        arg2[:post][:restricted].should be true
+        arg2[:post][:tags].should eq ['queued']
+      end
 
-      Providers::NullProvider.any_instance.
-        should_receive(:send_message!).
-        with(
-          hash_including(
-            recipient_email: 'test@test.com',
-            subject: "Foo",
-            text: 'Yip',
-            html: '<p>Yip</p>')
-        ).
-        once.
-        and_return("1234")
-
-      post "/test/messages/email", {
-        :recipient_email => 'test@test.com',
-        :subject => "Foo",
-        :text => 'Yip',
-        :html => '<p>Yip</p>'
-      }
-
+      post '/test/messages/email', email_params
       last_response.status.should eq 200
-      grove_post_stub.should have_been_requested
     end
 
-    it 'returns 400 on if recipient is rejected' do
-      grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test").
-        to_return(
-          status: 200,
-          body: {
-            post: {
-              uid: "post.hermes_message:test$1234",
-              document: {
-                body: "fofo",
-                callback_url: "http://example.com/"
-              },
-              tags: ["failed"]
-            }
-          }.to_json)
 
-      Providers::NullProvider.any_instance.
-        should_receive(:send_message!) {
-          raise RecipientRejectedError.new("test@test.com", "Is not valid")
-        }.once
+    it "supports force param" do
+      allow_any_instance_of(Pebblebed::GenericClient).to receive(:post) do |arg1, arg2|
+        arg1.should eq '/posts/post.hermes_message:test'
+        arg2[:post][:document][:recipient_email].should eq 'jan@banan.com'
+      end
 
-      post "/test/messages/email", {
-        :recipient_email => 'test@test.com',
-        :subject => "Foo",
-        :text => 'Yip',
-        :html => '<p>Yip</p>'
-      }
-
-      last_response.status.should eq 400
-      last_response.body.should satisfy { |v|
-        v =~ /is not valid/i
-      }
-
-      grove_post_stub.should have_been_requested
+      post '/test/messages/email', email_params.merge(force: 'jan@banan.com')
+      last_response.status.should eq 200
     end
 
-    it "supports test mode 'force'" do
-      grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test").
-        to_return(
-          status: 200,
-          body: {
-            post: {
-              uid: "post.hermes_message:test$1234",
-              document: {
-                body: "fofo",
-                callback_url: "http://example.com/"
-              },
-              tags: ["in_progress"]
-            }
-          }.to_json)
 
-      Providers::NullProvider.any_instance.
-        should_receive(:send_message!).
-        with(
-          hash_including(
-            recipient_email: 'jan@banan.com',
-            subject: "Foo",
-            text: 'Yip',
-            html: '<p>Yip</p>')
-        ).
-        once.
-        and_return("1234")
+    it 'supports batch_label param' do
+      allow_any_instance_of(Pebblebed::GenericClient).to receive(:post) do |arg1, arg2|
+        arg1.should eq '/posts/post.hermes_message:test'
+        arg2[:post][:document][:batch_label].should eq 'stuff_sent_today'
+      end
 
-      post "/test/messages/email", {
-        force: 'jan@banan.com',
-        recipient_email: 'test@test.com',
-        subject: "Foo",
-        text: 'Yip',
-        html: '<p>Yip</p>'
-      }
+      post '/test/messages/email', email_params.merge(batch_label: 'stuff_sent_today')
       last_response.status.should eq 200
-
-      grove_post_stub.should have_been_requested
     end
 
   end

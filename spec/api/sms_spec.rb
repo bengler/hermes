@@ -23,6 +23,14 @@ describe 'SMS' do
     })
   end
 
+  let(:sms_params) {
+    {
+      recipient_number: '12345678',
+      sender_number: '555',
+      text: 'Yip'
+    }
+  }
+
   before :each do
     Configuration.instance.add_realm('test', realm)
     god!(:realm => 'test')
@@ -37,37 +45,32 @@ describe 'SMS' do
       last_response.status.should == 404
     end
 
-    it 'accepts message' do
-      grove_post_stub = stub_request(:post, "http://example.org/api/grove/v1/posts/post.hermes_message:test").
-        to_return(
-          status: 200,
-          body: {
-            post: {
-              uid: "post.hermes_message:test$1234",
-              document: {
-                body: "fofo",
-                callback_url: "http://example.com/"
-              },
-              tags: ["in_progress"]
-            }
-          }.to_json)
+    it 'queues a message' do
+      allow_any_instance_of(Pebblebed::GenericClient).to receive(:post) do |arg1, arg2|
+        arg1.should eq '/posts/post.hermes_message:test'
+        arg2[:post][:document][:recipient_number].should eq sms_params[:recipient_number]
+        arg2[:post][:document][:sender_number].should eq sms_params[:sender_number]
+        arg2[:post][:document][:text].should eq sms_params[:text]
+        arg2[:post][:document][:kind].should eq 'sms'
+        arg2[:post][:document][:receipt_url].should eq 'http://example.org:80/api/hermes/v1/test/receipt/sms'
+        arg2[:post][:restricted].should be true
+        arg2[:post][:tags].should eq ['queued']
+      end
 
-      Providers::NullProvider.any_instance.
-        should_receive(:send_message!).
-        with(
-          hash_including(
-            recipient_number: '12345678',
-            text: 'Yip')
-        ).
-        once.
-        and_return("1234")
-
-      post "/test/messages/sms",
-        recipient_number: '12345678',
-        text: 'Yip'
+      post "/test/messages/sms", sms_params
       last_response.status.should eq 200
+    end
 
-      grove_post_stub.should have_been_requested
+    it 'supports rate param' do
+      rate_params = {currency: 'NOK', amount: '10'}
+      allow_any_instance_of(Pebblebed::GenericClient).to receive(:post) do |arg1, arg2|
+        arg1.should eq '/posts/post.hermes_message:test'
+        arg2[:post][:document][:rate].should eq rate_params
+        arg2[:post][:tags].should eq ['queued']
+      end
+
+      post "/test/messages/sms", sms_params.merge(rate: rate_params)
+      last_response.status.should eq 200
     end
 
   end
