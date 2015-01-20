@@ -7,6 +7,17 @@ GIT
       pebblebed
       rack
 
+GIT
+  remote: https://github.com/bengler/pebbles-river.git
+  revision: f2d4764ef8a9617513906bcf74880e85df7bccbd
+  specs:
+    pebbles-river (0.2.1)
+      activesupport (>= 3.0)
+      bunny (= 1.6.0.rc2)
+      mercenary (~> 0.3.3)
+      pebblebed (~> 0.3.0)
+      servolux (~> 0.10)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -50,12 +61,6 @@ GEM
       pathbuilder
       queryparams
       yajl-ruby
-    pebbles-river (0.2.1)
-      activesupport (>= 3.0)
-      bunny (= 1.6.0.rc2)
-      mercenary (~> 0.3.3)
-      pebblebed (~> 0.3.0)
-      servolux (~> 0.10)
     pebbles-uid (0.0.9)
     queryparams (0.0.3)
     rack (1.5.2)
@@ -110,7 +115,7 @@ DEPENDENCIES
   nokogiri (~> 1.5.2)
   pebblebed (~> 0.3.1)
   pebbles-cors!
-  pebbles-river
+  pebbles-river (~> 0.2.1)!
   pebbles-uid
   rack (~> 1.4)
   rack-contrib (~> 1.1.0)
