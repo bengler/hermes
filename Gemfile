@@ -8,7 +8,7 @@ gem "activesupport", '~> 3.2.8'
 gem 'yajl-ruby', '~> 1.1.0', :require => "yajl"
 gem 'pebblebed', '~> 0.3.1'
 gem 'pebbles-cors', git: 'https://github.com/bengler/pebbles-cors.git'
-gem 'pebbles-river'
+gem 'pebbles-river', '~> 0.2.1', git: 'https://github.com/bengler/pebbles-river.git'
 gem 'nokogiri', '~> 1.5.2'
 gem 'excon', '~> 0.12.0'
 gem 'crack', '~> 0.3.2'
