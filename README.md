@@ -64,9 +64,9 @@ connector.hermes.post("/endeavor/messages/email", {
 To send SMS messages, `POST` to `/api/hermes/v1/test/messages/sms`.
 
 ### Backend behavior
-
+or `dropped` might also appear, depending on the provider feedback.
 Upon receiving a post, Hermes writes a `post.hermes_message` to Grove tagged `queued`, and returns 201.
-Asynchronously, a daemon picks up created `post.hermes_message`s, tags it with `inprogress` and routes the message to its correct provider. Upon receiving a callback from the provider, the `post.hermes_message` is tagged with either `delivered` or `failed` depending on provider result.
+Asynchronously, a daemon picks up created `post.hermes_message`s, tags it with `inprogress` and routes the message to its correct provider. Upon receiving a callback from the provider, the `post.hermes_message` is tagged with either `delivered` or `failed` depending on provider result. Other tags such as `bounced` or `dropped` might also appear, check out any specific provider implementation for details.
 
 If the client included a sensible value in the `batch_label` parameter when posting a message, this parameter will be written to `post.hermes_message.document.batch_label` and can thus be used for keeping track of the send status on a collection of messages. The `batch_label` field is not unique or prefixed in any way, so the client is advised to come up with suitably narrow label.
 
