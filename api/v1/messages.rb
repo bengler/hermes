@@ -18,10 +18,10 @@ module Hermes
     # @example /api/hermes/v1/apdm/messages/latest
     # @required [String] realm The realm sending messages for.
     # @status 200 The twenty latest messages
-    get '/:realm/messages/latest' do |realm|
+    get '/:realm/messages/latest' do |realm_name|
       require_god
       halt 403, "Not allowed in production environment" if ENV['RACK_ENV'] == "production"
-      [200, Message.find(realm, "post.hermes_message:*").to_json]
+      [200, Message.find(realm_name, "post.hermes_message:*").to_json]
     end
 
     # @apidoc
@@ -34,9 +34,9 @@ module Hermes
     # @required [String] realm The realm sending messages for.
     # @required [String] uid The message UID
     # @status 200 The message as stored in Grove with status of the message stored in the 'tags' field.
-    get '/:realm/messages/:uid' do |realm, uid|
+    get '/:realm/messages/:uid' do |realm_name, uid|
       require_god
-      message = Message.get(realm, uid)
+      message = Message.get(realm_name, uid)
       halt 404, "No such message" unless message
       [200, message.to_json]
     end
@@ -65,15 +65,16 @@ module Hermes
     # @optional [String] path Grove path to post internal message to.
     # @optional [String] batch_label Arbitrary handle decided upon by the client. Use it to later look up the send status of a collection messages.
     # @status 200 The message as stored in Grove with status of the message stored in the 'tags' field.
-    post '/:realm/messages/:kind' do |realm, kind|
+    post '/:realm/messages/:kind' do |realm_name, kind|
       require_god
 
-      @realm, @provider = realm_and_provider(realm, kind)
-
+      realm = CONFIG.realm(realm_name)
+      host = request.host
       message = {
         text: params[:text],
         callback_url: params[:callback_url]
       }
+
       case kind.to_sym
         when :sms
           message[:recipient_number] = params[:recipient_number]
@@ -91,7 +92,7 @@ module Hermes
           message[:html] = params[:html]
       end
       message.select! { |k, v| !v.blank? }
-      message[:receipt_url] = "http://#{request.host}:#{request.port}/api/hermes/v1/#{realm}/receipt/#{kind}"
+      message[:receipt_url] = "http://#{host}:#{request.port}/api/hermes/v1/#{realm.name}/receipt/#{kind}"
 
       if params[:force]
         message[:recipient_email] = params[:force] if kind == 'email'
@@ -106,8 +107,8 @@ module Hermes
         tags: ['queued']
       }
 
-      path = "/posts/post.hermes_message:" + [@realm.name, params[:path]].compact.join('.')
-      result = pebblebed_connector(@realm, current_identity).grove.post(path, post: post)
+      path = "/posts/post.hermes_message:" + [realm.name, params[:path]].compact.join('.')
+      result = PebblesProxy.connector_for(realm, current_identity, host).grove.post(path, post: post)
       [200, result.to_json]
     end
 

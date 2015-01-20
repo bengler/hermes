@@ -37,14 +37,15 @@ module Hermes
     # @required [String] realm The realm sending messages for.
     # @required [String] kind The kind of message, 'email', 'sms'
     # @status 200
-    get '/:realm/receipt/:kind' do |realm, kind|
-      do_receipt(realm, kind, request, params)
+    get '/:realm/receipt/:kind' do |realm_name, kind|
+      do_receipt(realm_name, kind, request, params)
     end
 
     private
 
-      def do_receipt(realm, kind, request, params)
-        realm, provider = realm_and_provider(realm, kind)
+      def do_receipt(realm_name, kind, request, params)
+        realm = CONFIG.realm(realm_name)
+        provider = realm.provider(kind)
 
         result = provider.parse_receipt(request)
         logger.info("Receipt status: #{result.inspect}")
