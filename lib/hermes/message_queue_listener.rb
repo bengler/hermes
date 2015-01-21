@@ -13,14 +13,12 @@ module Hermes
 
     # we only subscribe to new posts (event == 'create') so messages will only appear here once
     def consider(payload)
-      puts("Consider #{payload}")
       post = payload['attributes']
       post = fix_tags!(post)
       unless post['tags'].include? 'queued'
         LOGGER.error("Message #{post['uid']} not queued. That's odd.")
         return
       end
-      puts("Consider #{post}")
 
       message = post['document'].dup
       message.delete('callback_url')
