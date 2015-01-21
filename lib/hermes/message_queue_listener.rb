@@ -4,6 +4,8 @@ require 'deepstruct'
 
 module Hermes
 
+  # Listens for a new post.hermes_message, looks up provider,
+  # dispatches, and updates the grove post with a tag reflecting new status
   class MessageQueueListener
 
     def call(message)
@@ -11,7 +13,7 @@ module Hermes
       nil
     end
 
-    # we only subscribe to new posts (event == 'create') so messages will only appear here once
+
     def consider(payload)
       post = payload['attributes']
       post = fix_tags!(post)
@@ -20,25 +22,21 @@ module Hermes
         return
       end
 
-      message = post['document'].dup
-      message.delete('callback_url')
-
-      realm_name = Pebbles::Uid.new(post['uid']).realm
-      realm = CONFIG.realm(realm_name)
+      message = post['document']
+      realm = CONFIG.realm(Pebbles::Uid.new(post['uid']).realm)
       provider = realm.provider(message['kind'])
-      grove = realm.pebblebed_connector.grove
-      grove_path = "/posts/#{post['uid']}"
 
       begin
         id = provider.send_message!(message)
       rescue ProviderError
         post['tags'] << 'failed'
-        grove.post(grove_path, post: post)
         raise
       else
         post['tags'] << 'inprogress'
         post['external_id'] = Message.build_external_id(provider, id)
-        grove.post(grove_path, post: post).to_json
+      ensure
+        grove_path = "/posts/#{post['uid']}"
+        realm.pebblebed_connector.grove.post(grove_path, post: post)
       end
     end
 
