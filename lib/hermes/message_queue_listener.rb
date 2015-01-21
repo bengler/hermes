@@ -26,19 +26,19 @@ module Hermes
       realm_name = Pebbles::Uid.new(post['uid']).realm
       realm = CONFIG.realm(realm_name)
       provider = realm.provider(message['kind'])
-      connector = realm.pebblebed_connector
+      grove = realm.pebblebed_connector.grove
       grove_path = "/posts/#{post['uid']}"
 
       begin
         id = provider.send_message!(message)
       rescue ProviderError
         post['tags'] << 'failed'
-        connector.grove.post(grove_path, post: post)
+        grove.post(grove_path, post: post)
         raise
       else
         post['tags'] << 'inprogress'
         post['external_id'] = Message.build_external_id(provider, id)
-        connector.grove.post(grove_path, post: post).to_json
+        grove.post(grove_path, post: post).to_json
       end
     end
 
