@@ -22,6 +22,7 @@ describe 'MessageQueueListener' do
           'kind' => 'sms'
         },
         'uid' => uid,
+        'restricted' => true,
         'tags_vector' => "'queued'"
       }
     }
@@ -34,6 +35,7 @@ describe 'MessageQueueListener' do
       expect_any_instance_of(Pebblebed::GenericClient).to receive(:post) do |path, hash|
         path.should eq expected_path
         hash[:post]['document'].should eq sms_payload['attributes']['document']
+        hash[:post]['restricted'].should be true
         hash[:post]['tags'].should eq ["queued", "inprogress"]
       end
       subject.consider sms_payload
