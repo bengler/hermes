@@ -183,9 +183,7 @@ describe 'Receiving' do
 
     it 'it rejects incomplete message' do
       Providers::NullProvider.any_instance.
-        should_receive(:parse_message).once.and_return {
-          raise InvalidMessageError
-        }
+        should_receive(:parse_message).once.and_raise(Hermes::InvalidMessageError)
 
       post_body "/test/incoming/sms", {}, %{<something></something>}
       last_response.status.should eq 400
@@ -280,9 +278,7 @@ describe 'Receiving' do
 
     it 'it rejects incomplete message' do
       Providers::NullProvider.any_instance.
-        should_receive(:parse_message).once.and_return {
-          raise InvalidMessageError
-        }
+        should_receive(:parse_message).once.and_raise(Hermes::InvalidMessageError)
 
       post_body "/test/incoming/email", {}, %{<something></something>}
       last_response.status.should eq 400
