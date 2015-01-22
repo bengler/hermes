@@ -46,9 +46,8 @@ module Hermes
       def do_receipt(realm_name, kind, request, params)
         realm = CONFIG.realm(realm_name)
         provider = realm.provider(kind)
-
         result = provider.parse_receipt(request)
-        logger.info("Receipt status: #{result.inspect}")
+
         if result[:id] and result[:status]
           if (message = Message.find_by_external_id(
             Message.build_external_id(provider, result[:id]), realm.name))
