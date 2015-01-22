@@ -14,16 +14,17 @@ describe 'MessageQueueListener' do
 
   let(:sms_payload) {
     {
+      'event' => 'create',
       'attributes' => {
-        'document' => {
-          'sender_number' => "555-callme",
-          'recipient_number' => "555-goaway",
-          'text' => 'sup',
-          'kind' => 'sms'
+        document: {
+          sender_number: "555-callme",
+          recipient_number: "555-goaway",
+          text: 'sup',
+          kind: 'sms'
         },
-        'uid' => uid,
-        'restricted' => true,
-        'tags_vector' => "'queued'"
+        uid: uid,
+        restricted: true,
+        tags_vector: "'queued'"
       }
     }
   }
@@ -34,9 +35,9 @@ describe 'MessageQueueListener' do
       expected_path = "/posts/#{uid}"
       expect_any_instance_of(Pebblebed::GenericClient).to receive(:post) do |path, hash|
         path.should eq expected_path
-        hash[:post]['document'].should eq sms_payload['attributes']['document']
-        hash[:post]['restricted'].should be true
-        hash[:post]['tags'].should eq ["queued", "inprogress"]
+        hash[:post][:document].should eq sms_payload['attributes'][:document]
+        hash[:post][:restricted].should be true
+        hash[:post][:tags].should eq ["queued", "inprogress"]
       end
       subject.consider sms_payload
     end
