@@ -99,9 +99,6 @@ module Hermes
         message[:recipient_number] = params[:force] if kind == 'sms'
       end
 
-      message[:recipient_email] = 'thomas@bengler.no' if kind == 'email'
-      message[:recipient_number] = '93606449' if kind == 'sms'
-
       document = message.merge(kind: kind)
       document[:batch_label] = params[:batch_label] if params[:batch_label]
       post = {
