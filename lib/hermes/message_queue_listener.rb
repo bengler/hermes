@@ -9,13 +9,12 @@ module Hermes
   class MessageQueueListener
 
     def call(message)
-      consider message.payload
+      handle(message.payload) if message.payload['event'] == 'create'
       nil
     end
 
 
-    def consider(payload)
-      return unless payload['event'] == 'create'
+    def handle(payload)
       post = payload['attributes'].deep_symbolize_keys
       post = fix_tags!(post)
 
