@@ -13,9 +13,9 @@ adapter = Class.new do
   def configure_supervisor(supervisor)
     options = {
       name: 'hermes.queue',
-      :path => '**',
-      :klass => 'post.hermes_message',
-      :event => 'create',
+      path: '**',
+      klass: 'post.hermes_message',
+      event: 'create',
     }
     supervisor.add_listener(Hermes::MessageQueueListener.new, options)
   end
