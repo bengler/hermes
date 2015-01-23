@@ -9,8 +9,8 @@ module Hermes
     # @category Hermes/Receiving
     # @path /api/hermes/v1/:realm/incoming/:kind
     # @http GET
-    get '/:realm/incoming/:kind' do |realm, kind|
-      do_incoming(realm, kind)
+    get '/:realm/incoming/:kind' do |realm_name, kind|
+      do_incoming(realm_name, kind)
     end
 
     # @apidoc
@@ -19,14 +19,17 @@ module Hermes
     # @category Hermes/Receiving
     # @path /api/hermes/v1/:realm/incoming/:kind
     # @http POST
-    post '/:realm/incoming/:kind' do |realm, kind|
-      do_incoming(realm, kind)
+    post '/:realm/incoming/:kind' do |realm_name, kind|
+      do_incoming(realm_name, kind)
     end
+
 
     private
 
       def do_incoming(realm_name, kind)
-        realm, provider = realm_and_provider(realm_name, kind)
+        realm = CONFIG.realm(realm_name)
+        provider = realm.provider(kind)
+
         unless provider.respond_to?(:parse_message)
           halt 400, "Provider does not support handling incoming messages"
         end

@@ -36,6 +36,9 @@ RSpec.configure do |config|
   config.include StubbingHelper
   config.include RackHelper
   config.include Pebblebed::RSpecHelper
+  config.mock_with :rspec do |mocks|
+    mocks.yield_receiver_to_any_instance_implementation_blocks = false
+  end
 
   config.before :each do
     WebMock.reset!

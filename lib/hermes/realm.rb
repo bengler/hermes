@@ -44,8 +44,7 @@ module Hermes
     end
 
     def pebblebed_connector
-      Pebblebed::Connector.new(
-        Hermes::Configuration.instance.realm(@name).session_key, host: HostContext.host)
+      PebblesProxy.connector(@session_key, HostContext.host)
     end
 
     def provider(kind)

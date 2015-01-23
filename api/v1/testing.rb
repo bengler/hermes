@@ -14,9 +14,10 @@ module Hermes
     # @required [String] kind The implementation kind: 'sms' or 'email'
     # @status 200 Provider is fine
     # @status 500 Provider unavailable
-    post '/:realm/test/:kind' do |realm, kind|
-      @realm, @provider = realm_and_provider(realm, kind)
-      if @provider.test!
+    post '/:realm_name/test/:kind' do |realm_name, kind|
+      realm = CONFIG.realm(realm_name)
+      provider = realm.provider(kind)
+      if provider.test!
         halt 200, "Provider is fine"
       else
         halt 500, "Provider unavailable"

@@ -31,34 +31,18 @@ module Hermes
     end
 
     before do
-      @configuration = Configuration.instance
-
       LOGGER.info "Processing #{request.url}"
       LOGGER.info "Params: #{params.inspect}"
-
       cache_control :private, :no_cache, :no_store, :must_revalidate
       headers "Content-Type" => "application/json; charset=utf8"
     end
 
     private
 
-      def realm_and_provider(realm_name, provider_kind)
-        realm = @configuration.realm(realm_name)
-        provider = realm.provider(provider_kind)
-        return realm, provider
-      end
 
-      def pebblebed_connector(realm, checkpoint_identity)
-        unless realm.name == checkpoint_identity.realm
-          halt 500, "Wrong realm #{realm.name.inspect}, " \
-            "expected #{checkpoint_identity.realm.inspect}"
-        end
-        Pebblebed::Connector.new(realm.session_key, host: request.host)
-      end
-
-      def logger
-        LOGGER
-      end
+    def logger
+      LOGGER
+    end
 
   end
 end
