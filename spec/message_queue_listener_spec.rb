@@ -14,7 +14,6 @@ describe 'MessageQueueListener' do
 
   let(:sms_payload) {
     {
-      'event' => 'create',
       'attributes' => {
         document: {
           sender_number: "555-callme",
@@ -39,7 +38,7 @@ describe 'MessageQueueListener' do
         hash[:post][:restricted].should be true
         hash[:post][:tags].should eq ["queued", "inprogress"]
       end
-      subject.consider sms_payload
+      subject.handle(sms_payload)
     end
 
   end
