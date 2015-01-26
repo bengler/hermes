@@ -18,7 +18,7 @@ module Hermes
       post = payload['attributes'].deep_symbolize_keys
       post = fix_tags!(post)
 
-      return unless post[:tags] = ['queued']
+      return unless post[:tags] == ['queued']
       # unless post[:tags].include? 'queued'
       #   LOGGER.error("Message #{post[:uid]} not queued. That's odd.")
       #   return
@@ -39,7 +39,18 @@ module Hermes
         post[:external_id] = Message.build_external_id(provider, id)
       ensure
         grove_path = "/posts/#{post[:uid]}"
-        realm.pebblebed_connector.grove.post(grove_path, post: post)
+        begin
+          realm.pebblebed_connector.grove.post(grove_path, post: post)
+        rescue Pebblebed::HttpError => e
+          if e.message.include? 'Post has been modified'
+            # refetch
+            message = Message.get(realm.name, post[:uid])
+            # uptdate tags
+            message.tags = post[:tags]
+            # repost
+            realm.pebblebed_connector.grove.post(grove_path, post: message)
+          end
+        end
       end
     end
 
