@@ -9,7 +9,7 @@ module Hermes
   class MessageQueueListener
 
     def call(message)
-      handle(message.payload) if message.payload['event'] == 'create'
+      handle(message.payload) #if message.payload['event'] == 'create'
       nil
     end
 
@@ -18,10 +18,11 @@ module Hermes
       post = payload['attributes'].deep_symbolize_keys
       post = fix_tags!(post)
 
-      unless post[:tags].include? 'queued'
-        LOGGER.error("Message #{post[:uid]} not queued. That's odd.")
-        return
-      end
+      return unless post[:tags] = ['queued']
+      # unless post[:tags].include? 'queued'
+      #   LOGGER.error("Message #{post[:uid]} not queued. That's odd.")
+      #   return
+      # end
 
       message = post[:document].dup
       realm = CONFIG.realm(Pebbles::Uid.new(post[:uid]).realm)
