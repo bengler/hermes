@@ -6,6 +6,5 @@ map '/api/hermes/v1/' do
   use Rack::PostBodyContentTypeParser
   use Rack::MethodOverride
   use Pebbles::Cors
-  use Hermes::HostContext
   run Hermes::V1
 end
