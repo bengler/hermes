@@ -45,7 +45,7 @@ module Hermes
             # refetch
             message = Message.get(realm.name, post[:uid])
             # uptdate tags
-            message.tags = post[:tags]
+            message.tags = message.tags.concat(post[:tags]).uniq
             # repost
             realm.pebblebed_connector.grove.post(grove_path, post: message)
           else
