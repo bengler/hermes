@@ -37,3 +37,5 @@ end
   end
 end
 
+Hermes::Configuration.instance.load!
+CONFIG = Hermes::Configuration.instance
