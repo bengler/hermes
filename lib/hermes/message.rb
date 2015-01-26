@@ -59,7 +59,8 @@ module Hermes
     end
 
     def self.grove(realm_name)
-      PebblesProxy.connector(CONFIG.realm(realm_name).session_key, HostContext.host).grove
+      realm = CONFIG.realm(realm_name)
+      PebblesProxy.connector(realm.session_key, realm.host).grove
     end
 
     private

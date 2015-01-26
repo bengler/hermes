@@ -8,6 +8,7 @@ describe Realm do
   describe '#provider' do
     it 'returns null provider if environment disables sending' do
       realm = Realm.new('foo', {
+        host: {'test' => 'example.org'},
         deny_actual_sending_from_environments: ENV['RACK_ENV']
       })
       realm.provider(:sms).should satisfy { |v|

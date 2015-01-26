@@ -12,6 +12,7 @@ describe 'Testing' do
   let :realm do
     Realm.new('test', {
       session: 'some_checkpoint_god_session_for_test_realm',
+      host: {'test' => 'example.org'},
       implementations: {
         sms: {
           provider: 'Null'
