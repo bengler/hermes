@@ -107,9 +107,16 @@ module Hermes
         tags: ['queued']
       }
 
-      path = "/posts/post.hermes_message:" + [realm.name, params[:path]].compact.join('.')
-      result = PebblesProxy.connector_for(realm, current_identity, host).grove.post(path, post: post)
+      endpoint = "/posts/post.hermes_message:" + sane_path(realm.name, params[:path])
+      result = PebblesProxy.connector_for(realm, current_identity, host).grove.post(endpoint, post: post)
       [200, result.to_json]
+    end
+
+
+    def sane_path(realm_name, path)
+      return realm_name unless path
+      return path if path.start_with? realm_name
+      "#{realm_name}.#{path}"
     end
 
   end
