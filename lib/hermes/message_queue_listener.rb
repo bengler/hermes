@@ -43,9 +43,9 @@ module Hermes
         rescue Pebblebed::HttpError => e
           if e.message.include? 'Post has been modified'
             # refetch
-            message = Message.get(realm.name, post[:uid])
+            message = Message.get(realm.name, post[:uid]).unwrap
             # uptdate tags
-            message.tags = message.tags.concat(post[:tags]).uniq
+            message['tags'] = message['tags'].concat(post[:tags]).uniq
             # repost
             realm.pebblebed_connector.grove.post(grove_path, post: message)
           else
