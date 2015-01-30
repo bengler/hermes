@@ -26,6 +26,40 @@ describe 'Messages' do
     god!(:realm => 'test')
   end
 
+
+  describe "POST /:realm/messages/:kind" do
+
+    it 'posts a message' do
+      params = {
+        sender_email: 'asdf@example.org',
+        recipient_email: 'bling@blong.com',
+        text: 'hello',
+        path: 'test.email.bucket'
+      }
+
+      expected_post = {
+        post: {
+          document: {
+            text: "hello",
+            recipient_email: "bling@blong.com",
+            sender_email: "asdf@example.org",
+            receipt_url: "http://example.org:80/api/hermes/v1/test/receipt/email",
+            kind: "email"
+          },
+          restricted: true,
+          tags: ["queued"]
+        }
+      }
+      Pebblebed::GenericClient.any_instance.should_receive(:post).with(
+        '/posts/post.hermes_message:test.email.bucket',
+        expected_post
+      )
+      post('/test/messages/email', params)
+    end
+
+  end
+
+
   describe "GET /:realm/messages/:uid" do
 
     it "returns 404 if the realm does not exist" do
