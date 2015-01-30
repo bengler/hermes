@@ -3,7 +3,7 @@ source "https://rubygems.org"
 gem 'rake'
 gem 'sinatra', '~> 1.3.2'
 gem 'rack', '~> 1.4'
-gem 'rack-contrib', '~> 1.1.0'
+gem 'rack-contrib', '~> 1.2.0'
 gem "activesupport", '~> 4.2.0'
 gem 'yajl-ruby', '~> 1.1.0', :require => "yajl"
 gem 'pebblebed', '~> 0.3.1'
