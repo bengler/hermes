@@ -27,6 +27,7 @@ module Hermes
       realm = CONFIG.realm(Pebbles::Uid.new(post[:uid]).realm)
       provider = realm.provider(message[:kind])
       message.delete(:kind)
+      message.delete(:batch_label)
 
       begin
         id = provider.send_message!(message)
