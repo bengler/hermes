@@ -7,7 +7,6 @@ adapter = Class.new do
   end
 
   def on_start(options, helper)
-    puts "on_start #{options.inspect}"
   end
 
   def configure_supervisor(supervisor)
