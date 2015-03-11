@@ -20,10 +20,11 @@ module Hermes
         :name, :host, :session, :grove_path, :incoming_url, :implementations,
         :deny_actual_sending_from_environments)
 
+      environment = ENV['RACK_ENV']
+
       @name = name
       @session_key = options[:session]
-      environment = ENV['RACK_ENV']
-      @host = options[:host][environment]
+      @host = options.fetch(:host, {})[environment]
       @grove_path = options[:grove_path]
       @incoming_url = options[:incoming_url]
 
