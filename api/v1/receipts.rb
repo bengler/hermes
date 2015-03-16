@@ -58,7 +58,7 @@ module Hermes
           end
         end
 
-        halt 200, ''
+        success! message: "Received"
       end
 
   end

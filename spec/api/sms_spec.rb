@@ -59,7 +59,8 @@ describe 'SMS' do
       end
 
       post "/test/messages/sms", sms_params
-      last_response.status.should eq 200
+      expect(last_response.status).to eq 200
+      expect(last_response).to have_media_type('application/json')
     end
 
     it 'supports rate param' do
@@ -71,7 +72,8 @@ describe 'SMS' do
       end
 
       post "/test/messages/sms", sms_params.merge(rate: rate_params)
-      last_response.status.should eq 200
+      expect(last_response.status).to eq 200
+      expect(last_response).to have_media_type('application/json')
     end
 
   end

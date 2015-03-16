@@ -29,10 +29,10 @@ describe 'Receipts' do
 
     it "always accepts callback, as long as the realm is correct" do
       post_body "/test/receipt/sms", {}, %{I am test realm}
-      last_response.status.should eq 200
+      expect(last_response.status).to eq 200
 
       post_body "/meh/receipt/sms", {}, %{I am meh}
-      last_response.status.should eq 404
+      expect(last_response.status).to eq 404
     end
 
     it 'it updates message when a receipt is posted and performs callback' do
@@ -93,7 +93,7 @@ describe 'Receipts' do
 
       Providers::NullProvider.any_instance.
         should_receive(:ack_receipt) { |params, controller|
-          controller.halt 200, "OK"
+          controller.success! message: "OK"
         }.
         with(
           hash_including({id: "1234"}),
@@ -103,8 +103,9 @@ describe 'Receipts' do
 
       post_body "/test/receipt/sms", {}, "<something></something>"
 
-      last_response.status.should eq 200
-      last_response.body.should eq "OK"
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq "OK"
+      expect(last_response).to have_media_type('text/plain')
 
       grove_get_stub.should have_been_requested
       grove_post_stub.should have_been_requested

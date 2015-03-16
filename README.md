@@ -69,7 +69,6 @@ Asynchronously, a daemon picks up created `post.hermes_message`s, tags it with `
 
 If the client included a sensible value in the `batch_label` parameter when posting a message, this parameter will be written to `post.hermes_message.document.batch_label` and can thus be used for keeping track of the send status on a collection of messages. The `batch_label` field is not unique or prefixed in any way, so the client is advised to come up with suitably narrow label.
 
-
 ## Testing and staging
 
 You probably don't want to send actual SMS or email messages in environments that is not production.

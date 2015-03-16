@@ -38,7 +38,8 @@ describe 'Testing' do
           once.
           and_return(true)
         post "/test/test/#{kind}"
-        last_response.status.should == 200
+        expect(last_response.status).to eq 200
+        expect(last_response).to have_media_type('text/plain')
       end
 
       it 'returns 500 when provider returns false' do
@@ -48,7 +49,8 @@ describe 'Testing' do
           once.
           and_return(false)
         post "/test/test/#{kind}"
-        last_response.status.should == 500
+        expect(last_response.status).to eq 500
+        expect(last_response).to have_media_type('text/plain')
       end
 
     end

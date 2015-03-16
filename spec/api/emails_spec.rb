@@ -54,9 +54,9 @@ describe 'Email' do
       end
 
       post '/test/messages/email', email_params
-      last_response.status.should eq 200
+      expect(last_response.status).to eq 200
+      expect(last_response).to have_media_type('application/json')
     end
-
 
     it "supports force param" do
       allow_any_instance_of(Pebblebed::GenericClient).to receive(:post) do |arg1, arg2|
@@ -65,9 +65,9 @@ describe 'Email' do
       end
 
       post '/test/messages/email', email_params.merge(force: 'jan@banan.com')
-      last_response.status.should eq 200
+      expect(last_response.status).to eq 200
+      expect(last_response).to have_media_type('application/json')
     end
-
 
     it 'supports batch_label param' do
       allow_any_instance_of(Pebblebed::GenericClient).to receive(:post) do |arg1, arg2|
@@ -76,7 +76,8 @@ describe 'Email' do
       end
 
       post '/test/messages/email', email_params.merge(batch_label: 'stuff_sent_today')
-      last_response.status.should eq 200
+      expect(last_response.status).to eq 200
+      expect(last_response).to have_media_type('application/json')
     end
 
   end

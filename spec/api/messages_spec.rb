@@ -26,7 +26,6 @@ describe 'Messages' do
     god!(:realm => 'test')
   end
 
-
   describe "POST /:realm/messages/:kind" do
 
     it 'posts a message' do
@@ -55,16 +54,18 @@ describe 'Messages' do
         expected_post
       )
       post('/test/messages/email', params)
+
+      expect(last_response).to have_media_type('application/json')
     end
 
   end
-
 
   describe "GET /:realm/messages/:uid" do
 
     it "returns 404 if the realm does not exist" do
       get("/foo/messages/post.hermes_message:test$1234")
-      last_response.status.should eq 404
+      expect(last_response.status).to eq 404
+      expect(last_response).to have_media_type('text/plain')
     end
 
     it "returns a 404 if the post was not found" do
@@ -77,7 +78,9 @@ describe 'Messages' do
         to_return(status: 404)
 
       get("/test/messages/post.hermes_message:test$4321")
-      last_response.status.should eq 404
+
+      expect(last_response.status).to eq 404
+      expect(last_response).to have_media_type('text/plain')
 
       grove_get_stub.should have_been_requested
     end
@@ -102,7 +105,9 @@ describe 'Messages' do
           }.to_json)
 
       get("/test/messages/post.hermes_message:test$1234")
-      last_response.status.should eq 200
+
+      expect(last_response.status).to eq 200
+      expect(last_response).to have_media_type('application/json')
       JSON.parse(last_response.body)['uid'].should eq "post.hermes_message:test$1234"
 
       grove_get_stub.should have_been_requested

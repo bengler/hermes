@@ -3,11 +3,6 @@
 module Hermes
   class V1 < Sinatra::Base
 
-    error RecipientRejectedError do |e|
-      logger.error e.message
-      return halt 400, e.message
-    end
-
     # @apidoc
     # Get latest messages sent in a realm. Note: only works in non-production mode.
     # This is used for reading not actually sent messages in development/staging environment.
@@ -20,8 +15,10 @@ module Hermes
     # @status 200 The twenty latest messages
     get '/:realm/messages/latest' do |realm_name|
       require_god
-      halt 403, "Not allowed in production environment" if ENV['RACK_ENV'] == "production"
-      [200, Message.find(realm_name, "post.hermes_message:*").to_json]
+      if ENV['RACK_ENV'] == "production"
+        failure! status: 403, message: "Not allowed in production environment"
+      end
+      render_json Message.find(realm_name, "post.hermes_message:*")
     end
 
     # @apidoc
@@ -37,8 +34,10 @@ module Hermes
     get '/:realm/messages/:uid' do |realm_name, uid|
       require_god
       message = Message.get(realm_name, uid)
-      halt 404, "No such message" unless message
-      [200, message.to_json]
+      unless message
+        failure!(status: 404, message: "No such message")
+      end
+      render_json message
     end
 
     # @apidoc
@@ -109,9 +108,9 @@ module Hermes
 
       endpoint = "/posts/post.hermes_message:" + sane_path(realm.name, params[:path])
       result = PebblesProxy.connector_for(realm, current_identity, host).grove.post(endpoint, post: post)
-      [200, result.to_json]
-    end
 
+      render_json result
+    end
 
     def sane_path(realm_name, path)
       return realm_name unless path

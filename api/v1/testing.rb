@@ -15,12 +15,15 @@ module Hermes
     # @status 200 Provider is fine
     # @status 500 Provider unavailable
     post '/:realm_name/test/:kind' do |realm_name, kind|
+      headers 'Content-Type' => 'text/plain; charset=utf8'
+
       realm = CONFIG.realm(realm_name)
+
       provider = realm.provider(kind)
       if provider.test!
-        halt 200, "Provider is fine"
+        success! message: "Provider is fine"
       else
-        halt 500, "Provider unavailable"
+        failure! message: "Provider unavailable", status: 500
       end
     end
 

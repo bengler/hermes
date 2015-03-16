@@ -48,7 +48,7 @@ describe 'Receiving' do
           if acking
             Providers::NullProvider.any_instance.
               should_receive(:ack_message) { |message, controller|
-                controller.halt 201, "OK"
+                controller.success! status: 201, message: "OK"
               }.
               with(
                 hash_including(
@@ -106,12 +106,13 @@ describe 'Receiving' do
 
           post_body "/test/incoming/sms", {}, %{<something></something>}
           if acking
-            last_response.status.should eq 201
-            last_response.body.should eq 'OK'
+            expect(last_response.status).to eq 201
+            expect(last_response.body).to eq 'OK'
           else
-            last_response.status.should eq 200
-            last_response.body.should eq ''
+            expect(last_response.status).to eq 200
+            expect(last_response.body).to eq 'Received'
           end
+          expect(last_response).to have_media_type('text/plain')
 
           callback_stub.should have_been_requested
         end
@@ -177,7 +178,8 @@ describe 'Receiving' do
           body: "")
 
       post_body "/test/incoming/sms", {}, %{<something></something>}
-      last_response.status.should eq 200
+      expect(last_response.status).to eq 200
+      expect(last_response).to have_media_type('text/plain')
 
       callback_stub.should have_been_requested
     end
@@ -187,7 +189,8 @@ describe 'Receiving' do
         should_receive(:parse_message).once.and_raise(Hermes::InvalidMessageError)
 
       post_body "/test/incoming/sms", {}, %{<something></something>}
-      last_response.status.should eq 400
+      expect(last_response.status).to eq 400
+      expect(last_response).to have_media_type('text/plain')
     end
 
   end
@@ -209,7 +212,7 @@ describe 'Receiving' do
           if acking
             Providers::NullProvider.any_instance.
               should_receive(:ack_message) { |message, controller|
-                controller.halt 201, "OK"
+                controller.success! status: 201, message: "OK"
               }.
               with(
                 hash_including(
@@ -265,12 +268,13 @@ describe 'Receiving' do
 
           post_body "/test/incoming/email", {}, %{<something></something>}
           if acking
-            last_response.status.should eq 201
+            expect(last_response.status).to eq 201
             last_response.body.should eq 'OK'
           else
-            last_response.status.should eq 200
-            last_response.body.should eq ''
+            expect(last_response.status).to eq 200
+            last_response.body.should eq 'Received'
           end
+          expect(last_response).to have_media_type('text/plain')
 
           callback_stub.should have_been_requested
         end
@@ -282,7 +286,8 @@ describe 'Receiving' do
         should_receive(:parse_message).once.and_raise(Hermes::InvalidMessageError)
 
       post_body "/test/incoming/email", {}, %{<something></something>}
-      last_response.status.should eq 400
+      expect(last_response.status).to eq 400
+      expect(last_response).to have_media_type('text/plain')
     end
 
   end
