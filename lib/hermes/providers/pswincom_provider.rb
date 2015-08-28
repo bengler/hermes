@@ -105,6 +105,7 @@ module Hermes
       private
 
         def post_data(message, recipient_number, sender_number)
+          LOGGER.info("##### DEBUG #{message.inspect}")
           {
             "USER" => @user,
             "PW" => @password,
