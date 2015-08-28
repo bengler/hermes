@@ -1,3 +1,4 @@
+#encoding: utf-8
 require "httpclient"
 
 module Hermes
@@ -11,6 +12,10 @@ module Hermes
       URL = "https://sms.pswin.com/http4sms/sendRef.asp".freeze
       DEFAULT_SENDER_COUNTRY = 'NO'.freeze
       DEFAULT_PREFIX = '47'.freeze
+      CONVERSION_OPTIONS = {
+        :undef => :replace,
+        :replace => ''
+      }
 
       class PSWinComError < ProviderError; end
       class APIFailureError < PSWinComError; end
@@ -105,13 +110,13 @@ module Hermes
       private
 
         def post_data(message, recipient_number, sender_number)
-          LOGGER.info("##### DEBUG #{message.inspect}")
+          message.gsub!('😃', ':)')
           {
             "USER" => @user,
             "PW" => @password,
             "RCV" => number_to_msisdn(recipient_number),
             "SND" => sender_number || @default_sender_number,
-            "TXT" => message.encode("iso-8859-1"),
+            "TXT" => message.encode('iso-8859-1', CONVERSION_OPTIONS),
             "RCPREQ" => "Y" # get a unique reference value back
           }
         end
