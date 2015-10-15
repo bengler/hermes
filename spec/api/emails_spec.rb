@@ -25,6 +25,7 @@ describe 'Email' do
     {
       recipient_email: 'test@test.com',
       sender_email: 'no-reply@test.com',
+      bcc_email: 'secret@test.com',
       subject: 'Foo',
       text: 'Yip',
       html: '<p>Yip</p>'
@@ -44,6 +45,7 @@ describe 'Email' do
         arg1.should eq '/posts/post.hermes_message:test'
         arg2[:post][:document][:recipient_email].should eq 'test@test.com'
         arg2[:post][:document][:sender_email].should eq 'no-reply@test.com'
+        arg2[:post][:document][:bcc_email].should eq 'secret@test.com'
         arg2[:post][:document][:subject].should eq 'Foo'
         arg2[:post][:document][:text].should eq 'Yip'
         arg2[:post][:document][:html].should eq '<p>Yip</p>'

@@ -39,6 +39,7 @@ module Hermes
           url,
           post_data(
             options[:recipient_email],
+            options[:bcc_email],
             options[:sender_email] || @default_sender_email,
             options[:subject],
             options[:text],
@@ -109,9 +110,10 @@ module Hermes
 
       private
 
-        def post_data(recipient_email, sender_email, subject, text, html)
+        def post_data(recipient_email, bcc_email, sender_email, subject, text, html)
           {
             "to" => recipient_email,
+            "bcc" => bcc_email,
             "from" => sender_email,
             "subject" => subject,
             "text" => text,

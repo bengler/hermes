@@ -31,6 +31,7 @@ describe 'Messages' do
     it 'posts a message' do
       params = {
         sender_email: 'asdf@example.org',
+        bcc_email: 'secret@recipient.net',
         recipient_email: 'bling@blong.com',
         text: 'hello',
         path: 'test.email.bucket'
@@ -42,6 +43,7 @@ describe 'Messages' do
             text: "hello",
             recipient_email: "bling@blong.com",
             sender_email: "asdf@example.org",
+            bcc_email: "secret@recipient.net",
             receipt_url: "http://example.org:80/api/hermes/v1/test/receipt/email",
             kind: "email"
           },

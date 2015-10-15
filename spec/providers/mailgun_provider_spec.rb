@@ -46,7 +46,8 @@ describe Providers::MailGunProvider do
             html: "",
             subject: "",
             text: "test",
-            to: "foo@bar.com"
+            to: "foo@bar.com",
+            bcc: ""
           },
           headers: {
             'Authorization' => 'Basic YXBpOmZvbw==',

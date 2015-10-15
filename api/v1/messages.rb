@@ -55,6 +55,7 @@ module Hermes
     # @optional [String] recipient_number The number of the recipient if 'sms' message.
     # @optional [String] sender_number The number or shortname of the sender if 'sms' message.
     # @optional [String] sender_email The email address of the sender if 'email' message. Can be of format 'Some name <someone@somwhere.com>' or just 'someone@somwhere.com'.
+    # @optional [String] bcc_email The email address of the BCC recipient if 'email' message. Can be of format 'Some name <someone@somwhere.com>' or just 'someone@somwhere.com'.
     # @optional [String] recipient_email The email address of the recipient if 'email' message. Can be of format 'Some name <someone@somwhere.com>' or just 'someone@somwhere.com'.
     # @optional [String] subject The email subject if 'email' message.
     # @optional [String] text The message text for 'sms' message or 'email' plain text version.
@@ -87,6 +88,7 @@ module Hermes
         when :email
           message[:recipient_email] = params[:recipient_email]
           message[:sender_email] = params[:sender_email]
+          message[:bcc_email] = params[:bcc_email]
           message[:subject] = params[:subject]
           message[:html] = params[:html]
       end

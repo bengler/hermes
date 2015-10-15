@@ -52,6 +52,7 @@ To send email, `POST` to `/api/hermes/v1/test/messages/email`. With the [pebbleb
 connector.hermes.post("/endeavor/messages/email", {
   recipient_email: 'foo@example.com',
   sender_email: 'no-reply@example.org',
+  bcc_email: 'secret@example.org',
   subject: "You are hereby invited",
   text: "You are hereby invited to my awesome party!",
   html: "You are hereby invited to my <em>awesome</em> party!",
