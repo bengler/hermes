@@ -29,7 +29,7 @@ module Hermes
       end
 
       def send_message!(options)
-        options.assert_valid_keys(:receipt_url, :sender_email, :recipient_email, :subject, :text, :html)
+        options.assert_valid_keys(:receipt_url, :bcc_email, :sender_email, :recipient_email, :subject, :text, :html)
         raise Hermes::OptionMissingError.new("recipient_email is missing") unless options[:recipient_email]
         raise Hermes::OptionMissingError.new("text is missing") unless options[:text]
         url = "https://api.mailgun.net/v2/#{@mailgun_domain}/messages"
