@@ -111,14 +111,15 @@ module Hermes
       private
 
         def post_data(recipient_email, bcc_email, sender_email, subject, text, html)
-          {
+          d = {
             "to" => recipient_email,
-            "bcc" => bcc_email,
             "from" => sender_email,
             "subject" => subject,
             "text" => text,
             "html" => html
           }
+          d['bcc'] = bcc_email if bcc_email.present?
+          d
         end
     end
 
