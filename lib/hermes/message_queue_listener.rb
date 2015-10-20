@@ -12,14 +12,15 @@ module Hermes
       nil
     end
 
-
     def handle(payload)
       post = payload['attributes'].deep_symbolize_keys
       post = fix_tags!(post)
 
+      logger.info { "Handling message: #{post.inspect}" }
+
       return if post[:tags].include? 'delivered'
       unless post[:tags].include? 'queued'
-        LOGGER.error("Message #{post[:uid]} not queued. That's odd.")
+        logger.error("Message #{post[:uid]} not queued. That's odd.")
         return
       end
 
@@ -32,7 +33,7 @@ module Hermes
       begin
         id = provider.send_message!(message)
       rescue ProviderError => e
-        LOGGER.error("Error: #{e.message} when trying to send: #{message}")
+        logger.error("Error: #{e.message} when trying to send: #{message}")
         post[:tags] << 'failed'
       else
         post[:tags] << 'inprogress'
@@ -50,7 +51,7 @@ module Hermes
             # repost
             realm.pebblebed_connector.grove.post(grove_path, post: message)
           else
-            LOGGER.error("#{e.message} when trying to save post: #{message}")
+            logger.error("#{e.message} when trying to save post: #{message}")
           end
         end
       end
@@ -58,13 +59,17 @@ module Hermes
 
     private
 
-    def fix_tags!(post)
-      tags = post[:tags_vector]
-      tags = tags.split('\' \'').map{|t| t.gsub('\'','')}
-      post[:tags] = tags
-      post.delete(:tags_vector)
-      post
-    end
+      def fix_tags!(post)
+        tags = post[:tags_vector]
+        tags = tags.split('\' \'').map{|t| t.gsub('\'','')}
+        post[:tags] = tags
+        post.delete(:tags_vector)
+        post
+      end
+
+      def logger
+        LOGGER
+      end
 
   end
 
