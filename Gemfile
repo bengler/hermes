@@ -14,6 +14,7 @@ gem 'excon', '~> 0.12.0'
 gem 'crack', '~> 0.3.2'
 gem 'httpclient'
 gem 'pebbles-uid'
+gem 'mail'
 
 group :test do
   gem 'rspec', '~> 2.99.0'

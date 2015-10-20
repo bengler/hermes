@@ -39,10 +39,16 @@ The ``session`` key must be a god session that matches the realm in Checkpoint.
 
 See [this reference](./PROVIDERS.md) for details about available providers for the `sms` and `email` keys.
 
+### Mailgun
+
+The `mailgun` provider has these options:
+
+* `api_key`: The API key.
+* `mailgun_domain`: Optional. This domain will be used if a sender address does not match any domain in the Mailgun account. The provider will first attempt to use the sender email's domain, and fall back to this domain. (Note that if a send fails with the sender's domain, the provider will not retry for another minute, but will continue to use the `mailgun_domain` setting as a fallback.) Normally, it should not be necessary to set this option.
+
 ## Sending messages
 
 With the example above, it's possible to send SMS and email for the `test` realm. We may then post messages with the API, via `POST` requests:
-
 
 ### Email
 

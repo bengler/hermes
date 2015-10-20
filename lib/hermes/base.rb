@@ -24,6 +24,9 @@ module Hermes
   # Invalid option to provider method.
   class OptionMissingError < ProviderError; end
 
+  # Invalid option to provider method.
+  class OptionInvalidError < ProviderError; end
+
   # Thrown when recipient is not valid.
   class RecipientRejectedError < ProviderError
 
