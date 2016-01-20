@@ -96,7 +96,7 @@ module Hermes
           else
             :unknown
         end
-        result[:vendor_message] = request.params["error"]
+        result[:vendor_message] = request.params["error"] || request.params["description"]
         result
       end
 
