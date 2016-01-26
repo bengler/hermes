@@ -52,6 +52,7 @@ module Hermes
           raise Hermes::OptionMissingError.new("sender_email required")
         end
 
+        sender_email = sanitize_email(sender_email)
         sender = Mail::Address.new(Mail::Encodings.address_encode(sender_email))
         unless sender.domain
           raise Hermes::OptionInvalidError, "Invalid sender: Domain missing"
@@ -160,6 +161,11 @@ module Hermes
           else
             raise InvalidResponseError, "Expected JSON from server, got #{response.body.inspect}"
           end
+        end
+
+        # quickfix to save the worlg from sender "Moss Avis <dinesider@moss-avis.no.>"
+        def sanitize_email(email)
+          email.gsub('.>', '>')
         end
 
         def logger
