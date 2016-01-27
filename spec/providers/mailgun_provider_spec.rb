@@ -75,6 +75,15 @@ describe Providers::MailGunProvider do
         e.recipient.should eq "foo@bar.com"
         e.reason.should eq "'to' parameter is not a valid address, you dick."
       }
+
+      -> {
+        provider.send_message!(
+          recipient_email: 'foo@bar.com', sender_email: 'humbabumba@bar.com.', text: 'test')
+      }.should raise_error(RecipientRejectedError) { |e|
+        e.recipient.should eq "humbabumba@bar.com."
+        e.reason.should eq "Mail::AddressList can not parse |humbabumba@bar.com.|\nReason was: Only able to parse up to humbabumba@bar.com."
+      }
+
     end
 
     it "translates HTTP timeout error into Timeout::Error" do

@@ -52,7 +52,11 @@ module Hermes
           raise Hermes::OptionMissingError.new("sender_email required")
         end
 
-        sender = Mail::Address.new(Mail::Encodings.address_encode(sender_email))
+        begin
+          sender = Mail::Address.new(Mail::Encodings.address_encode(sender_email))
+        rescue Mail::Field::ParseError => e
+          raise RecipientRejectedError.new(sender_email, e.message)
+        end
         unless sender.domain
           raise Hermes::OptionInvalidError, "Invalid sender: Domain missing"
         end
