@@ -39,16 +39,10 @@ describe Providers::MailGunProvider do
   describe "#send_message!" do
 
     it "posts message and returns ID" do
+
       stub_request(:post, "https://api:foo@api.mailgun.net/v2/test.com/messages").
         with(
-          body: {
-            from: "No-reply <no-reply@test.com>",
-            html: "",
-            subject: "",
-            text: "test",
-            to: "foo@bar.com",
-            bcc: ""
-          },
+          :body => {"from"=>"", "html"=>"", "subject"=>"", "text"=>"test", "to"=>"foo@bar.com"},
           headers: {
             'Authorization' => 'Basic YXBpOmZvbw==',
             'Content-Type' => 'application/x-www-form-urlencoded'
@@ -59,7 +53,7 @@ describe Providers::MailGunProvider do
             message: "Queued. Thank you.",
             id: "<20111114174239.25659.5817@test.com>"
           }.to_json,
-          headers: {})
+          headers: {'Content-Type' => 'application/json'})
 
       provider.send_message!(
         recipient_email: 'foo@bar.com', text: 'test').should eq "<20111114174239.25659.5817@test.com>"
@@ -69,6 +63,7 @@ describe Providers::MailGunProvider do
       stub_request(:post, "https://api:foo@api.mailgun.net/v2/test.com/messages").
         to_return(
           status: 400,
+          headers: {'Content-Type' => 'application/json'},
           body: {
             message: "'to' parameter is not a valid address, you dick.",
           }.to_json)
