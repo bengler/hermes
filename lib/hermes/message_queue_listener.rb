@@ -25,12 +25,7 @@ module Hermes
       end
 
       message = post[:document].dup
-
-      uid = Pebbles::Uid.new(post[:uid])
-      return if uid.oid == '22040509' # quickfix
-
-      realm = CONFIG.realm(uid.realm)
-
+      realm = CONFIG.realm(Pebbles::Uid.new(post[:uid]).realm)
       provider = realm.provider(message[:kind])
       message.delete(:kind)
       message.delete(:batch_label)
