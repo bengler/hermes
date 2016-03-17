@@ -1,14 +1,14 @@
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
 gem 'rake'
 gem 'sinatra', '~> 1.3.2'
 gem 'rack', '~> 1.4'
 gem 'rack-contrib'
 gem "activesupport", '~> 4.2.0'
-gem 'yajl-ruby', '~> 1.1.0', :require => "yajl"
-gem 'pebblebed', '~> 0.3.1'
+gem 'yajl-ruby', '~> 1.1.0', :require => 'yajl'
+gem 'pebblebed', '~> 0.3.6'
 gem 'pebbles-cors', git: 'https://github.com/bengler/pebbles-cors.git'
-gem 'pebbles-river', '~> 0.2.1', git: 'https://github.com/bengler/pebbles-river.git'
+gem 'pebbles-river', '~> 0.2.1'
 gem 'nokogiri', '~> 1.5.2'
 gem 'excon', '~> 0.12.0'
 gem 'crack', '~> 0.3.2'
