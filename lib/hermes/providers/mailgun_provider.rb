@@ -109,6 +109,15 @@ module Hermes
         def try_send_with_domain(options, domain)
           client =  HTTPClient.new()
           client.set_auth(nil, "api", @api_key)
+          # FIXME The below is necessary to force HTTPClient to use CA
+          # certificates from the system, rather than the ancient CA
+          # certificates bundled with HTTPClient (which does not support server
+          # certificates issued using recent CA certs). This will break on
+          # macOS, which does not have CA certificates at this path.  A better
+          # solution is to use the env var SSL_CERT_FILE, but HTTPClient does
+          # not support it yet. See also:
+          # https://github.com/nahi/httpclient/issues/369
+          client.ssl_config.add_trust_ca("/etc/ssl/certs/ca-certificates.crt")
 
           payload = {
             "to" => options[:recipient_email],
