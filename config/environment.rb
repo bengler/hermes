@@ -22,6 +22,7 @@ unless defined?(LOGGER)
 end
 
 Pebblebed.config do
+  scheme 'http'
   service :checkpoint, :version => 1
   service :grove, :version => 1
 end
